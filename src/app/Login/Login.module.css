@@ -1,0 +1,333 @@
+:root {
+  /* Identidade Visual Eco Manager - Cores Oficiais */
+  --color-blue-main: #1E6EBE;    /* Azul Principal (Texto "eco") */
+  --color-orange-sun: #FA643C;   /* Laranja (Sol) - Cor de Destaque/CTA */
+  --color-blue-sky: #6EC8F0;     /* Azul Claro (Respingos) - Apoio */
+  --color-yellow-sun: #FAD228;   /* Amarelo (Raios do Sol) */
+  --color-green-nature: #3CC83C; /* Verde (Folhas) - Sucesso */
+  --color-purple-deep: #991094;  /* Roxo (Texto Inferior) */
+
+  /* Cores de Interface */
+  --bg-light: #F8FAFC;
+  --surface: #FFFFFF;
+  --text-main: #1E293B;
+  --text-muted: #64748B;
+  --border: #E2E8F0;
+  --input-bg: #F1F5F9;
+  
+  /* Sombras e Bordas */
+  --shadow-lg: 0 10px 25px -5px rgba(30, 110, 190, 0.1), 0 8px 10px -6px rgba(30, 110, 190, 0.1);
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+}
+
+.loginContainer {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-light);
+  font-family: 'Inter', sans-serif;
+}
+
+/* Lado Esquerdo - Branding */
+.brandingSection {
+  display: none;
+  flex: 1.2;
+  background: linear-gradient(135deg, var(--color-blue-main) 0%, #164e8a 100%);
+  color: white;
+  padding: 4rem;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .brandingSection {
+    display: flex;
+  }
+}
+
+.checkboxLabel{
+    color: #1E6EBE;
+}
+
+/* Elementos decorativos inspirados no Sol e Respingos */
+.brandingSection::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  right: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, var(--color-yellow-sun) 0%, transparent 70%);
+  opacity: 0.15;
+  filter: blur(40px);
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  z-index: 1;
+}
+
+.logoImg {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+}
+
+.logoText {
+  display: flex;
+  flex-direction: column;
+}
+
+.logoTitle {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.logoSubtitle {
+  font-size: 0.9rem;
+  font-weight: 400;
+  opacity: 0.9;
+  letter-spacing: 0.15em;
+  color: var(--color-blue-sky);
+}
+
+.brandingContent {
+  z-index: 1;
+  max-width: 520px;
+}
+
+.brandingTitle {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 2rem;
+}
+
+.brandingDescription {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  opacity: 0.9;
+  border-left: 4px solid var(--color-orange-sun);
+  padding-left: 1.5rem;
+}
+
+.brandingFooter {
+  z-index: 1;
+  font-size: 0.9rem;
+  opacity: 0.8;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Lado Direito - Formulário */
+.formSection {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.formWrapper {
+  width: 100%;
+  max-width: 460px;
+  background-color: var(--surface);
+  padding: 3.5rem 3rem;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+}
+
+.mobileLogo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+  .mobileLogo {
+    display: none;
+  }
+}
+
+.formHeader {
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.formTitle {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-blue-main);
+  margin-bottom: 0.75rem;
+}
+
+.formSubtitle {
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 1.25rem;
+  color: var(--color-blue-main);
+  opacity: 0.7;
+}
+
+.input {
+  width: 100%;
+  padding: 1rem 1.25rem 1rem 3.25rem;
+  font-size: 1rem;
+  color: var(--text-main);
+  background-color: var(--input-bg);
+  border: 2px solid transparent;
+  border-radius: var(--radius-lg);
+  transition: all 0.3s ease;
+}
+
+.input:focus {
+  background-color: var(--surface);
+  border-color: var(--color-blue-main);
+  box-shadow: 0 0 0 4px rgba(30, 110, 190, 0.1);
+  outline: none;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 1.25rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.passwordToggle:hover {
+  color: var(--color-blue-main);
+}
+
+.formOptions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.checkboxGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.checkbox {
+  appearance: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+}
+
+.checkbox:checked {
+  background: var(--color-blue-main);
+  border-color: var(--color-blue-main);
+}
+.checkbox:checked::after {
+  content: "✓";
+  color: white;
+  font-size: 0.8rem;
+}
+.forgotPassword {
+  color: var(--color-purple-deep);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.forgotPassword:hover {
+  text-decoration: underline;
+}
+
+.submitButton {
+  width: 100%;
+  padding: 1.1rem;
+  background-color: var(--color-orange-sun);
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  box-shadow: 0 4px 12px rgba(250, 100, 60, 0.3);
+}
+
+.submitButton:hover {
+  background-color: #e5532d;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(250, 100, 60, 0.4);
+}
+
+.submitButton:active {
+  transform: translateY(0);
+}
+
+.formFooter {
+  margin-top: 2.5rem;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.formFooterLink {
+  color: var(--color-blue-main);
+  font-weight: 700;
+  text-decoration: none;
+  margin-left: 0.4rem;
+}
+
+.formFooterLink:hover {
+  text-decoration: underline;
+}

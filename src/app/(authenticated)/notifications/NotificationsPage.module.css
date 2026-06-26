@@ -1,0 +1,350 @@
+.container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.content {
+  padding: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Filter Bar ── */
+.filterBar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.search input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 0.9rem;
+  color: #000;
+  background-color: #fff;
+}
+
+.clearSearch {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #94a3b8;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+/* ── Desktop tabs ── */
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filterBtn {
+  background: white;
+  border: 1px solid #e2e8f0;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.filterBtn:hover {
+  border-color: #1E6EBE;
+  color: #1E6EBE;
+}
+
+.filterBtnActive {
+  background: #1E6EBE;
+  color: #fff;
+  border-color: #1E6EBE;
+}
+
+.filterCount {
+  font-size: 11px;
+  font-weight: 700;
+  background: #f1f5f9;
+  color: #64748b;
+  border-radius: 10px;
+  padding: 1px 6px;
+}
+
+.filterCountActive {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+/* ── Mobile dropdown ── */
+.filterDropdown {
+  display: none;
+  position: relative;
+}
+
+.filterDropdownTrigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.filterDropdownTrigger:hover {
+  border-color: #1E6EBE;
+}
+
+.filterDropdownMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+  overflow: hidden;
+  animation: fadeDown 0.15s ease;
+}
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.filterDropdownItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-align: left;
+}
+
+.filterDropdownItem:hover {
+  background: #f8fafc;
+}
+
+.filterDropdownItemActive {
+  background: #f0f7ff;
+  color: #1E6EBE;
+  font-weight: 600;
+}
+
+.filterDropdownItem + .filterDropdownItem {
+  border-top: 1px solid #f1f5f9;
+}
+
+/* Checkbox visual */
+.checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1.5px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+
+.checkboxChecked {
+  background: #1E6EBE;
+  border-color: #1E6EBE;
+}
+
+/* ── Notifications ── */
+.notificationGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notificationWrapper {
+  position: relative;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.notificationWrapper:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.notificationUnread {
+  border-left: 3px solid #1E6EBE;
+  background: #F5F9FF;
+}
+
+.deleteBtn {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #fff1f2;
+  color: #e11d48;
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, background 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+
+.notificationWrapper:hover .deleteBtn {
+  opacity: 1;
+}
+
+.deleteBtn:hover {
+  background: #ffe4e6;
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* ── Empty state ── */
+.emptyState {
+  padding: 80px 20px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.emptyState h3 {
+  margin-top: 20px;
+  color: #1e293b;
+  font-size: 1rem;
+}
+
+.emptyState p {
+  margin-top: 8px;
+  font-size: 0.875rem;
+}
+
+.clearFiltersBtn {
+  margin-top: 12px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 1.5px solid #1E6EBE;
+  background: transparent;
+  color: #1E6EBE;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.clearFiltersBtn:hover {
+  background: #f0f7ff;
+}
+
+.countLabel {
+  font-size: 12px;
+  color: #94a3b8;
+  text-align: right;
+  margin-top: 8px;
+}
+
+/* ── Tablet ── */
+@media (max-width: 768px) {
+  .content {
+    padding: 16px;
+  }
+
+  .filterBar {
+    margin: 16px 0;
+  }
+
+  /* Esconde tabs, mostra dropdown */
+  .filters {
+    display: none;
+  }
+
+  .filterDropdown {
+    display: block;
+  }
+
+  .deleteBtn {
+    opacity: 1;
+    right: 10px;
+  }
+}
+
+/* ── Mobile ── */
+@media (max-width: 480px) {
+  .content {
+    padding: 12px;
+  }
+
+  .notificationGrid {
+    gap: 8px;
+  }
+
+  .notificationWrapper {
+    border-radius: 12px;
+  }
+
+  .deleteBtn {
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+  }
+
+  .emptyState {
+    padding: 48px 16px;
+  }
+}

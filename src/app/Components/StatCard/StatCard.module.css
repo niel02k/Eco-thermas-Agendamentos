@@ -1,0 +1,76 @@
+.card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  border: 1px solid #E2E8F0;
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.iconContainer {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Variantes de Cores baseadas na Identidade Visual */
+.blue .iconContainer { background-color: rgba(30, 110, 190, 0.1); color: #1E6EBE; }
+.green .iconContainer { background-color: rgba(60, 200, 60, 0.1); color: #3CC83C; }
+.orange .iconContainer { background-color: rgba(250, 100, 60, 0.1); color: #FA643C; }
+.yellow .iconContainer { background-color: rgba(250, 210, 40, 0.1); color: #FAD228; }
+.purple .iconContainer { background-color: rgba(153, 16, 148, 0.1); color: #991094; }
+
+.trend {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 2rem;
+}
+
+.positive {
+  background-color: rgba(60, 200, 60, 0.1);
+  color: #3CC83C;
+}
+
+.negative {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #1E293B;
+  margin: 0;
+}
+
+.label {
+  font-size: 0.85rem;
+  color: #64748B;
+  margin: 0;
+}

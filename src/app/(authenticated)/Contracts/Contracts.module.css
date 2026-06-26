@@ -1,0 +1,195 @@
+:root {
+  --color-primary: #1E6EBE;
+  --color-accent: #FA643C;
+  --color-success: #3CC83C;
+  --color-secondary: #991094;
+  --color-info: #6EC8F0;
+  --color-warning: #FAD228;
+  
+  /* Variações com transparência para fundos */
+  --color-primary-light: rgba(30, 110, 190, 0.1);
+  --color-accent-light: rgba(250, 100, 60, 0.1);
+}
+
+
+.container {
+  display: flex;
+  min-height: 100vh;
+  background: #F0F4FA;
+}
+
+.mainContent {
+  flex: 1;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: 0.4s;
+}
+
+.mainVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.content {
+  padding: 2rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ───── GRID KPI ───── */
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+/* ───── INSIGHTS ───── */
+
+.insightsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.insightCard {
+  background: #fff;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 12px rgba(30,110,190,0.06);
+}
+
+.insightCard span {
+  color: var(--color-success)
+ 
+}
+
+.bigValue {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color:var(--color-primary);
+}
+
+/* ───── TABLE ───── */
+
+.tableCard {
+  background: #fff;
+  border-radius: 1.5rem;
+  border: 1px solid #E2E8F0;
+  padding: 1.5rem;
+}
+
+.tableHeader {
+  margin-bottom: 1rem;
+}
+
+.tableHeader h3 {
+  color: var(--color-info);
+}
+
+.tableRowHeader span {
+  color: var(--color-secondary);
+}
+
+.tableRowcode{
+    color: var(--color-accent);
+}
+
+.tableRowclient{
+    color :var(--color-success)
+}
+
+.tableRowtype{
+    color :var(--color-info)
+}
+.tableRowseller{
+    color :var(--color-warning)
+}
+.tableRowbravery{
+    color: var(--color-accent);
+}
+
+
+.topseller{
+    color:var(--color-secondary)
+}
+
+.table {
+  display: flex;
+  flex-direction: column;
+}
+
+.tableRowHeader,
+.tableRow {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1fr 1fr 1fr;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+}
+
+.tableRow span{
+    color: var(--color-info)
+}
+
+.tableRowHeader {
+  font-weight: 700;
+  color: #64748B;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.tableRow {
+  border-bottom: 1px solid #F1F5F9;
+  font-size: 0.9rem;
+}
+
+/* ───── STATUS ───── */
+
+.status {
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.active {
+  color: #3CC83C;
+}
+
+.completed {
+  color: #1E6EBE;
+}
+
+.cancelled {
+  color: #EF4444;
+}
+
+.pending {
+  color: #FAD228;
+}
+
+/* ───── RESPONSIVE ───── */
+
+@media (max-width: 1024px) {
+  .mainContent {
+    margin-left: 0;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .insightsRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .tableRowHeader,
+  .tableRow {
+    grid-template-columns: 1fr 1fr;
+  }
+}

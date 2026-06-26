@@ -1,0 +1,175 @@
+/* Header.module.css */
+
+.header {
+  height: 80px;
+  background: white;
+  padding: 0 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #E2E8F0;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.menuBtn {
+  display: none; /* Escondido no desktop */
+  background: transparent;
+  border: none;
+  color: #1E293B;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: background 0.2s;
+}
+
+.menuBtn:hover {
+  background-color: #F1F5F9;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  background: #F1F5F9;
+  padding: 0.75rem 1.25rem;
+  border-radius: 2rem;
+  width: 100%;
+  max-width: 400px;
+  gap: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.searchBar:focus-within {
+  background: white;
+  box-shadow: 0 0 0 3px rgba(30, 110, 190, 0.1);
+  border: 1px solid #1E6EBE;
+}
+
+.searchIcon {
+  color: #64748B;
+}
+
+.searchInput {
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 0.95rem;
+  color: #1E293B;
+}
+
+.userActions {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* Wrapper para o Dropdown de Notificações */
+.notificationWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notificationBtn {
+  background: transparent;
+  border: none;
+  color: #64748B;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.notificationBtn:hover, .notificationBtn.active {
+  background-color: #F1F5F9;
+  color: #1E6EBE;
+}
+
+.notificationBadge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  background-color: #FA643C;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-left: 1.5rem;
+  border-left: 1px solid #E2E8F0;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  background-color: #1E293B;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-weight: 700;
+  color: #1E293B;
+  font-size: 0.95rem;
+}
+
+.userRole {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+/* RESPONSIVIDADE MOBILE */
+@media (max-width: 1024px) {
+  .header {
+    padding: 0 1.25rem;
+  }
+
+  .menuBtn {
+    display: flex; /* Mostra no mobile */
+  }
+
+  .searchBar {
+    max-width: 200px;
+  }
+}
+
+@media (max-width: 640px) {
+  .searchBar {
+    display: none; /* Esconde busca em telas muito pequenas */
+  }
+  .userInfo {
+    display: none;
+  }
+  .userActions {
+    gap: 1rem;
+  }
+}

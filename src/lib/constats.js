@@ -1,0 +1,50 @@
+export const CARGO = {
+  SDR: 'SDR',
+  VENDEDOR: 'VENDEDOR',
+}
+
+export const STATUS_USUARIO = {
+  ATIVO: 'ATIVO',
+  INATIVO: 'INATIVO',
+}
+
+export const ORIGEM = {
+  LEADS_SDR: 'Leads SDR',
+  DIRETO: 'Direto',
+  ORGANICO: 'Orgânico',
+  DAY_USE: 'Day use',
+  OUTRO: 'OUTRO',
+}
+
+export const STATUS_AGENDAMENTO = {
+  PENDENTE: 'PENDENTE',
+  CONFIRMADO: 'CONFIRMADO',
+  CANCELADO: 'CANCELADO',
+  REALIZADO: 'REALIZADO',
+}
+
+export const STATUS_CONTRATO = {
+  PENDENTE: 'PENDENTE',
+  ATIVO: 'ATIVO',
+  BLOQUEADO: 'BLOQUEADO',
+  ENCERRADO: 'ENCERRADO',
+  CANCELADO: 'CANCELADO',
+}
+
+export const PAGAMENTO = {
+  PIX: 'PIX',
+  DINHEIRO: 'DINHEIRO',
+  CARTAO_CREDITO: 'CARTAO_CREDITO',
+  CARTAO_DEBITO: 'CARTAO_DEBITO',
+}
+
+export const COBRANCA = {
+  UNICO: 'UNICO',
+  RECORRENTE: 'RECORRENTE',
+}
+
+export const ACAO = {
+  CREATE: 'CREATE',
+  UPDATE: 'UPDATE',
+  DELETE: 'DELETE',
+}

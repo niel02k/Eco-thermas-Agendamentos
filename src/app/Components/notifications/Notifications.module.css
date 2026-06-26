@@ -1,0 +1,156 @@
+.container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.content {
+  padding: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.filterBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 24px 0;
+  gap: 16px;
+}
+
+.search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  gap: 12px;
+  color: #64748b;
+}
+
+.search input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 0.9rem;
+  color: #1e293b;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+}
+
+.filterBtn {
+  background: white;
+  border: 1px solid #e2e8f0;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.filterBtn:hover {
+  border-color: #1E6EBE;
+  color: #1E6EBE;
+}
+
+.notificationGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notificationWrapper {
+  position: relative;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.notificationWrapper:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.deleteBtn {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #fff1f2;
+  color: #e11d48;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s;
+}
+
+.notificationWrapper:hover .deleteBtn {
+  opacity: 1;
+}
+
+.deleteBtn:hover {
+  background: #ffe4e6;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.emptyState {
+  padding: 80px 20px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.emptyState h3 {
+  margin-top: 20px;
+  color: #1e293b;
+}
+
+.emptyState p {
+  margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+  .filterBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filters {
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  
+  .filterBtn {
+    white-space: nowrap;
+  }
+
+  .deleteBtn {
+    opacity: 1; /* Sempre visível no mobile */
+    right: 10px;
+  }
+}

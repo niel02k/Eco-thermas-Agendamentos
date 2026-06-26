@@ -1,0 +1,115 @@
+.container {
+  padding: 2.5rem;
+  background: #f5f7fb;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 2rem;
+}
+
+.card {
+  background: white;
+  padding: 1.8rem;
+  border-radius: 14px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+  border: 1px solid #eef2f7;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* GRID DO HORÁRIO */
+.scheduleGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+/* CARD DE CADA DIA */
+.dayCard {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+/* HEADER DO DIA */
+.dayHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* BOTÃO ABERTO / FECHADO */
+.openBtn {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.closedBtn {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* HORÁRIOS */
+.timeRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.timeInput {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #dbe3ec;
+}
+
+/* INPUTS */
+.input {
+  padding: 12px;
+  border: 1px solid #dbe3ec;
+  border-radius: 10px;
+  outline: none;
+}
+
+.select {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #dbe3ec;
+  background: white;
+}
+
+/* BOTÃO PRINCIPAL */
+.button {
+  padding: 12px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+}

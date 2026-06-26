@@ -1,0 +1,424 @@
+/* Dashboard.module.css */
+
+/* ─── Page shell ──────────────────────────────────────────── */
+.container {
+  display: flex;
+  min-height: 80vh;
+  background-color: #edf3fc;
+  box-sizing: border-box;
+}
+
+.mainContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  margin-left: 150px;
+}
+
+.mainVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Content area ────────────────────────────────────────── */
+.content {
+  
+  padding: 2rem 2.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* ─── Stats grid ──────────────────────────────────────────── */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.cardEntry {
+  animation: cardIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  min-width: 0;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(22px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ─── Charts row ──────────────────────────────────────────── */
+.chartsRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.25rem;
+  width: 80%;
+  animation: cardIn 0.55s 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.chartCard {
+  background: #ffffff;
+  width: 100%;
+  border-radius: 1.5rem;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 12px rgba(30, 110, 190, 0.06);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  transition: box-shadow 0.2s, transform 0.2s;
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.chartCard:hover {
+  box-shadow: 0 8px 28px rgba(30, 110, 190, 0.1);
+  transform: translateY(-2px);
+}
+
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.chartTitle {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #1E293B;
+  margin: 0 0 0.2rem 0;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.chartSub {
+  font-size: 0.82rem;
+  color: #94A3B8;
+  margin: 0;
+}
+
+.chartBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #DCFCE7;
+  color: #166534;
+  padding: 0.35rem 0.75rem;
+  border-radius: 2rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.chartBadgeBlue {
+  background: #EFF6FF;
+  color: #1E6EBE;
+}
+
+/* ─── Activity feed ───────────────────────────────────────── */
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+}
+
+.activityItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #F1F5F9;
+  animation: cardIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.activityItem:last-child { border-bottom: none; }
+
+.activityAvatar {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.activityInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.activityName {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1E293B;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.activityAction {
+  font-size: 0.74rem;
+  color: #64748B;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.activityTime {
+  font-size: 0.68rem;
+  color: #94A3B8;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ─── Quick strip ─────────────────────────────────────────── */
+.quickStrip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  width: 100%;
+  animation: cardIn 0.55s 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.stripCard {
+  background: #ffffff;
+  border-radius: 1.25rem;
+  border: 1px solid #E2E8F0;
+  padding: 1.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  box-shadow: 0 2px 8px rgba(30, 110, 190, 0.05);
+  transition: box-shadow 0.2s, transform 0.2s;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.stripCard:hover {
+  box-shadow: 0 6px 20px rgba(30, 110, 190, 0.1);
+  transform: translateY(-2px);
+}
+
+.stripValue {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #1E293B;
+  line-height: 1;
+  display: block;
+}
+
+.stripLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748B;
+  display: block;
+}
+
+.stripSub {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: #94A3B8;
+  margin-top: 0.25rem;
+}
+
+.stripGood { color: #3CC83C; }
+.stripBad  { color: #EF4444; }
+
+/* ================================================================
+   📱 TABLET LARGO (até 1280px)
+================================================================ */
+@media (max-width: 1280px) {
+  .mainContent {
+
+  margin-left: 0px;
+  }
+  .statsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .chartsRow {
+    grid-template-columns: 3fr 2fr;
+      width: 100%;
+  }
+
+  .quickStrip {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ================================================================
+   📱 TABLET (até 1024px)
+================================================================ */
+@media (max-width: 1024px) {
+  .mainContent {
+
+  margin-left: 0px;
+  }
+  .content {
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .chartsRow {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    width: 100%;
+  }
+
+ 
+  .chartsRow > .chartCard:first-child {
+    grid-column: span 2;
+  }
+
+  .chartCard {
+    padding: 1.25rem;
+    border-radius: 1.25rem;
+  }
+
+  .chartTitle { font-size: 1rem; }
+  .chartSub   { font-size: 0.75rem; }
+
+  .quickStrip {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .stripCard  { padding: 1.25rem; }
+  .stripValue { font-size: 1.4rem; }
+}
+
+/* ================================================================
+   📱 TABLET PEQUENO (até 768px)
+================================================================ */
+@media (max-width: 768px) {
+  .content {
+    padding: 1.25rem 1rem;
+    gap: 1.25rem;
+  }
+  .mainContent {
+
+  margin-left: 0px;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .chartsRow {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .chartsRow > .chartCard:first-child {
+    grid-column: span 1;
+  }
+
+  .quickStrip {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .stripCard  { padding: 1rem 1.25rem; }
+  .stripValue { font-size: 1.3rem; }
+  .stripLabel { font-size: 0.75rem; }
+}
+
+/* ================================================================
+   📱 CELULAR (até 640px)
+================================================================ */
+@media (max-width: 640px) {
+  .mainContent {
+
+  margin-left: 0px;
+  }
+  .content {
+    padding: 1rem 0.75rem 1.5rem;
+    gap: 1rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .chartsRow {
+    grid-template-columns: 1fr;
+  }
+
+  .chartCard {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+
+  .chartHeader {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .chartTitle { font-size: 0.95rem; }
+
+  .quickStrip {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .stripCard {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+
+  .stripValue { font-size: 1.2rem; }
+  .stripLabel { font-size: 0.7rem; }
+  .stripSub   { font-size: 0.68rem; }
+}
+
+/* ================================================================
+   📱 CELULAR PEQUENO (até 400px)
+================================================================ */
+@media (max-width: 400px) {
+  .content {
+    padding: 0.75rem 0.5rem 1rem;
+    gap: 0.75rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .quickStrip {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .stripCard  { padding: 0.875rem 1rem; }
+  .chartCard  { padding: 0.875rem; }
+}

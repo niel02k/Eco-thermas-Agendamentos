@@ -1,0 +1,58 @@
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1E293B; /* var(--text-main) */
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 1.25rem;
+  color: #1E6EBE; /* var(--color-blue-main) */
+  opacity: 0.7;
+}
+
+.input {
+  width: 100%;
+  padding: 1rem 1.25rem 1rem 3.25rem;
+  font-size: 1rem;
+  color: #1E293B;
+  background-color: #F1F5F9; /* var(--input-bg) */
+  border: 2px solid transparent;
+  border-radius: 1rem; /* var(--radius-lg) */
+  transition: all 0.3s ease;
+}
+
+.input:focus {
+  background-color: #ffffff;
+  border-color: #1E6EBE;
+  box-shadow: 0 0 0 4px rgba(30, 110, 190, 0.1);
+  outline: none;
+}
+
+.rightElement {
+  position: absolute;
+  right: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
+  -webkit-text-fill-color: var(--text-main) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}

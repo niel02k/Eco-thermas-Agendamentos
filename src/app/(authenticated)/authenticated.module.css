@@ -1,0 +1,54 @@
+/* app/(authenticated)/authenticated.module.css */
+
+.wrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+}
+
+.mainWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-left: 260px; /* Ajustado para 260px - mesma largura da sua sidebar */
+  transition: margin-left 0.3s ease;
+}
+
+.mainContent {
+  flex: 1;
+  /* SEM padding aqui - cada página controla seu próprio padding */
+}
+
+/* Loading state */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  gap: 16px;
+  color: #64748b;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e2e8f0;
+  border-top: 3px solid #1E6EBE;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* RESPONSIVIDADE */
+@media (max-width: 1024px) {
+  .mainWrapper {
+    margin-left: 0;
+  }
+}

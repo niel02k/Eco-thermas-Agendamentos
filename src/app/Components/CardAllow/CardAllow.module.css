@@ -1,0 +1,255 @@
+.bottomPage{
+  height:100vh;
+  width:100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bottomCardA{
+    height:78.7vh;
+    width:30vw;
+    border:2px solid rgba(0, 0, 0, 0.121);
+    border-radius:15px;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+    background-color: white;
+    min-width:450px;
+}
+.request{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width:100%;
+    gap: 10px;
+    color: black;
+}
+.request h5{
+    color:#757575
+}
+.elements{
+    display: flex;
+    flex-direction: column;
+    gap:30px;
+    margin-left: 40px;
+    color:black
+}
+
+.contName{
+    display:flex;
+    flex-direction: column;
+    gap:10px;
+}
+.nameInput{
+    width:25vw;
+    height:5vh;
+    border:1px solid rgba(0, 0, 0, 0.127);
+    border-radius:10px
+}
+.contEmail{
+    display:flex;
+    flex-direction: column;
+    gap:10px;
+    border-radius:10px
+}
+.emailInput{
+    width:25vw;
+    height:5vh;
+    border:1px solid rgba(0, 0, 0, 0.127);
+    border-radius:10px;
+    
+}
+.contPosition{
+    display:flex;
+    flex-direction: column;
+    gap:10px;
+    
+}
+.positionInput{
+    width:25vw;
+    height:5vh;
+    border:1px solid rgba(0, 0, 0, 0.127);
+    border-radius:10px
+}
+.contDescription{
+    display:flex;
+    flex-direction: column;
+    gap:10px;
+    
+}
+.descriptionInput{
+    width:25vw;
+    height:10vh;
+    border:1px solid rgba(0, 0, 0, 0.127);
+    border-radius:10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    box-sizing: border-box;
+}
+
+.contButton{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.button{
+    background-color: rgb(37, 99, 235);
+    color:white;
+    border:none;
+    height:5vh;
+    width: 25vw;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    
+}
+.button:hover {
+  transform: translateY(-4px);     
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35); 
+}
+
+.button:active {
+  transform: translateY(0px);       
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
+.inputWrapper{
+    position:relative;
+    width:25vw;
+}
+.inputWrapperDescription{
+    position:relative;
+    width:25vw;
+}
+.inputIcon{
+    position:absolute;
+    left:10px;
+    top:50%;
+    transform:translateY(-50%);
+}
+.inputIconDescription{
+    position:absolute;
+    left:10px;
+    top:10px;
+}
+.nameInput,
+.emailInput,
+.positionInput{
+    padding-left:40px;
+    background-color: white;
+    color: #757575;
+}
+.descriptionInput{
+    padding-left:40px;
+    background-color: white;
+    color: #757575;
+}
+.icon{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin-top:20px;
+    
+}
+.bottomIR{
+     display:flex;
+    justify-content:center;
+    align-items:center;
+}
+.iconRequest{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin-top:20px;
+    background-color:#DBEAFE;
+    width: 4.5vw;
+    height: 8vh;
+    border-radius: 5vw; 
+}
+.inputWrapper,
+.inputWrapperDescription,
+.nameInput,
+.emailInput,
+.positionInput,
+.descriptionInput,
+.button{
+    min-width:370px;
+}
+@media (max-width: 1024px){
+
+    .bottomCardA{
+        width:60vw;
+        height:auto;
+        padding-bottom:30px;
+    }
+
+    .inputWrapper,
+    .inputWrapperDescription,
+    .nameInput,
+    .emailInput,
+    .positionInput,
+    .descriptionInput,
+    .button{
+        width:50vw;
+    }
+
+    .iconRequest{
+        width:8vw;
+        height:8vw;
+    }
+}
+
+/* ========================= */
+/* CELULAR */
+/* ========================= */
+
+@media (max-width: 768px){
+
+    .bottomPage{
+        height:auto;
+        min-height:100vh;
+        padding:20px 0;
+    }
+
+    .bottomCardA{
+        width:92vw;
+        height:auto;
+        padding-bottom:25px;
+    }
+
+    .elements{
+        margin-left:10px;
+        align-items:center;
+    }
+
+    .contName,
+    .contEmail,
+    .contPosition,
+    .contDescription{
+        width:100%;
+        align-items:flex-start;
+    }
+
+    .inputWrapper,
+    .inputWrapperDescription,
+    .nameInput,
+    .emailInput,
+    .positionInput,
+    .descriptionInput,
+    .button{
+        width:85vw;
+    }
+
+    .iconRequest{
+        width:60px;
+        height:60px;
+        border-radius:50%;
+    }
+
+    .request h2,
+    .request h5{
+        text-align:center;
+    }
+}
+

@@ -1,0 +1,120 @@
+.cardSettings {
+  background: #fff;
+  padding: 28px;
+  border-radius: 14px;
+  max-width: 520px;
+  width: 100%;
+  margin: 40px auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  font-family: Arial;
+}
+
+.title {
+  font-size: 22px;
+  margin-bottom: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.formGroup label {
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* INPUT */
+.formGroup input {
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.formGroup input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* 🔽 NOVO: SELECT */
+.select {
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+  background: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+  color: #757575
+}
+
+.select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* INPUT COM ÍCONE */
+.inputIconBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIconBox input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.icon {
+  position: absolute;
+  right: 12px;
+  cursor: pointer;
+  font-size: 18px;
+  user-select: none;
+  opacity: 0.7;
+  transition: 0.2s;
+}
+
+.icon:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* BOTÃO ANTIGO */
+.toggleBtn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* BOTÃO SALVAR */
+.btnSave {
+  width: 100%;
+  padding: 12px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btnSave:hover {
+  background: #1d4ed8;
+}
+
+/* ERROS */
+.error {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 4px;
+}

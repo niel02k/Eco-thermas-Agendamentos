@@ -1,0 +1,109 @@
+.container {
+  display: flex;
+  min-height: 100vh;
+  background: #F0F4FA;
+}
+
+.mainContent {
+  flex: 1;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: 0.4s ease;
+}
+
+.mainVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.content {
+  padding: 2rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ───── KPIs ───── */
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.25rem;
+}
+
+/* ───── INSIGHTS ───── */
+
+.insightsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.insightCard {
+  background: #fff;
+  border-radius: 1.5rem;
+  border: 1px solid #E2E8F0;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(30,110,190,0.06);
+}
+
+.insightTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+}
+
+.insightValue {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #1E293B;
+  margin-top: 0.3rem;
+}
+
+.insightSub {
+  font-size: 0.8rem;
+  color: #94A3B8;
+}
+
+/* ───── TABLE ───── */
+
+.tableCard {
+  background: #fff;
+  border-radius: 1.5rem;
+  border: 1px solid #E2E8F0;
+  padding: 1.5rem;
+}
+
+.tableRowHeader,
+.tableRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr 1fr 1fr 1fr;
+  padding: 0.85rem 1rem;
+}
+
+.tableRowHeader {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94A3B8;
+  border-bottom: 1px solid #E2E8F0;
+  text-transform: uppercase;
+}
+
+.tableRow {
+  font-size: 0.9rem;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.tableRow:hover {
+  background: #F8FAFC;
+}
+
+.status {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.active { color: #3CC83C; }
+.completed { color: #1E6EBE; }
+.cancelled { color: #EF4444; }

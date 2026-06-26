@@ -1,0 +1,79 @@
+.button {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 1rem; /* var(--radius-lg) */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  outline: none;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Variante Primária - Laranja da Marca */
+.primary {
+  background-color: #fa643c; /* var(--color-orange-sun) */
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(250, 100, 60, 0.3);
+}
+
+.primary:hover:not(:disabled) {
+  background-color: #e5532d;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(250, 100, 60, 0.4);
+}
+
+/* Variante Secundária - Azul da Marca */
+.secondary {
+  background-color: #1E6EBE; /* var(--color-blue-main) */
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(30, 110, 190, 0.2);
+}
+
+.secondary:hover:not(:disabled) {
+  background-color: #164e8a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(30, 110, 190, 0.3);
+}
+
+/* Variante Outline */
+.outline {
+  background-color: transparent;
+  color: #1E6EBE;
+  border: 2px solid #1E6EBE;
+}
+
+.outline:hover:not(:disabled) {
+  background-color: rgba(30, 110, 190, 0.05);
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
+/* Loader para estado de carregamento */
+.loader {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #FFFFFF;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
