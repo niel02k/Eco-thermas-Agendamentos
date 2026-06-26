@@ -287,7 +287,7 @@ export async function agendamentosPorDiaSemana() {
   return contagem
 }
 
-export default async function taxaDeConversao({
+export async function taxaDeConversao({
   inicio,
   fim,
 } = {}) {
@@ -295,15 +295,28 @@ export default async function taxaDeConversao({
   const dataInicio = inicio || new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().split('T')[0];
   const dataFim = fim || hoje.toISOString().split('T')[0];
 
-  const { count, error } = await supabase
+  const { count: vendasrealizada , error } = await supabase
     .from('agendamentos')
     .select('*', { count: 'exact', head: true })
     .eq('status', 'REALIZADO')
-    .eq('resultado_venda', 'VENDIDO')
+    .eq('resultado_venda', 'VENDA_REALIZADA')
     .gte('data_visita', dataInicio)
     .lte('data_visita', dataFim);
 
   if (error) throw error;
 
-  return count ?? 0;
+   const { count: atendidos, error: totalError } = await supabase
+    .from('agendamentos')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'REALIZADO')
+    .gte('data_visita', dataInicio)
+    .lte('data_visita', dataFim);
+
+    const resultado = atendidos > 0
+    ? Number(((vendasrealizada / atendidos) * 100).toFixed(2))
+    : 0;
+
+  if (totalError) throw totalError;
+
+  return resultado ?? 0;
 }

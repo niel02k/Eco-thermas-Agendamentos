@@ -12,7 +12,6 @@ import {
   Calendar
 } from "lucide-react";
 
-import Sidebar from "@/app/Components/Sidebar/Sidebar.jsx";
 import Headers from "@/app/Components/Header/Header.jsx";
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
 import StatCard from "@/app/Components/StatCard/StatCard.jsx";
@@ -115,20 +114,10 @@ export default function Reports() {
 
   return (
     <div className={styles.container}>
-      <Sidebar
-        activeItem="reports"
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-      />
+      
 
       <main className={`${styles.mainContent} ${visible ? styles.mainVisible : ""}`}>
-        <Headers
-          userName="Marcos Daniel"
-          userRole="Administrador"
-          initials="RM"
-          activeItem="reports"
-          onMenuOpen={() => setIsSidebarOpen(true)}
-        />
+        
 
         <div className={styles.content}>
 
