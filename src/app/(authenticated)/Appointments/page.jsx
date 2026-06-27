@@ -6,6 +6,7 @@ import {Plus,CalendarCheck,CircleDollarSign,CheckCircle2,CalendarDays,Eye,Pencil
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
 import StatCard from "@/app/Components/StatCard/StatCard.jsx";
 import styles from "./Appointments.module.css";
+import NewAppointment from "@/app/Components/modal/Newappointment";
 
 /* -------------------------------------------------------------------------- */
 /* MOCK DATA                                                                   */
@@ -100,6 +101,7 @@ const recentActivities = [
 /* -------------------------------------------------------------------------- */
 
 export default function AppointmentsPage() {
+  const [abrirModal, setAbrirModal] = useState(false);
   const [visible, setVisible] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -161,7 +163,7 @@ export default function AppointmentsPage() {
             }}
             actionLabel="Novo Agendamento"
             actionIcon={Plus}
-            onAction={() => console.log("Novo agendamento")}
+            onAction={() => setAbrirModal(true)}
           />
 
           {/* ---------------------------------------------------------------- */}
@@ -415,6 +417,11 @@ export default function AppointmentsPage() {
           </div>
         </div>
       </main>
+        {abrirModal && (
+          <NewAppointment
+            onClose={() => setAbrirModal(false)}
+          />
+        )}
     </div>
   );
 }
