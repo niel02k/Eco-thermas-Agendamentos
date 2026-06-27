@@ -244,7 +244,7 @@
   background: #ffffff;
   border-radius: 1.5rem;
   border: 1px solid #e2e8f0;
-  overflow: hidden;
+  overflow: none;
   box-shadow: 0 4px 12px rgba(30, 110, 190, 0.06);
   animation: cardIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -314,7 +314,7 @@
 
 .tableWrapper {
   width: 100%;
-  overflow-x: auto;
+ 
 }
 
 .table {
@@ -744,4 +744,9 @@
   .weekGrid   { grid-template-columns: 1fr; }
   .actions    { flex-wrap: wrap; }
   .modalBox   { padding: 1.5rem; }
+  .table th:nth-child(3),
+  .table td:nth-child(3),
+  .table th:nth-child(4),
+  .table td:nth-child(4) {display: none;}
+  .clienteTel{display:none;}
 }
