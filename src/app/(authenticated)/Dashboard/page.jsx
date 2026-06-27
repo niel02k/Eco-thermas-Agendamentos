@@ -6,7 +6,7 @@ import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 import PageHeader from '@/app/Components/PageHeader/PageHeader.jsx';
 import StatCard from '@/app/Components/StatCard/StatCard.jsx';
 import styles from './Dashboard.module.css';
-import { agendamentosHoje, proximosDiasComAgendamentos, totalClientesAtendidos, agendamentosPorDiaSemana } from '@/app/services/agendamentosServices.js';
+import { agendamentosHoje, proximosDiasComAgendamentos, totalClientesAtendidos, agendamentosPorDiaSemana, taxaDeConversao } from '@/app/services/agendamentosServices.js';
 import { receitaPorMes, ticketMedio} from '@/app/services/contratosServices.js';
 
 /* ── Dashboard ── */
@@ -26,19 +26,21 @@ const Dashboard = () => {
   // Activity feed
 
   const [ticketMedioValor, setTicketMedioValor] = useState(null);
+  const [taxaConversao, setTaxaConversao] = useState(0);
 
 
 
   useEffect(() => {
     async function carregarDados() {
       try {
-        const [clientes, hoje, dias, receita, semana, ticket] = await Promise.all([
+        const [clientes, hoje, dias, receita, semana, ticket , taxa] = await Promise.all([
           totalClientesAtendidos(),
           agendamentosHoje(),
           proximosDiasComAgendamentos(2),
           receitaPorMes(),
           agendamentosPorDiaSemana(),
-          ticketMedio()
+          ticketMedio(),
+          taxaDeConversao()
         ]);
 
         setTotalClientes(clientes);
@@ -47,6 +49,7 @@ const Dashboard = () => {
         setDadosReceita(receita);
         setDadosSemana(semana);
         setTicketMedioValor(ticket);
+        setTaxaConversao(taxa);
       } catch (error) {
         console.error('Erro ao carregar dados:', error);
       } finally {
@@ -57,7 +60,6 @@ const Dashboard = () => {
     carregarDados();
   }, []);
 
-  console.log('Ticket Médio:', ticketMedioValor);
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80);
@@ -174,8 +176,11 @@ const Dashboard = () => {
                 <BarChart data={dadosSemanaFormatado} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
                   <XAxis dataKey="dia" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} allowDecimals={false} />
-                  <Tooltip formatter={(v) => [v, 'Agendamentos']} />
+                  <YAxis tick={{ fontSize: 11, fill: '#000000' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <Tooltip formatter={(v) => [v, 'Agendamentos']}
+                    labelStyle={{ color: '#252424' }}
+                   itemStyle={{ color: '#56f3aa' }}
+                    />
                    <Bar dataKey="total" fill="#6EC8F0" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -189,12 +194,11 @@ const Dashboard = () => {
           {/* Quick Strip */}
           <div className={styles.quickStrip}>
             <div className={styles.stripCard}>
-              <span className={styles.stripValue}>...</span>
               <span className={styles.stripLabel}>Taxa de Conversão</span>
+              <span className={styles.stripValue}>{loading ? '...' : taxaConversao ? `${taxaConversao.toFixed(2)} % ` : ' 0 %'}</span>
               <span className={`${styles.stripSub} ${styles.stripGood}`}>
-                <TrendingUp size={11} />
-                Em breve
               </span>
+            
             </div>
             <div className={styles.stripCard}>
               <span className={styles.stripLabel}>Ticket Médio</span>
@@ -206,7 +210,7 @@ const Dashboard = () => {
               </span>
             </div>
             <div className={styles.stripCard}>
-              <span className={styles.stripLabel}>Quantidade de contrato vendidos </span>
+              <span className={styles.stripLabel}>Contratos Vendidos</span>
                <span className={`${styles.stripValue} `}>
                 {ticketMedioValor ? `${ticketMedioValor.total_contratos} contratos` : ' 0' }
               </span>
