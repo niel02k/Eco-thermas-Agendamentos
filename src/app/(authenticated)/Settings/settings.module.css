@@ -1,115 +1,815 @@
+/* settings.module.css */
+
+/* ─────────────────────────────────────────────
+   CONTAINER
+───────────────────────────────────────────── */
 .container {
-  padding: 2.5rem;
-  background: #f5f7fb;
+  padding: 2rem 2.5rem 3rem;
+  background: #f0f4fa;
   min-height: 100vh;
-  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  box-sizing: border-box;
+}
+
+/* ─────────────────────────────────────────────
+   CABEÇALHO
+───────────────────────────────────────────── */
+.pageHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .title {
-  font-size: 1.8rem;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+  font-family: "Montserrat", sans-serif;
+}
+
+.subtitle {
+  color: #94a3b8;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.adminBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #1e293b;
+  color: #fff;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 2rem;
+  padding: 0.4rem 0.875rem;
+  border-radius: 999px;
+  letter-spacing: 0.05em;
 }
 
+/* ─────────────────────────────────────────────
+   ACESSO NEGADO
+───────────────────────────────────────────── */
+.accessDenied {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: #64748b;
+  text-align: center;
+  padding: 2rem;
+}
+.accessDenied h2 { font-size: 1.5rem; font-weight: 800; color: #1e293b; margin: 0; }
+
+/* ─────────────────────────────────────────────
+   CARD BASE
+───────────────────────────────────────────── */
 .card {
-  background: white;
-  padding: 1.8rem;
-  border-radius: 14px;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
-  border: 1px solid #eef2f7;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* GRID DO HORÁRIO */
-.scheduleGrid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 10px;
-}
-
-/* CARD DE CADA DIA */
-.dayCard {
-  padding: 14px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
   background: #fff;
+  border-radius: 1.5rem;
+  border: 1px solid #e2e8f0;
+  padding: 1.75rem;
+  box-shadow: 0 4px 12px rgba(30, 110, 190, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-/* HEADER DO DIA */
-.dayHeader {
+.cardHead {
   display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.cardIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1e293b;
+  font-family: "Montserrat", sans-serif;
+}
+
+.cardSub {
+  margin-top: 0.2rem;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+  flex-wrap: wrap;
+}
+
+/* ─────────────────────────────────────────────
+   FEEDBACK
+───────────────────────────────────────────── */
+.feedback {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.75rem;
+  flex: 1;
+}
+.feedback_ok   { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+.feedback_erro { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+
+/* ─────────────────────────────────────────────
+   BOTÃO PRIMÁRIO
+───────────────────────────────────────────── */
+.btnPrimary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #1e6ebe;
+  color: #fff;
+  border: none;
+  border-radius: 0.875rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.btnPrimary:hover:not(:disabled) {
+  background: #164e8a;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(30, 110, 190, 0.25);
+}
+.btnPrimary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.spin { animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─────────────────────────────────────────────
+   LAYOUT DO CALENDÁRIO
+───────────────────────────────────────────── */
+.calLayout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.calWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ─────────────────────────────────────────────
+   REACT-DAY-PICKER — OVERRIDES
+───────────────────────────────────────────── */
+.rdpRoot {
+  --rdp-accent-color: #1e6ebe;
+  --rdp-background-color: #eff6ff;
+  font-family: "Inter", sans-serif;
+  width: 100%;
+}
+
+.rdpMonths {
+  display: flex;
+  gap: 1rem;
+}
+
+.rdpMonth {
+  width: 100%;
+}
+
+.rdpCaption {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 1rem;
 }
 
-/* BOTÃO ABERTO / FECHADO */
-.openBtn {
-  background: #dcfce7;
-  color: #166534;
-  border: 1px solid #86efac;
-  padding: 6px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
+.rdpCaptionLabel {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #1e293b;
+  font-family: "Montserrat", sans-serif;
+  text-transform: capitalize;
 }
 
-.closedBtn {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #fca5a5;
-  padding: 6px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
+.rdpNav {
+  display: flex;
+  gap: 0.5rem;
 }
 
-/* HORÁRIOS */
-.timeRow {
+.rdpNavBtn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: #fff;
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s;
+}
+.rdpNavBtn:hover { background: #eff6ff; border-color: #1e6ebe; color: #1e6ebe; }
+
+.rdpTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 3px;
 }
 
-.timeInput {
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #dbe3ec;
+
+.rdpHeadCell {
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.4rem 0;
 }
 
-/* INPUTS */
-.input {
-  padding: 12px;
-  border: 1px solid #dbe3ec;
-  border-radius: 10px;
+
+
+.rdpCell {
+  text-align: center;
+  padding: 1px;
+}
+
+.rdpDayBtn {
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: #1e293b;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rdpDayBtn:hover {
+  background: #eff6ff;
+  color: #1e6ebe;
+  font-weight: 700;
+}
+
+/* Hoje */
+.rdpToday .rdpDayBtn {
+  border: 2px solid #1e6ebe;
+  font-weight: 800;
+  color: #1e6ebe;
+}
+
+/* Passado */
+.rdpDisabled .rdpDayBtn,
+.dayPast .rdpDayBtn {
+  color: #cbd5e1 !important;
+  cursor: not-allowed;
+  background: transparent !important;
+}
+
+/* Fora do mês */
+.rdpOutside .rdpDayBtn { color: #e2e8f0; }
+
+/* ─────────────────────────────────────────────
+   MODIFICADORES DE DIA
+───────────────────────────────────────────── */
+
+/* Salvo e aberto (já no banco) */
+.daySavedOpen .rdpDayBtn {
+  background: #1e6ebe !important;
+  color: #fff !important;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(30, 110, 190, 0.35);
+}
+.daySavedOpen .rdpDayBtn:hover {
+  background: #164e8a !important;
+}
+
+/* Novo selecionado mas ainda não salvo */
+.dayNewOpen .rdpDayBtn {
+  background: #bfdbfe !important;
+  color: #1e40af !important;
+  font-weight: 700;
+  border: 2px dashed #1e6ebe !important;
+}
+
+/* Salvo como fechado */
+.daySavedClosed .rdpDayBtn {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+  text-decoration: line-through;
+}
+
+/* ─────────────────────────────────────────────
+   LEGENDA
+───────────────────────────────────────────── */
+.legenda {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.legendaItem {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.legendaDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.dotSavedOpen { background: #1e6ebe; }
+.dotNewOpen   { background: #bfdbfe; border: 2px dashed #1e6ebe; }
+.dotClosed    { background: #fee2e2; }
+
+/* ─────────────────────────────────────────────
+   PAINEL LATERAL
+───────────────────────────────────────────── */
+.calPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Card de hover */
+.hoverCard {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  transition: all 0.2s;
+  min-height: 72px;
+}
+
+.hoverDate {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.5rem;
+  text-transform: capitalize;
+}
+
+.hoverStatus {
+  display: inline-flex;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+}
+
+.hoverAberto { background: #dcfce7; color: #166534; }
+.hoverFechado { background: #fee2e2; color: #b91c1c; }
+.hoverNovo { background: #dbeafe; color: #1e40af; border: 1px dashed #1e6ebe; }
+
+.hoverCap {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin: 0.4rem 0 0;
+}
+
+.hoverSemInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* Seção de config */
+.panelSection {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.panelLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.timeRange {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.timeField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.timeField label {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.timeSep {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  padding-bottom: 0.5rem;
+}
+
+.selectSmall2 {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.625rem;
+  font-size: 0.85rem;
+  color: #1e293b;
+  background: #fff;
   outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  appearance: none;
+}
+.selectSmall2:focus { border-color: #1e6ebe; box-shadow: 0 0 0 3px rgba(30,110,190,0.1); }
+
+.inputSmall {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  color: #1e293b;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.inputSmall:focus { border-color: #1e6ebe; box-shadow: 0 0 0 3px rgba(30,110,190,0.1); }
+
+.textareaSmall {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.625rem;
+  font-size: 0.82rem;
+  color: #1e293b;
+  background: #fff;
+  outline: none;
+  resize: none;
+  transition: border-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.textareaSmall:focus { border-color: #1e6ebe; box-shadow: 0 0 0 3px rgba(30,110,190,0.1); }
+
+/* Resumo */
+.resumoBox {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.875rem;
+  padding: 0.875rem 1.25rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.resumoNum {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #1e6ebe;
+  font-family: "Montserrat", sans-serif;
+}
+
+.resumoLabel {
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.panelFooter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.panelFooter .btnPrimary {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ─────────────────────────────────────────────
+   SKELETON DO CALENDÁRIO
+───────────────────────────────────────────── */
+.calSkeleton {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1.5rem;
+}
+
+.skeletonCal {
+  height: 340px;
+  border-radius: 1rem;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+.skeletonPanel {
+  height: 340px;
+  border-radius: 1rem;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+/* ─────────────────────────────────────────────
+   FORMULÁRIO CRIAR USUÁRIO
+───────────────────────────────────────────── */
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.input {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  font-size: 0.9rem;
+  color: #1e293b;
+  background: #f8fafc;
+  outline: none;
+  transition: all 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.input:focus { background: #fff; border-color: #1e6ebe; box-shadow: 0 0 0 3px rgba(30,110,190,0.1); }
+.input::placeholder { color: #94a3b8; }
+
+.inputIconBox { position: relative; }
+.inputIconBox .input { padding-right: 2.75rem; }
+
+.eyeBtn {
+  position: absolute;
+  right: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  transition: color 0.2s;
+}
+.eyeBtn:hover { color: #1e6ebe; }
+
+.selectWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .select {
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #dbe3ec;
-  background: white;
-}
-
-/* BOTÃO PRINCIPAL */
-.button {
-  padding: 12px;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  color: white;
-  border: none;
-  border-radius: 10px;
+  width: 100%;
+  padding: 0.75rem 2.25rem 0.75rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  font-size: 0.9rem;
+  color: #1e293b;
+  background: #f8fafc;
+  appearance: none;
+  outline: none;
   cursor: pointer;
-  font-weight: 600;
-  transition: 0.2s;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+.select:focus { background: #fff; border-color: #1e6ebe; box-shadow: 0 0 0 3px rgba(30,110,190,0.1); }
+
+.selectSmall {
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  font-size: 0.82rem;
 }
 
-.button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+.selectIcon {
+  position: absolute;
+  right: 0.75rem;
+  color: #94a3b8;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────
+   TABELA DE USUÁRIOS
+───────────────────────────────────────────── */
+.userTableWrapper {
+  overflow-x: auto;
+  border-radius: 1rem;
+  border: 1px solid #f1f5f9;
+}
+
+.userTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.userTable thead { background: #f8fafc; }
+
+.userTable th {
+  padding: 0.875rem 1.25rem;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.userTable td {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #f1f5f9;
+  font-size: 0.875rem;
+  color: #1e293b;
+  vertical-align: middle;
+}
+
+.userTable tbody tr { transition: background 0.15s; }
+.userTable tbody tr:hover { background: #fafbff; }
+.rowInativo td { opacity: 0.55; }
+
+.userNameCell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.userAvatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.youBadge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: #eff6ff;
+  color: #1e6ebe;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  margin-left: 0.4rem;
+}
+
+.emailCell { color: #64748b; font-size: 0.82rem; }
+.dataCell  { color: #94a3b8; font-size: 0.8rem; white-space: nowrap; }
+
+.cargoBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+}
+.cargoBadge[data-cargo="ADM"]      { background: #eff6ff; color: #1e6ebe; }
+.cargoBadge[data-cargo="CONSULTOR"] { background: #faf5ff; color: #7c3aed; }
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.badgeAtivo   { background: #dcfce7; color: #166534; }
+.badgeInativo { background: #fee2e2; color: #b91c1c; }
+
+.toggleStatusBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.875rem;
+  border: none;
+  border-radius: 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btnDesativar { background: #fee2e2; color: #b91c1c; }
+.btnDesativar:hover { background: #fecaca; transform: translateY(-1px); }
+.btnAtivar    { background: #dcfce7; color: #166534; }
+.btnAtivar:hover { background: #bbf7d0; transform: translateY(-1px); }
+
+.selfNote  { color: #cbd5e1; }
+.emptyRow  { text-align: center; color: #94a3b8; padding: 2.5rem 1rem !important; font-size: 0.9rem; }
+
+/* ─────────────────────────────────────────────
+   SKELETON GERAL
+───────────────────────────────────────────── */
+.skeletonLine {
+  height: 14px;
+  border-radius: 0.4rem;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+
+/* ─────────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .calLayout { grid-template-columns: 1fr; }
+  .calPanel  { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .panelFooter { grid-column: span 2; }
+  .calSkeleton { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 1024px) {
+  .container { padding: 1.5rem 1.25rem 2rem; }
+}
+
+@media (max-width: 768px) {
+  .container { padding: 1.25rem 1rem 2rem; }
+  .formGrid  { grid-template-columns: 1fr; }
+  .pageHeader { flex-direction: column; align-items: flex-start; }
+  .cardFooter { flex-direction: column; align-items: stretch; }
+  .btnPrimary { justify-content: center; }
+  .calPanel   { grid-template-columns: 1fr; }
+  .panelFooter { grid-column: span 1; }
+}
+
+@media (max-width: 480px) {
+  .title         { font-size: 1.5rem; }
+  .rdpDayBtn     { width: 34px; height: 34px; font-size: 0.8rem; }
 }

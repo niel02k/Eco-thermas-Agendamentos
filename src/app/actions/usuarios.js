@@ -15,7 +15,7 @@ export async function criarUsuario({ nome, email, senha, cargo }) {
     .eq('id', user.id)
     .single()
 
-  if (usuarioLogado?.cargo !== 'SDR') {
+  if (usuarioLogado?.cargo !== 'ADM') {
     throw new Error('Sem permissão para criar usuários.')
   }
 

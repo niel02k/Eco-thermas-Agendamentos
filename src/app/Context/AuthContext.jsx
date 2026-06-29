@@ -51,7 +51,6 @@ export function AuthProvider({ children }) {
 
     carregarUsuario()
 
-    // Atualiza automaticamente quando sessão muda
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(() => {
