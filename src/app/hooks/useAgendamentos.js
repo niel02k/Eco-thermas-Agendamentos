@@ -1,13 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import {
-  listarAgendamentos,
-  agendamentosHoje,
-  agendamentosPorDiaSemana,
-  atualizarAgendamento,
-  excluirAgendamento,
-} from '@/app/services/agendamentosServices';
+import {listarAgendamentos,agendamentosHoje,agendamentosPorDiaSemana,atualizarAgendamento,excluirAgendamento,} from '@/app/services/agendamentosServices';
 
 const DIAS_SEMANA = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 const LIMITE = 10;

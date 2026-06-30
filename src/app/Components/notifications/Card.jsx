@@ -2,15 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { 
-  CalendarCheck, 
-  UserCheck, 
-  CreditCard, 
-  AlertCircle,
-  Bell,
-  CheckCheck,
-  FileCheck2,
-} from 'lucide-react';
+import { CalendarCheck, UserCheck, CreditCard, AlertCircle,Bell,CheckCheck,FileCheck2,} from 'lucide-react';
 import Notification from './Notification';
 import styles from './Card.module.css';
 import { useRouter } from 'next/navigation';
@@ -19,7 +11,7 @@ import { useRouter } from 'next/navigation';
  * Componente principal do Card de Notificações com Gerenciamento de Estado
  */
 
-const route = useRouter
+const router = useRouter
 
 const CardNotification = () => {
   // Dados iniciais mockados
