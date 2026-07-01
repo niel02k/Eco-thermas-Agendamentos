@@ -244,7 +244,7 @@
   background: #ffffff;
   border-radius: 1.5rem;
   border: 1px solid #e2e8f0;
-  overflow: none;
+  overflow: hidden;
   box-shadow: 0 4px 12px rgba(30, 110, 190, 0.06);
   animation: cardIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -715,28 +715,183 @@
   .scheduleRow { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 1024px) {
-  .mainContent { margin-left: 0; }
-}
+@media (max-width:1024px) {
 
-@media (max-width: 768px) {
-  .content {
-    padding: 1.5rem 1rem 2rem;
+  .mainContent {
+    margin-left: 0;
   }
 
-  .tableHeader {
-    flex-direction: column;
-    align-items: flex-start;
+  .tableWrapper {
+    width: 100%;
   }
 
-  .searchBox { width: 100%; min-width: unset; }
-
-  .weekGrid { grid-template-columns: repeat(2, 1fr); }
+  .table {
+    width: 100%;
+    table-layout: fixed;
+  }
 
   .table th,
-  .table td { padding: 0.75rem 0.875rem; }
+  .table td {
+    padding: .75rem .6rem;
+    font-size: .78rem;
+  }
 
-  .pagination { justify-content: center; }
+  .clienteNome,
+  .clienteTel,
+  .horario {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .codBadge {
+    padding: .2rem .45rem;
+    font-size: .68rem;
+  }
+
+  .statusBadge {
+    padding: .25rem .55rem;
+    font-size: .65rem;
+  }
+
+  .actions {
+    gap: .2rem;
+    justify-content: center;
+  }
+
+  .actionButton {
+    width: 30px;
+    height: 30px;
+  }
+}
+@media (min-width:770px) and (max-width:1023px) {
+
+  .table {
+    table-layout: fixed;
+  }
+
+  .table th,
+  .table td {
+    padding: .55rem .35rem;
+    font-size: .72rem;
+  }
+
+  .table th {
+    font-size: .65rem;
+  }
+
+  .codBadge {
+    padding: .18rem .35rem;
+    font-size: .60rem;
+  }
+
+  .statusBadge {
+    padding: .18rem .45rem;
+    font-size: .60rem;
+  }
+
+  .clienteNome {
+    font-size: .74rem;
+  }
+
+  .clienteTel,
+  .horario {
+    font-size: .64rem;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+    width: 58px;
+    justify-items: center;
+    align-items: center;
+    margin: auto;
+  }
+
+  .actionButton {
+    width: 26px;
+    height: 26px;
+    border-radius: .45rem;
+  }
+
+  .actionButton svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .table tbody tr {
+    height: 82px;
+  }
+}
+@media (max-width:768px) {
+
+ .content {
+  padding: 1.5rem 1rem 2rem;
+}
+
+.tableHeader {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.searchBox {
+  width: 100%;
+  min-width: unset;
+}
+
+.weekGrid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.table {
+  table-layout: fixed;
+}
+
+.table th,
+.table td {
+  padding: .55rem .35rem;
+  font-size: .72rem;
+}
+
+.codBadge {
+  padding: .18rem .35rem;
+  font-size: .62rem;
+}
+
+.statusBadge {
+  padding: .18rem .45rem;
+  font-size: .60rem;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  justify-items: center;
+  align-items: center;
+  width: 60px;
+  margin: auto;
+}
+
+.actionButton {
+  width: 26px;
+  height: 26px;
+  border-radius: .45rem;
+}
+
+.actionButton svg {
+  width: 13px;
+  height: 13px;
+}
+
+.table tbody tr {
+  height: 82px;
+}
+
+.pagination {
+  justify-content: center;
+}
 }
 
 @media (max-width: 640px) {
