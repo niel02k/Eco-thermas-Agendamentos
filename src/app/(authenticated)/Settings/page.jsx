@@ -3,15 +3,30 @@
 import { useState } from "react";
 import { DayPicker } from "react-day-picker";
 import { ptBR } from "react-day-picker/locale";
-import {CalendarDays,UserPlus,Users,CheckCircle2,XCircle,ChevronDown,Eye,EyeOff,Shield,ShieldOff,Loader2,Clock,Users2,Info,} from "lucide-react";
+import {
+  CalendarDays,
+  UserPlus,
+  Users,
+  CheckCircle2,
+  XCircle,
+  ChevronDown,
+  Eye,
+  EyeOff,
+  Shield,
+  ShieldOff,
+  Loader2,
+  Clock,
+  Users2,
+  Info,
+} from "lucide-react";
 
 import { useAuth } from "@/app/Context/AuthContext";
 import { useSettings, HORARIOS_PADRAO, dateToISO, isoToDate } from "./useSettings";
 import styles from "./settings.module.css";
 
-
-
-
+/* -------------------------------------------------------------------------- */
+/* HELPERS                                                                     */
+/* -------------------------------------------------------------------------- */
 
 function formatarData(iso) {
   if (!iso) return "—";
@@ -26,6 +41,9 @@ function formatarDataExibicao(date) {
   });
 }
 
+/* -------------------------------------------------------------------------- */
+/* SUBCOMPONENTES                                                              */
+/* -------------------------------------------------------------------------- */
 
 function FeedbackMsg({ msg }) {
   if (!msg) return null;
@@ -51,8 +69,6 @@ export default function Settings() {
   const { usuario } = useAuth();
   const [showPass, setShowPass]           = useState(false);
   const [hoveredDate, setHoveredDate]     = useState(null); // Date | null
-  
-
 
   const {
     selectedDates, toggleDate,
@@ -122,7 +138,7 @@ export default function Settings() {
           <Shield size={14} />
           ADM
         </div>
-      </div>  
+      </div>
 
       {/* ══════════════════════════════════════════════════════════
           SEÇÃO 1 — CALENDÁRIO DE DISPONIBILIDADE
@@ -172,24 +188,26 @@ export default function Settings() {
                   past:        styles.dayPast,
                 }}
                 classNames={{
-                  root:         styles.rdpRoot,
-                  months:       styles.rdpMonths,
-                  month:        styles.rdpMonth,
-                  caption:      styles.rdpCaption,
-                  caption_label: styles.rdpCaptionLabel,
-                  nav:          styles.rdpNav,
-                  nav_button:   styles.rdpNavBtn,
-                  table:        styles.rdpTable,
-                  head_row:     styles.rdpHeadRow,
-                  head_cell:    styles.rdpHeadCell,
-                  row:          styles.rdpRow,
-                  cell:         styles.rdpCell,
-                  day:          styles.rdpDay,
-                  day_button:   styles.rdpDayBtn,
-                  today:        styles.rdpToday,
-                  outside:      styles.rdpOutside,
-                  disabled:     styles.rdpDisabled,
-                  hidden:       styles.rdpHidden,
+                  root:            styles.rdpRoot,
+                  months:          styles.rdpMonths,
+                  month:           styles.rdpMonth,
+                  month_caption:   styles.rdpCaption,
+                  caption_label:   styles.rdpCaptionLabel,
+                  nav:             styles.rdpNav,
+                  button_previous: styles.rdpNavBtnPrev,
+                  button_next:     styles.rdpNavBtnNext,
+                  month_grid:      styles.rdpTable,
+                  weekdays:        styles.rdpHeadRow,
+                  weekday:         styles.rdpHeadCell,
+                  week:            styles.rdpRow,
+                  day:             styles.rdpCell,
+                  day_button:      styles.rdpDayBtn,
+                  today:           styles.rdpToday,
+                  outside:         styles.rdpOutside,
+                  disabled:        styles.rdpDisabled,
+                  hidden:          styles.rdpHidden,
+                  selected:        styles.rdpSelected,
+                  chevron:         styles.rdpChevron,
                 }}
               />
 

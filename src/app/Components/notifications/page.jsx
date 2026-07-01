@@ -18,7 +18,7 @@ const NotificationsPage = () => {
     { id: 3, title: "Pagamento Pendente", description: "O boleto de Bruno Leite vence hoje.", time: "1h atrás", icon: CreditCard, iconColor: "#FA643C", isUnread: false, category: "financeiro" },
     { id: 4, title: "Alerta de Capacidade", description: "O parque atingiu 85% da capacidade permitida.", time: "3h atrás", icon: AlertCircle, iconColor: "#FAD228", isUnread: false, category: "alerta" },
     { id: 5, title: "Novo Cliente", description: "Juliana Silva se cadastrou via site.", time: "5h atrás", icon: UserCheck, iconColor: "#1E6EBE", isUnread: false, category: "cadastro" },
-    { id: 6, title: "Revisão de Contrato", description: "O contrato #442 precisa de revisão manual.", time: "1 dia atrás", icon: FileCheck, iconColor: "#991094", isUnread: false, category: "contrato" },
+    { id: 6, title: "Revisão de Contrato", description: "O contrato #442 precisa de revisão manual.", time: "1 dia atrás", icon: FileCheckz, iconColor: "#991094", isUnread: false, category: "contrato" },
   ]);
 
   const markAllAsRead = () => {
