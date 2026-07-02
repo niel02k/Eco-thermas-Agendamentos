@@ -1,7 +1,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: transparent;
 
   display: flex;
   justify-content: center;
@@ -11,12 +11,38 @@
 }
 
 .modal {
-  width: 700px;
-  max-width: 90%;
+  position: absolute;
 
+  top: 95px;
+  align-items: center;
+
+  color: black;
   background: white;
-  padding: 24px;
+  padding: 250px;
   border-radius: 12px;
+
+  box-shadow: 0 10px 35px rgba(0,0,0,.15);
+  border: 1px solid #e5e7eb;
+}
+
+.modal h2 {
+  margin: 0;
+  text-align: left;
+  align-self: flex-start;
+}
+
+.header {
+    width: 100%;
+    text-align: left;
+}
+
+.header h2 {
+    margin: 0;
+}
+
+.header p {
+    margin-top: 6px;
+    color: #6b7280;
 }
 
 .buttons {
