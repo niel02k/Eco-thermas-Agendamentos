@@ -3,26 +3,12 @@
 import { useState } from "react";
 import { DayPicker } from "react-day-picker";
 import { ptBR } from "react-day-picker/locale";
-import {
-  CalendarDays,
-  UserPlus,
-  Users,
-  CheckCircle2,
-  XCircle,
-  ChevronDown,
-  Eye,
-  EyeOff,
-  Shield,
-  ShieldOff,
-  Loader2,
-  Clock,
-  Users2,
-  Info,
-} from "lucide-react";
+import { CalendarDays,UserPlus,Users,CheckCircle2,XCircle,ChevronDown,Eye,EyeOff,Shield,ShieldOff,Loader2,Clock,Users2,Info,} from "lucide-react";
 
 import { useAuth } from "@/app/Context/AuthContext";
 import { useSettings, HORARIOS_PADRAO, dateToISO, isoToDate } from "./useSettings";
 import styles from "./settings.module.css";
+import Calendary from "@/app/Components/Calendary/Calendary";
 
 /* -------------------------------------------------------------------------- */
 /* HELPERS                                                                     */
@@ -166,50 +152,16 @@ export default function Settings() {
 
             {/* ── Calendário ─────────────────────────────────── */}
             <div className={styles.calWrapper}>
-              <DayPicker
-                mode="multiple"
-                selected={selectedDates}
-                onDayClick={(date, { disabled }) => {
-                  if (disabled) return;
-                  toggleDate(date);
-                }}
-                onDayMouseEnter={(date) => setHoveredDate(date)}
-                onDayMouseLeave={() => setHoveredDate(null)}
-                month={month}
-                onMonthChange={setMonth}
-                locale={ptBR}
-                disabled={[{ before: new Date() }]}
-                modifiers={modifiers}
-                modifiersClassNames={{
-                  selected:    styles.daySelected,
-                  savedOpen:   styles.daySavedOpen,
-                  newOpen:     styles.dayNewOpen,
-                  savedClosed: styles.daySavedClosed,
-                  past:        styles.dayPast,
-                }}
-                classNames={{
-                  root:            styles.rdpRoot,
-                  months:          styles.rdpMonths,
-                  month:           styles.rdpMonth,
-                  month_caption:   styles.rdpCaption,
-                  caption_label:   styles.rdpCaptionLabel,
-                  nav:             styles.rdpNav,
-                  button_previous: styles.rdpNavBtnPrev,
-                  button_next:     styles.rdpNavBtnNext,
-                  month_grid:      styles.rdpTable,
-                  weekdays:        styles.rdpHeadRow,
-                  weekday:         styles.rdpHeadCell,
-                  week:            styles.rdpRow,
-                  day:             styles.rdpCell,
-                  day_button:      styles.rdpDayBtn,
-                  today:           styles.rdpToday,
-                  outside:         styles.rdpOutside,
-                  disabled:        styles.rdpDisabled,
-                  hidden:          styles.rdpHidden,
-                  selected:        styles.rdpSelected,
-                  chevron:         styles.rdpChevron,
-                }}
-              />
+              <Calendary
+              selectedDates={selectedDates}
+              toggleDate={toggleDate}
+              hoveredDate={hoveredDate}
+              setHoveredDate={setHoveredDate}
+              month={month}
+              setMonth={setMonth}
+          modifiers={modifiers}
+            />
+
 
               {/* Legenda */}
               <div className={styles.legenda}>
