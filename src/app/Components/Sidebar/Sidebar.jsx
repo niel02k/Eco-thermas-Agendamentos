@@ -26,7 +26,6 @@ const Sidebar = ({ activeItem = 'dashboard', isOpen = false, onClose }) => {
     { id: 'Dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'Appointments', label: 'Agendamentos', icon: CalendarRange },
     { id: 'Contracts', label: 'Contratos', icon: FileText },
-    { id: 'ticket', label: 'Ingressos', icon: Ticket },
     { id: 'Reports', label: 'Relatórios', icon: BarChart3 },
     { id: 'Settings', label: 'Configurações', icon: Settings },
   ];

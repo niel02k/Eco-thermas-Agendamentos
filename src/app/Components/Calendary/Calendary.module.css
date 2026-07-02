@@ -1,0 +1,362 @@
+/* =======================================
+   CARD
+======================================= */
+
+.rdpRoot {
+  width: 100%;
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.08);
+}
+
+/* =======================================
+   MÊS
+======================================= */
+
+.rdpMonths{
+    width:100%;
+}
+
+.rdpMonth{
+    width:100%;
+}
+
+/* =======================================
+   HEADER
+======================================= */
+
+.rdpCaption{
+    position:relative;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    margin-bottom:20px;
+
+    height:48px;
+}
+
+.rdpCaptionLabel{
+
+    font-size:1.25rem;
+
+    font-weight:700;
+
+    color:#2c2c2c;
+
+    text-transform:capitalize;
+}
+
+/* =======================================
+   SETAS
+======================================= */
+
+.rdpNav{
+    position:absolute;
+
+    inset:0;
+
+    pointer-events:none;
+}
+
+.rdpNavBtnPrev,
+.rdpNavBtnNext{
+
+    pointer-events:all;
+
+    position:absolute;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+    width:42px;
+    height:42px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#f4f5f8;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    cursor:pointer;
+
+    transition:.25s;
+}
+
+.rdpNavBtnPrev{
+
+    left:0;
+}
+
+.rdpNavBtnNext{
+
+    right:0;
+}
+
+.rdpNavBtnPrev:hover,
+.rdpNavBtnNext:hover{
+
+    background:#ece8ff;
+
+    transform:translateY(-50%) scale(1.08);
+}
+
+.rdpChevron{
+
+    width:22px;
+    height:22px;
+
+    stroke:#555;
+}
+
+/* =======================================
+   TABELA
+======================================= */
+
+.rdpTable{
+
+    width:100%;
+
+    border-collapse:separate;
+
+    border-spacing:8px;
+}
+
+/* =======================================
+   SEMANA
+======================================= */
+
+.rdpHeadCell{
+
+    padding-bottom:12px;
+
+    text-align:center;
+
+    color:#888;
+
+    font-weight:600;
+}
+
+/* =======================================
+   DIA
+======================================= */
+
+.rdpCell{
+
+    text-align:center;
+}
+
+.rdpDayBtn{
+
+    width:48px;
+
+    height:48px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:transparent;
+
+    cursor:pointer;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    color:#2f2f2f;
+
+    transition:.25s;
+
+    position:relative;
+}
+
+.rdpDayBtn:hover:not(:disabled){
+
+    background:#f1f3f6;
+
+    transform:scale(1.08);
+}
+
+/* =======================================
+   HOJE
+======================================= */
+
+.rdpToday .rdpDayBtn{
+
+    border:2px solid #3b82f6;
+}
+
+/* =======================================
+   SELECIONADO
+======================================= */
+
+.daySelected .rdpDayBtn,
+.rdpSelected .rdpDayBtn{
+
+    background:#2563eb;
+
+    color:#fff;
+
+    box-shadow:0 8px 18px rgba(37,99,235,.35);
+}
+
+/* =======================================
+   ABERTO
+======================================= */
+
+.daySavedOpen .rdpDayBtn,
+.dayNewOpen .rdpDayBtn{
+
+    background:#7c3aed;
+
+    color:white;
+
+    box-shadow:0 8px 18px rgba(124,58,237,.35);
+}
+
+/* =======================================
+   FECHADO
+======================================= */
+
+.daySavedClosed .rdpDayBtn{
+
+    background:#fee2e2;
+
+    color:#dc2626;
+
+    font-weight:700;
+}
+
+.daySavedClosed .rdpDayBtn::after{
+
+    content:"";
+
+    position:absolute;
+
+    left:8px;
+
+    right:8px;
+
+    top:50%;
+
+    height:2px;
+
+    background:#dc2626;
+
+    transform:rotate(-12deg);
+}
+
+/* =======================================
+   PASSADO
+======================================= */
+
+.dayPast .rdpDayBtn,
+.rdpDisabled .rdpDayBtn{
+
+    color:#b5b5b5;
+
+    background:#fafafa;
+
+    cursor:not-allowed;
+}
+
+/* =======================================
+   FORA DO MÊS
+======================================= */
+
+.rdpOutside .rdpDayBtn{
+
+    opacity:.25;
+}
+
+/* =======================================
+   RESPONSIVO
+======================================= */
+
+@media (max-width:900px){
+
+    .rdpDayBtn{
+
+        width:44px;
+        height:44px;
+    }
+
+}
+
+@media (max-width:700px){
+
+    .rdpRoot{
+
+        padding:18px;
+    }
+
+    .rdpTable{
+
+        border-spacing:4px;
+    }
+
+    .rdpDayBtn{
+
+        width:38px;
+        height:38px;
+
+        font-size:14px;
+    }
+
+    .rdpCaptionLabel{
+
+        font-size:18px;
+    }
+
+    .rdpNavBtnPrev,
+    .rdpNavBtnNext{
+
+        width:36px;
+        height:36px;
+    }
+
+}
+
+@media (max-width:450px){
+
+    .rdpRoot{
+
+        padding:10px;
+    }
+
+    .rdpTable{
+
+        border-spacing:2px;
+    }
+
+    .rdpDayBtn{
+
+        width:34px;
+        height:34px;
+
+        font-size:13px;
+
+        border-radius:10px;
+    }
+
+    .rdpCaptionLabel{
+
+        font-size:16px;
+    }
+
+    .rdpNavBtnPrev,
+    .rdpNavBtnNext{
+
+        width:32px;
+        height:32px;
+    }
+
+}
