@@ -496,7 +496,7 @@ export default function AppointmentsPage() {
 
             {abrirModal && (
               <NewAppointment
-                onClass={() => setAbrirModal(false)}
+                onClose={() => setAbrirModal(false)}
               />
             )} 
 

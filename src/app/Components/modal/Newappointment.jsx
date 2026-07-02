@@ -2,59 +2,114 @@
 
 import styles from "./modal.module.css";
 
-export default function NovoAgendamento({ onClose }) {
+export default function NewAppointment({ onClose }) {
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
+    <div className={styles.overlay} onClick={onClose}>
+      <div
+        className={styles.modal}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className={styles.header}>
-          <h2>Novo Agendamento</h2>
-          <p>Crie seu novo agendamento aqui!</p>
+          <div>
+            <h2>Novo Agendamento</h2>
+            <p>Cadastre um novo agendamento para um visitante.</p>
+          </div>
+
+          <button
+            className={styles.closeButton}
+            onClick={onClose}
+          >
+            ✕
+          </button>
         </div>
 
-        <input
-          placeholder="Código"
-          type="text"
-        />
+        <div className={styles.body}>
+          <div className={styles.field}>
+            <label>Código</label>
+            <input
+              type="text"
+              placeholder="AGD-0001"
+              maxLength={20}
+            />
+          </div>
 
-        <select>
-          <option>Cliente</option>
-        </select>
+          <div className={styles.row}>
+            <div className={styles.field}>
+              <label>Cliente</label>
+              <input
+                type="text"
+                placeholder="Pesquisar cliente..."
+                maxLength={100}
+              />
+            </div>
 
-        <select>
-          <option>Vendedor</option>
-        </select>
+            <div className={styles.field}>
+              <label>Vendedor</label>
+              <input
+                type="text"
+                placeholder="Pesquisar vendedor..."
+                maxLength={100}
+              />
+            </div>
+          </div>
 
-        <div className={styles.row}>
-          <input type="date" />
-          
-          <input type="time"  />
+          <div className={styles.row}>
+            <div className={styles.field}>
+              <label>Data da visita</label>
+              <input type="date" />
+            </div>
+
+            <div className={styles.field}>
+              <label>Horário</label>
+              <input type="time" />
+            </div>
+          </div>
+
+          <div className={styles.row}>
+            <div className={styles.field}>
+              <label>Cidade</label>
+              <input
+                type="text"
+                placeholder="Cidade"
+                maxLength={40}
+              />
+            </div>
+
+            <div className={styles.field}>
+              <label>Quantidade de Pessoas</label>
+              <input
+                type="number"
+                min="1"
+                max="8"
+                defaultValue="1"
+              />
+            </div>
+          </div>
+
+          <div className={styles.field}>
+            <label>Observações</label>
+
+            <textarea
+              rows="4"
+              placeholder="Digite alguma observação..."
+              maxLength={500}
+            />
+          </div>
         </div>
 
-        <div className={styles.row}>
-          <input
-            placeholder="Cidade"
-            type="text"
-          />
+        <div className={styles.footer}>
+          <button
+            className={styles.cancelButton}
+            onClick={onClose}
+          >
+            Cancelar
+          </button>
 
-          <input
-            placeholder="Quant_Pessoas"
-            type="number"
-            min={1}
-            max={8}
-          />
-        </div>
-
-        <textarea
-          placeholder="Observações"
-        />
-
-        <div className={styles.buttons}>
-          <button>Salvar</button>
-          <button onClick={onClose}>Cancelar</button>
+          <button className={styles.saveButton}>
+            Salvar Agendamento
+          </button>
         </div>
       </div>
     </div>
   );
 }
-
-//
