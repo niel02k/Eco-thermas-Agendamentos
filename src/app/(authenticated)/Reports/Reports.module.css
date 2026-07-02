@@ -73,6 +73,7 @@
   border-radius: 1.5rem;
   border: 1px solid #E2E8F0;
   padding: 1.5rem;
+  color:#64748B
 }
 
 .tableRowHeader,
@@ -80,6 +81,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr 2fr 1fr 1fr 1fr;
   padding: 0.85rem 1rem;
+  color: #757575;
 }
 
 .tableRowHeader {
@@ -107,3 +109,109 @@
 .active { color: #3CC83C; }
 .completed { color: #1E6EBE; }
 .cancelled { color: #EF4444; }
+/* ───── RESPONSIVO ───── */
+.statsGrid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.insightsRow {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+/* TABELA MAIS SEGURA */
+.tableRowHeader,
+.tableRow {
+  grid-template-columns: repeat(6, minmax(120px, 1fr));
+}
+
+/* evita corte geral no layout */
+.content {
+  padding: clamp(1rem, 2vw, 2.5rem);
+}
+@media (max-width: 1486px) {
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .insightsRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* CELULAR */
+@media (max-width: 768px) {
+
+  /* ───── CARDS TOTALMENTE VERTICAIS ───── */
+  .content {
+    padding: 1rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .insightsRow {
+    grid-template-columns: 1fr;
+  }
+
+  .insightCard {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  /* ───── TABELA AJUSTADA (SEM CORTAR) ───── */
+  .tableCard {
+    padding: 1rem;
+  }
+
+  .tableRowHeader,
+  .tableRow {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  /* transforma “linha de tabela” em formato card */
+  .tableRowHeader {
+    display: none;
+  }
+
+  .tableRow {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    background: #F8FAFC;
+    margin-bottom: 0.75rem;
+  }
+
+  .tableRow > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .tableRow > div::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #64748B;
+  }
+}
+
+/* CELULAR PEQUENO */
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .insightCard {
+    padding: 1rem;
+  }
+
+  .tableRowHeader,
+  .tableRow {
+    min-width: 650px;
+  }
+}
