@@ -713,6 +713,85 @@
 @media (max-width: 1200px) {
   .statsGrid   { grid-template-columns: repeat(2, 1fr); }
   .scheduleRow { grid-template-columns: 1fr; }
+  
+}
+@media (min-width: 1025px) and (max-width: 1194px) {
+
+  .content {
+    padding: 1.75rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .scheduleRow {
+    grid-template-columns: 1fr;
+  }
+
+  .table {
+    table-layout: fixed;
+  }
+
+  .table th,
+  .table td {
+    padding: .75rem .55rem;
+    font-size: .76rem;
+  }
+
+  .table th {
+    font-size: .67rem;
+  }
+
+  .codBadge {
+    padding: .2rem .4rem;
+    font-size: .65rem;
+  }
+
+  .clienteNome {
+    font-size: .8rem;
+  }
+
+  .clienteTel,
+  .horario {
+    font-size: .67rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .statusBadge {
+    padding: .25rem .5rem;
+    font-size: .62rem;
+  }
+
+  /* ÍCONES EM 2x2 */
+  .actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, auto);
+    gap: 4px;
+    width: 64px;
+    justify-items: center;
+    align-items: center;
+    margin: 0 auto;
+  }
+
+  .actionButton {
+    width: 28px;
+    height: 28px;
+    border-radius: .45rem;
+  }
+
+  .actionButton svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .table tbody tr {
+    height: 90px;
+  }
 }
 
 @media (max-width:1024px) {
