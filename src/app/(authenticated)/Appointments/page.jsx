@@ -173,7 +173,7 @@ export default function AppointmentsPage() {
               badge={{ text: "Sistema Ativo", type: "success" }}
               actionLabel="Novo Agendamento"
               actionIcon={Plus}
-              onAction={() => console.log("Novo agendamento")}
+              onAction={() => setAbrirModal(true)}
             />
 
             {/* ── Erro global ─────────────────────────────────── */}
@@ -493,6 +493,13 @@ export default function AppointmentsPage() {
               </div>
             </div>
           </div>
+
+            {abrirModal && (
+              <NewAppointment
+                onClass={() => setAbrirModal(false)}
+              />
+            )} 
+
         </main>
       </div>
     </>
