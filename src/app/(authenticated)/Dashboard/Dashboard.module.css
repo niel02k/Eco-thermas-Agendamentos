@@ -16,7 +16,7 @@
   opacity: 0;
   transform: translateY(10px);
   transition: opacity 0.4s ease, transform 0.4s ease;
-  margin-left: 150px;
+  margin-left: 5vw;
 }
 
 .mainVisible {
@@ -30,7 +30,7 @@
   padding: 2rem 2.5rem 3rem;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1rem;
   box-sizing: border-box;
   width: 100%;
 }
@@ -58,7 +58,7 @@
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 1.25rem;
-  width: 80vw;
+  width: 100%;
   animation: cardIn 0.55s 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -71,7 +71,7 @@
   padding: 1.75rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1rem;
   transition: box-shadow 0.2s, transform 0.2s;
   box-sizing: border-box;
   min-width: 0;
