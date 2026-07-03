@@ -124,7 +124,7 @@
     padding:12px 20px;
     border:none;
     border-radius:10px;
-    background:#2563EB;
+    background:#ea580c;
     color:white;
     font-weight:600;
     cursor:pointer;
@@ -132,7 +132,7 @@
 }
 
 .saveButton:hover{
-    background:#1D4ED8;
+    background:#e5532d;
 }
 
 @keyframes show{
