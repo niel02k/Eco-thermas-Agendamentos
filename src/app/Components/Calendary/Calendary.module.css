@@ -54,8 +54,8 @@
 ======================================= */
 
 .rdpNav{
-    position:absolute;
-
+    position:relative;
+    padding:10px;
     inset:0;
 
     pointer-events:none;
@@ -199,13 +199,11 @@
 ======================================= */
 
 .daySelected .rdpDayBtn,
-.rdpSelected .rdpDayBtn{
-
-    background:#2563eb;
-
-    color:#fff;
-
-    box-shadow:0 8px 18px rgba(37,99,235,.35);
+.rdpSelected .rdpDayBtn {
+    border: 3px solid #2563eb;
+    background: #ffffff;
+    color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37,99,235,.15);
 }
 
 /* =======================================
@@ -217,7 +215,7 @@
 
     background:#7c3aed;
 
-    color:white;
+    color:rgb(255, 255, 255);
 
     box-shadow:0 8px 18px rgba(124,58,237,.35);
 }

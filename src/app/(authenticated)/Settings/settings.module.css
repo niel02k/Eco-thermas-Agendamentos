@@ -102,14 +102,131 @@
   margin: 0;
   font-size: 1.05rem;
   font-weight: 800;
-  color: #1e293b;
+  color: #000000;
   font-family: "Montserrat", sans-serif;
 }
 
 .cardSub {
   margin-top: 0.2rem;
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: #0046a8;
+}
+
+.legenda {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    margin-top: 1.5rem;
+    padding: 1rem;
+
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+}
+
+.legendaItem {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+
+    font-size: .85rem;
+    font-weight: 600;
+    color: #000000;
+
+    white-space: nowrap;
+}
+
+.legendaDot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    color: #000000;
+
+    border: 2px solid transparent;
+}
+
+/* Aberto salvo */
+.dotSavedOpen {
+    background: #7c3aed;
+    border-color: #6d28d9;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, .15);
+}
+
+/* Novo (ainda não salvo) */
+.dotNewOpen {
+    background: #2563eb;
+    border-color: #1d4ed8;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .15);
+}
+
+/* Fechado */
+.dotClosed {
+    background: #ef4444;
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, .15);
+    color: #ef4444;
+}
+
+.hoverBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: max-content;
+
+    padding: .45rem 1rem;
+
+    border-radius: 999px;
+
+
+    letter-spacing: .04em;
+
+    color: #000000;
+}
+
+.infoRow {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    font-size: .85rem;
+    color: #475569;
+}
+
+/* ==========================================
+   RESPONSIVO
+========================================== */
+
+@media (max-width: 768px) {
+
+    .legenda {
+        justify-content: flex-start;
+        gap: .8rem;
+        padding: .85rem;
+    }
+
+    .legendaItem {
+        width: calc(50% - .5rem);
+        font-size: .8rem;
+    }
+
+}
+
+@media (max-width: 480px) {
+
+    .legenda {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .legendaItem {
+        width: 100%;
+    }
+
 }
 
 .cardFooter {
@@ -170,55 +287,115 @@
 /* ─────────────────────────────────────────────
    PAINEL LATERAL
 ───────────────────────────────────────────── */
-.calPanel {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+
+/* ─────────────────────────────────────────────
+   PAINEL LATERAL
+───────────────────────────────────────────── */
+
+.hoverCard{
+  display:flex;
+  flex-direction:column;
+  gap:1rem;
+
+  padding:1.4rem;
+
+  background:#fff;
+
+  border:1px solid #e2e8f0;
+  border-radius:18px;
+
+  box-shadow:0 10px 24px rgba(15,23,42,.05);
 }
 
-/* Card de hover */
-.hoverCard {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 1rem;
-  padding: 1rem 1.25rem;
-  transition: all 0.2s;
-  min-height: 72px;
+.hoverDate{
+  margin:0;
+
+  font-size:1.1rem;
+  font-weight:700;
+
+  color:#1e293b;
+
+  text-transform:capitalize;
+
+  line-height:1.5;
 }
 
-.hoverDate {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0 0 0.5rem;
-  text-transform: capitalize;
+.hoverStatus{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+
+  width:max-content;
+
+  padding:.45rem 1rem;
+
+  border-radius:999px;
+
+  font-size:.78rem;
+  font-weight:700;
+
+  letter-spacing:.04em;
+
+  text-transform:uppercase;
 }
 
-.hoverStatus {
-  display: inline-flex;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.25rem 0.625rem;
-  border-radius: 999px;
+.hoverAberto{
+  background:rgba(124,58,237,.12);
+  color:#7c3aed;
 }
 
-.hoverAberto { background: #dcfce7; color: #166534; }
-.hoverFechado { background: #fee2e2; color: #b91c1c; }
-.hoverNovo { background: #dbeafe; color: #1e40af; border: 1px dashed #1e6ebe; }
-
-.hoverCap {
-  font-size: 0.78rem;
-  color: #64748b;
-  margin: 0.4rem 0 0;
+.hoverFechado{
+  background:rgba(239,68,68,.12);
+  color:#dc2626;
 }
 
-.hoverSemInfo {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 0.78rem;
-  color: #94a3b8;
-  margin: 0;
+.hoverNovo{
+  background:rgba(37,99,235,.12);
+  color:#2563eb;
+}
+
+.hoverCap{
+  margin:0;
+
+  padding:1rem;
+
+  background:#f8fafc;
+
+  border:1px solid #e2e8f0;
+  border-radius:12px;
+
+  font-size:.9rem;
+  color:#475569;
+}
+
+.hoverCap strong{
+  color:#1e293b;
+  font-weight:700;
+}
+
+.hoverSemInfo{
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+
+  margin:0;
+
+  padding:1rem;
+
+  background:#f8fafc;
+
+  border:1px dashed #cbd5e1;
+  border-radius:12px;
+
+  color:#64748b;
+
+  font-size:.88rem;
+  line-height:1.5;
+}
+
+.hoverSemInfo svg{
+  color:#94a3b8;
+  flex-shrink:0;
 }
 
 /* Seção de config */
@@ -530,6 +707,19 @@
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
   margin-left: 0.4rem;
+}
+
+  .calPanel  {
+     display: grid;
+     grid-template-columns: 1fr; ;
+     gap: 0.5rem;
+     }
+
+ .calLayout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-items: flex-start;
 }
 
 .emailCell { color: #64748b; font-size: 0.82rem; }
