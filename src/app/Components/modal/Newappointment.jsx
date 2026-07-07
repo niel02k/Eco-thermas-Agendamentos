@@ -1,8 +1,22 @@
 "use client";
 
 import styles from "./modal.module.css";
+import {useState} from 'react';
 
 export default function NewAppointment({ onClose }) {
+  const [time, setTime] = useState("");
+  const [errorTime, setErrorTime] = useState('');
+      const handleHorario = (e) => {
+      const value = e.target.value;
+
+      if (value < "10:00" || value > "17:00") {
+        setErrorTime('O parque não funciuona neste horario.')
+      } else {
+        setErrorTime('');
+      }
+
+      setTime(value);
+    };
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div
@@ -19,21 +33,23 @@ export default function NewAppointment({ onClose }) {
             className={styles.closeButton}
             onClick={onClose}
           >
-            ✕
+
           </button>
         </div>
 
         <div className={styles.body}>
-          <div className={`${styles.field} ${styles.codigoField}`}>
-            <label>Código</label>
-            <input
-              type="text"
-              placeholder="AGD-0001"
-              maxLength={20}
-            />
-          </div>
 
-          <div className={styles.row}>
+          {/* Linha 1 */}
+          <div className={styles.rowCode}>
+            <div className={`${styles.field} ${styles.codeField}`}>
+              <label>Código</label>
+              <input
+                type="text"
+                placeholder="AGD-0001"
+                maxLength={20}
+              />
+            </div>
+
             <div className={styles.field}>
               <label>Cliente</label>
               <input
@@ -42,7 +58,56 @@ export default function NewAppointment({ onClose }) {
                 maxLength={100}
               />
             </div>
+          </div>
 
+          {/* Linha 2 */}
+          <div className={styles.row}>
+            <div className={styles.field}>
+              <label>Data de Nascimento</label>
+              <input 
+                type="date" 
+                max={new Date().toISOString().split("T")[0]}
+              />
+            </div>
+
+            <div className={styles.field}>
+              <label>CPF</label>
+              <input
+                type="text"
+                placeholder="000.000.000-00"
+                maxLength={14}
+              />
+            </div>
+          </div>
+
+          {/* Linha 3 */}
+          <div className={styles.row}>
+            <div className={styles.field}>
+              <label>Data da Visita</label>
+              <input 
+                type="date" 
+                min={new Date().toISOString().split("T")[0]}
+              />
+            </div>
+
+            <div className={styles.field}>
+              <label>Horário</label>
+              <input 
+                type="time" 
+                value={time}
+                onChange={handleHorario}
+              />
+
+              {errorTime && (
+                <span className={styles.error}>
+                  {errorTime}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Linha 4 */}
+          <div className={styles.row}>
             <div className={styles.field}>
               <label>Vendedor</label>
               <input
@@ -51,21 +116,7 @@ export default function NewAppointment({ onClose }) {
                 maxLength={100}
               />
             </div>
-          </div>
 
-          <div className={styles.row}>
-            <div className={styles.field}>
-              <label>Data da visita</label>
-              <input type="date" />
-            </div>
-
-            <div className={styles.field}>
-              <label>Horário</label>
-              <input type="time" />
-            </div>
-          </div>
-
-          <div className={styles.row}>
             <div className={styles.field}>
               <label>Cidade</label>
               <input
@@ -74,18 +125,9 @@ export default function NewAppointment({ onClose }) {
                 maxLength={40}
               />
             </div>
-
-            <div className={styles.field}>
-              <label>Quantidade de Pessoas</label>
-              <input
-                type="number"
-                min="1"
-                max="8"
-                defaultValue="1"
-              />
-            </div>
           </div>
 
+          {/* Observações */}
           <div className={styles.field}>
             <label>Observações</label>
 
@@ -95,8 +137,8 @@ export default function NewAppointment({ onClose }) {
               maxLength={500}
             />
           </div>
-        </div>
 
+        </div>
         <div className={styles.footer}>
           <button
             className={styles.cancelButton}
