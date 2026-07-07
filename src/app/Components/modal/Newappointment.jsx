@@ -24,7 +24,7 @@ export default function NewAppointment({ onClose }) {
         </div>
 
         <div className={styles.body}>
-          <div className={styles.field}>
+          <div className={`${styles.field} ${styles.codigoField}`}>
             <label>Código</label>
             <input
               type="text"
@@ -106,7 +106,7 @@ export default function NewAppointment({ onClose }) {
           </button>
 
           <button className={styles.saveButton}>
-            Salvar Agendamento
+            Continuar
           </button>
         </div>
       </div>

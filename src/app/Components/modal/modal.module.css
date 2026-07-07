@@ -70,6 +70,10 @@
     gap:8px;
 }
 
+.codigoField{
+    width: 110px;
+}
+
 .field label{
     font-size:14px;
     font-weight:600;
