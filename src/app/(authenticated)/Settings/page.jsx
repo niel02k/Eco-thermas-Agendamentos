@@ -1,12 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { DayPicker } from "react-day-picker";
-import { ptBR } from "react-day-picker/locale";
-import { CalendarDays,UserPlus,Users,CheckCircle2,XCircle,ChevronDown,Eye,EyeOff,Shield,ShieldOff,Loader2,Clock,Users2,Info,} from "lucide-react";
-
+import { CalendarDays, UserPlus, Users, CheckCircle2, XCircle, ChevronDown, Eye, EyeOff, Shield, ShieldOff, Loader2, Clock, Users2, Info, } from "lucide-react";
 import { useAuth } from "@/app/Context/AuthContext";
-import { useSettings, HORARIOS_PADRAO, dateToISO, isoToDate } from "./useSettings";
+import {useSettings,HORARIOS_PADRAO,dateToISO,isoToDate} from "@/app/hooks/useSettings";
 import styles from "./settings.module.css";
 import Calendary from "@/app/Components/Calendary/Calendary";
 
@@ -53,8 +50,8 @@ function SkeletonLine({ w = "100%" }) {
 
 export default function Settings() {
   const { usuario } = useAuth();
-  const [showPass, setShowPass]           = useState(false);
-  const [hoveredDate, setHoveredDate]     = useState(null); // Date | null
+  const [showPass, setShowPass] = useState(false);
+  const [hoveredDate, setHoveredDate] = useState(null); // Date | null
 
   const {
     selectedDates, toggleDate,
@@ -90,9 +87,9 @@ export default function Settings() {
 
   // Classificadores de dias para o DayPicker
   const modifiers = {
-    selected:  selectedDates,
+    selected: selectedDates,
     savedOpen: selectedDates.filter((d) => savedOpenISOs.has(dateToISO(d))),
-    newOpen:   selectedDates.filter((d) => !savedOpenISOs.has(dateToISO(d))),
+    newOpen: selectedDates.filter((d) => !savedOpenISOs.has(dateToISO(d))),
     savedClosed: disponibilidades
       .filter((d) => !d.disponivel)
       .map((d) => isoToDate(d.data)),
@@ -153,14 +150,15 @@ export default function Settings() {
             {/* ── Calendário ─────────────────────────────────── */}
             <div className={styles.calWrapper}>
               <Calendary
-              selectedDates={selectedDates}
-              toggleDate={toggleDate}
-              hoveredDate={hoveredDate}
-              setHoveredDate={setHoveredDate}
-              month={month}
-              setMonth={setMonth}
-          modifiers={modifiers}
-            />
+                selectedDates={selectedDates}
+                toggleDate={toggleDate}
+                hoveredDate={hoveredDate}
+                setHoveredDate={setHoveredDate}
+                month={month}
+                setMonth={setMonth}
+                modifiers={modifiers}
+              />
+
 
 
               {/* Legenda */}
@@ -180,31 +178,56 @@ export default function Settings() {
               </div>
             </div>
 
+
+
             {/* ── Painel lateral ─────────────────────────────── */}
             <div className={styles.calPanel}>
 
               {/* Preview do dia em hover */}
               {hoveredDate ? (
                 <div className={styles.hoverCard}>
-                  <p className={styles.hoverDate}>{formatarDataExibicao(hoveredDate)}</p>
-                  {infoHovered ? (
+                  <span
+                    className={`${styles.hoverBadge} ${infoHovered
+                        ? infoHovered.disponivel
+                          ? styles.badgeOpen
+                          : styles.badgeClosed
+                        : isHoveredSelected
+                          ? styles.badgeNew
+                          : styles.badgeEmpty
+                      }`}
+                  >
+                    {infoHovered
+                      ? infoHovered.disponivel
+                        ? "🟣 Aberto"
+                        : "🔴 Fechado"
+                      : isHoveredSelected
+                        ? "🔵 Novo"
+                        : "⚪ Sem registro"}
+                  </span>
+
+                  <h3 className={styles.hoverDate}>
+                    {formatarDataExibicao(hoveredDate)}
+                  </h3>
+
+                  {infoHovered?.disponivel && (
                     <>
-                      <div className={`${styles.hoverStatus} ${infoHovered.disponivel ? styles.hoverAberto : styles.hoverFechado}`}>
-                        {infoHovered.disponivel ? "Aberto" : "Fechado"}
+                      <div className={styles.infoRow}>
+                        <span>Capacidade  </span>
+                        <strong>  {infoHovered.capacidade_maxima} pessoas</strong>
                       </div>
-                      {infoHovered.disponivel && (
-                        <p className={styles.hoverCap}>
-                          Capacidade: <strong>{infoHovered.capacidade_maxima}</strong>
-                        </p>
-                      )}
+
+                      <div className={styles.infoRow}>
+                        <span>Funcionamento</span>
+                        <strong>
+                          {infoHovered.hora_abertura} - {infoHovered.hora_fechamento}
+                        </strong>
+                      </div>
                     </>
-                  ) : isHoveredSelected ? (
-                    <div className={`${styles.hoverStatus} ${styles.hoverNovo}`}>
-                      Novo — não salvo
-                    </div>
-                  ) : (
+                  )}
+
+                  {!infoHovered && !isHoveredSelected && (
                     <p className={styles.hoverSemInfo}>
-                      <Info size={13} /> Sem registro. Clique para abrir.
+                      Clique sobre a data para disponibilizá-la.
                     </p>
                   )}
                 </div>
@@ -285,7 +308,7 @@ export default function Settings() {
               <div className={styles.resumoBox}>
                 <span className={styles.resumoNum}>{totalSelecionadas}</span>
                 <span className={styles.resumoLabel}>
-                  data{totalSelecionadas !== 1 ? "s" : ""} abertas neste mês
+                  data{totalSelecionadas !== 1 ? "s" : ""} abertas no total
                 </span>
               </div>
 

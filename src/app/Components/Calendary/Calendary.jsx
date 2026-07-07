@@ -36,34 +36,34 @@ export default function Calendary({
         past: styles.dayPast,
       }}
       classNames={{
-  root: styles.rdpRoot,
-  months: styles.rdpMonths,
-  month: styles.rdpMonth,
+          root: styles.rdpRoot,
+          months: styles.rdpMonths,
+          month: styles.rdpMonth,
 
-  month_caption: styles.rdpCaption,
-  caption_label: styles.rdpCaptionLabel,
+         month_caption: styles.rdpCaption,
+        caption_label: styles.rdpCaptionLabel,
 
-  nav: styles.rdpNav,
-  button_previous: styles.rdpNavBtnPrev,
-  button_next: styles.rdpNavBtnNext,
+         nav: styles.rdpNav,
+        button_previous: styles.rdpNavBtnPrev,
+         button_next: styles.rdpNavBtnNext,
 
-  month_grid: styles.rdpTable,
+         month_grid: styles.rdpTable,
 
-  weekdays: styles.rdpHeadRow,
-  weekday: styles.rdpHeadCell,
+        weekdays: styles.rdpHeadRow,
+         weekday: styles.rdpHeadCell,
 
-  week: styles.rdpRow,
+        week: styles.rdpRow,
 
-  day: styles.rdpCell,
-  day_button: styles.rdpDayBtn,
+       day: styles.rdpCell,
+       day_button: styles.rdpDayBtn,
 
-  today: styles.rdpToday,
-  outside: styles.rdpOutside,
-  disabled: styles.rdpDisabled,
-  hidden: styles.rdpHidden,
-  selected: styles.rdpSelected,
+      today: styles.rdpToday,
+      outside: styles.rdpOutside,
+      disabled: styles.rdpDisabled,
+      hidden: styles.rdpHidden,
+      selected: styles.rdpSelected,
 
-  chevron: styles.rdpChevron,
+      chevron: styles.rdpChevron,
         }}
     />
   );
