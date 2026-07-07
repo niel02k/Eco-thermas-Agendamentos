@@ -96,7 +96,7 @@ const Dashboard = () => {
               <StatCard
                 title="Atendidos"
                 value={loading ? '...' : formatarNumero(totalClientes)}
-                label="Pessoas atendidas no total"
+                label="Atendimento totais "
                 trend={12}
                 icon={Users}
                 color="green"
