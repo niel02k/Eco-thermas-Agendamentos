@@ -6,6 +6,8 @@ import { useAuth } from "@/app/Context/AuthContext";
 import {useSettings,HORARIOS_PADRAO,dateToISO,isoToDate} from "@/app/hooks/useSettings";
 import styles from "./settings.module.css";
 import Calendary from "@/app/Components/Calendary/Calendary";
+import { LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 /* -------------------------------------------------------------------------- */
 /* HELPERS                                                                     */
@@ -49,6 +51,7 @@ function SkeletonLine({ w = "100%" }) {
 /* -------------------------------------------------------------------------- */
 
 export default function Settings() {
+  const router = useRouter();
   const { usuario } = useAuth();
   const [showPass, setShowPass] = useState(false);
   const [hoveredDate, setHoveredDate] = useState(null); // Date | null
@@ -513,7 +516,17 @@ export default function Settings() {
             </tbody>
           </table>
         </div>
+          <div className={styles.logout}>
+              <button 
+                className={styles.logoutBtn}
+                onClick={() => router.push("/Login")}
+              >
+                <LogOut size={18} />
+                <span>Sair do Usuário</span>
+              </button>
+          </div>
       </section>
+
     </div>
   );
 }

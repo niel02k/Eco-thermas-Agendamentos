@@ -767,6 +767,65 @@
 .emptyRow  { text-align: center; color: #94a3b8; padding: 2.5rem 1rem !important; font-size: 0.9rem; }
 
 /* ─────────────────────────────────────────────
+   LOGOUT
+───────────────────────────────────────────── */
+
+.logout {
+  display: flex;
+  justify-content: flex-end;
+  
+}
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.5rem;
+  background: #ffffff;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: "Montserrat", sans-serif;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+  transition: all 0.25s ease;
+}
+
+.logoutBtn:hover {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.25);
+}
+
+.logoutBtn:active {
+  transform: translateY(0);
+}
+
+.logoutBtn svg {
+  transition: transform 0.25s ease;
+}
+
+.logoutBtn:hover svg {
+  transform: translateX(3px);
+}
+
+/* Responsivo */
+
+@media (max-width: 768px) {
+  .logout {
+    justify-content: stretch;
+  }
+
+  .logoutBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+/* ─────────────────────────────────────────────
    SKELETON GERAL
 ───────────────────────────────────────────── */
 .skeletonLine {
