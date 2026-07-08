@@ -1,5 +1,6 @@
-import { createClient } from '@/lib/supabase/client';
+// src/app/services/usuariosServices.js
 
+import { createClient } from '@/lib/supabase/client';
 
 const supabase = createClient();
 
@@ -9,43 +10,50 @@ const supabase = createClient();
 
 export async function listarUsuarios({
   pagina = 1,
-  limite = 10,
+  limite = 100,
   busca = '',
   status = '',
   cargo = ''
 } = {}) {
+  try {
+    const inicio = (pagina - 1) * limite;
+    const fim = inicio + limite - 1;
 
-  const inicio = (pagina - 1) * limite;
-  const fim = inicio + limite - 1;
+    let query = supabase
+      .from('usuarios')
+      .select('*', { count: 'exact' });
 
-  let query = supabase
-    .from('usuarios')
-    .select('*', { count: 'exact' });
+    if (busca) {
+      query = query.or(`nome.ilike.%${busca}%,email.ilike.%${busca}%`);
+    }
 
-  if (busca) {
-    query = query.or(`nome.ilike.%${busca}%,email.ilike.%${busca}%`);
+    if (status) {
+      query = query.eq('status', status);
+    }
+
+    if (cargo) {
+      query = query.eq('cargo', cargo);
+    }
+
+    const { data, count, error } = await query
+      .order('data_criacao', { ascending: false })
+      .range(inicio, fim);
+
+    if (error) {
+      console.warn('Erro ao buscar usuários:', error);
+      return { usuarios: [], total: 0, pagina, totalPaginas: 0 };
+    }
+
+    return {
+      usuarios: data || [],
+      total: count || 0,
+      pagina,
+      totalPaginas: Math.ceil((count || 0) / limite)
+    };
+  } catch (error) {
+    console.error('Erro no listarUsuarios:', error);
+    return { usuarios: [], total: 0, pagina, totalPaginas: 0 };
   }
-
-  if (status) {
-    query = query.eq('status', status);
-  }
-
-  if (cargo) {
-    query = query.eq('cargo', cargo);
-  }
-
-  const { data, count, error } = await query
-    .order('data_criacao', { ascending: false })
-    .range(inicio, fim);
-
-  if (error) throw error;
-
-  return {
-    usuarios: data,
-    total: count,
-    pagina,
-    totalPaginas: Math.ceil(count / limite)
-  };
 }
 
 /* ===========================================================
@@ -53,16 +61,19 @@ export async function listarUsuarios({
 =========================================================== */
 
 export async function buscarUsuario(id) {
+  try {
+    const { data, error } = await supabase
+      .from('usuarios')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-  const { data, error } = await supabase
-    .from('usuarios')
-    .select('*')
-    .eq('id', id)
-    .single();
-
-  if (error) throw error;
-
-  return data;
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Erro ao buscar usuário:', error);
+    return null;
+  }
 }
 
 /* ===========================================================
@@ -70,7 +81,6 @@ export async function buscarUsuario(id) {
 =========================================================== */
 
 export async function criarUsuario(usuario) {
-
   const { data, error } = await supabase
     .from('usuarios')
     .insert(usuario)
@@ -78,7 +88,6 @@ export async function criarUsuario(usuario) {
     .single();
 
   if (error) throw error;
-
   return data;
 }
 
@@ -87,7 +96,6 @@ export async function criarUsuario(usuario) {
 =========================================================== */
 
 export async function editarUsuario(id, usuario) {
-
   const { data, error } = await supabase
     .from('usuarios')
     .update({
@@ -99,7 +107,6 @@ export async function editarUsuario(id, usuario) {
     .single();
 
   if (error) throw error;
-
   return data;
 }
 
@@ -108,7 +115,6 @@ export async function editarUsuario(id, usuario) {
 =========================================================== */
 
 export async function desativarUsuario(id) {
-
   const { data, error } = await supabase
     .from('usuarios')
     .update({
@@ -120,7 +126,6 @@ export async function desativarUsuario(id) {
     .single();
 
   if (error) throw error;
-
   return data;
 }
 
@@ -129,7 +134,6 @@ export async function desativarUsuario(id) {
 =========================================================== */
 
 export async function ativarUsuario(id) {
-
   const { data, error } = await supabase
     .from('usuarios')
     .update({
@@ -141,7 +145,6 @@ export async function ativarUsuario(id) {
     .single();
 
   if (error) throw error;
-
   return data;
 }
 
@@ -150,14 +153,12 @@ export async function ativarUsuario(id) {
 =========================================================== */
 
 export async function excluirUsuario(id) {
-
   const { error } = await supabase
     .from('usuarios')
     .delete()
     .eq('id', id);
 
   if (error) throw error;
-
   return true;
 }
 
@@ -173,7 +174,6 @@ export async function atualizarComissoes(
     prctagem_M12x
   }
 ) {
-
   const { data, error } = await supabase
     .from('usuarios')
     .update({
@@ -187,6 +187,5 @@ export async function atualizarComissoes(
     .single();
 
   if (error) throw error;
-
   return data;
 }

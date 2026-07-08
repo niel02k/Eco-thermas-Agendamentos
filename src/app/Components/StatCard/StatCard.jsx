@@ -12,8 +12,8 @@ const StatCard = ({ title, value, label, trend, icon: Icon, color = 'blue' }) =>
           <Icon size={20} />
         </div>
         <div className={`${styles.trend} ${isPositive ? styles.positive : styles.negative}`}>
-          {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-          <span>{isPositive ? `+${trend}%` : `${trend}%`}</span>
+          
+         
         </div>
       </div>
       

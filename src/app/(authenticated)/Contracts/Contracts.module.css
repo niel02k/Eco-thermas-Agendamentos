@@ -1,3 +1,5 @@
+/* Contracts.module.css */
+
 :root {
   --color-primary: #1E6EBE;
   --color-accent: #FA643C;
@@ -6,23 +8,47 @@
   --color-info: #6EC8F0;
   --color-warning: #FAD228;
   
+  /* Textos */
+  --text-primary: #1E293B;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --text-white: #FFFFFF;
+  
+  /* Fundos */
+  --bg-page: #F0F4FA;
+  --bg-white: #FFFFFF;
+  --bg-light: #F8FAFC;
+  --bg-hover: #F1F5F9;
+  
+  /* Bordas */
+  --border-light: #E2E8F0;
+  --border-hover: #CBD5E1;
+  
   /* Variações com transparência para fundos */
-  --color-primary-light: rgba(30, 110, 190, 0.1);
-  --color-accent-light: rgba(250, 100, 60, 0.1);
+  --color-primary-light: rgba(30, 110, 190, 0.08);
+  --color-accent-light: rgba(250, 100, 60, 0.08);
+  --color-success-light: rgba(60, 200, 60, 0.08);
+  --color-secondary-light: rgba(153, 16, 148, 0.08);
+  --color-info-light: rgba(110, 200, 240, 0.08);
+  --color-warning-light: rgba(250, 210, 40, 0.08);
 }
 
-
+/* ─── Page shell ──────────────────────────────────────────── */
 .container {
   display: flex;
-  min-height: 100vh;
-  background: #F0F4FA;
+  min-height: 80vh;
+  background-color: var(--bg-page);
+  box-sizing: border-box;
 }
 
 .mainContent {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
   opacity: 0;
   transform: translateY(10px);
-  transition: 0.4s;
+  transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
 .mainVisible {
@@ -30,166 +56,1269 @@
   transform: translateY(0);
 }
 
+/* ─── Content area ────────────────────────────────────────── */
 .content {
-  padding: 2rem 2.5rem;
+  padding: 2rem 2.5rem 3rem;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
 }
 
-/* ───── GRID KPI ───── */
+/* ─── Filtros e Busca ──────────────────────────────────────────── */
+.filtersSection {
+  
+  display: none;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  background: var(--bg-white);
+  padding: 1rem 1.25rem;
+  border-radius: 1.5rem;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 4px 12px rgba(30, 110, 190, 0.06);
+  animation: cardIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
 
+.searchBar {
+  flex: 1;
+  min-width: 200px;
+  display: none;
+  align-items: center;
+  background: #ffff;
+  border-radius: 12px;
+  padding: 0 14px;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.searchBar:focus-within {
+  background: var(--bg-white);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.searchIcon {
+  color: var(--text-muted);
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 10px 0;
+  font-size: 0.9rem;
+  outline: none;
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.searchInput::placeholder {
+  color: var(--text-muted);
+}
+
+.clearSearch {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.clearSearch:hover {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+}
+
+.filtersGroup {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filterSelect {
+  padding: 8px 14px;
+  border: 2px solid var(--border-light);
+  border-radius: 12px;
+  background: var(--bg-white);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  min-width: 130px;
+}
+
+.filterSelect:hover {
+  border-color: var(--border-hover);
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--color-primary);
+  border: none;
+  border-radius: 12px;
+  color: var(--text-white);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.refreshButton:hover:not(:disabled) {
+  background: #1557A0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30, 110, 190, 0.3);
+}
+
+.refreshButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Error Message ──────────────────────────────────────────── */
+.errorMessage {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  background: #FEE2E2;
+  border: 1px solid #FECACA;
+  border-radius: 12px;
+  color: #991B1B;
+  font-size: 0.9rem;
+  font-weight: 500;
+  animation: cardIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.errorMessage button {
+  background: none;
+  border: none;
+  color: #991B1B;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.errorMessage button:hover {
+  background: rgba(153, 27, 27, 0.1);
+}
+
+/* ─── Stats grid ──────────────────────────────────────────── */
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.25rem;
+  width: 100%;
+  animation: cardIn 0.5s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* ───── INSIGHTS ───── */
+.cardEntry {
+  animation: cardIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  min-width: 0;
+}
 
-.insightsRow {
+@keyframes cardIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(22px) scale(0.97); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
+/* ─── Insights Grid ──────────────────────────────────────────── */
+.insightsGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.25rem;
+  width: 100%;
+  animation: cardIn 0.5s 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .insightCard {
-  background: #fff;
+  background: var(--bg-white);
   border-radius: 1.5rem;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 4px 12px rgba(30, 110, 190, 0.06);
   padding: 1.5rem;
-  border: 1px solid #E2E8F0;
-  box-shadow: 0 4px 12px rgba(30,110,190,0.06);
+  transition: all 0.2s ease;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.insightCard span {
-  color: var(--color-success)
- 
+.insightCard:hover {
+  box-shadow: 0 8px 28px rgba(30, 110, 190, 0.1);
+  transform: translateY(-2px);
 }
 
-.bigValue {
-  font-size: 1.4rem;
+.insightTitle {
+  font-size: 1rem;
   font-weight: 800;
-  color:var(--color-primary);
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Montserrat', sans-serif;
 }
 
-/* ───── TABLE ───── */
+/* ─── Top Vendedores ──────────────────────────────────────────── */
+.vendedorRank {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-light);
+  transition: background 0.2s;
+}
 
+.vendedorRank:last-child {
+  border-bottom: none;
+}
+
+.vendedorRank:hover {
+  background: var(--color-primary-light);
+  margin: 0 -8px;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.rank {
+  font-weight: 700;
+  color: var(--color-primary);
+  min-width: 30px;
+  font-size: 0.9rem;
+}
+
+.vendedorNome {
+  flex: 1;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.vendedorStats {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ─── Status Bars ──────────────────────────────────────────── */
+.statusBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+}
+
+.statusLabel {
+  min-width: 85px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.progressBar {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-hover);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.progressFill.ativo {
+  background: var(--color-success);
+}
+
+.progressFill.pendente {
+  background: var(--color-warning);
+}
+
+.progressFill.cancelado {
+  background: #EF4444;
+}
+
+.progressFill.finalizado {
+  background: var(--color-primary);
+}
+
+.statusCount {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 30px;
+  text-align: right;
+}
+
+/* ─── Tipo Destaque ──────────────────────────────────────────── */
+.tipoDestaque {
+  background: var(--color-primary-light);
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.tipoLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 4px 0;
+}
+
+.tipoValor {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.tipoQuantidade {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 4px 0 0 0;
+}
+
+.metricasRapidas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.metricaItem {
+  background: var(--bg-light);
+  border-radius: 10px;
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.metricaLabel {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.metricaValor {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-top: 2px;
+}
+
+/* ─── Sem dados ──────────────────────────────────────────── */
+.semDados {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 1rem 0;
+  margin: 0;
+}
+
+/* ─── Table Card ──────────────────────────────────────────── */
 .tableCard {
-  background: #fff;
+  background: var(--bg-white);
   border-radius: 1.5rem;
-  border: 1px solid #E2E8F0;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 4px 12px rgba(30, 110, 190, 0.06);
   padding: 1.5rem;
+  width: 100%;
+  overflow: hidden;
+  animation: cardIn 0.5s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .tableHeader {
-  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 .tableHeader h3 {
-  color: var(--color-info);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  font-family: 'Montserrat', sans-serif;
 }
 
-.tableRowHeader span {
-  color: var(--color-secondary);
-}
-
-.tableRowcode{
-    color: var(--color-accent);
-}
-
-.tableRowclient{
-    color :var(--color-success)
-}
-
-.tableRowtype{
-    color :var(--color-info)
-}
-.tableRowseller{
-    color :var(--color-warning)
-}
-.tableRowbravery{
-    color: var(--color-accent);
-}
-
-
-.topseller{
-    color:var(--color-secondary)
-}
-
-.table {
+.tableControls {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.totalRegistros {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.paginationControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.paginationBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  background: var(--bg-light);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  min-width: 32px;
+  height: 32px;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--text-white);
+}
+
+.paginationBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  min-width: 60px;
+  text-align: center;
+}
+
+/* ─── Table ──────────────────────────────────────────── */
+.tableContainer {
+  overflow-x: auto;
+  width: 100%;
 }
 
 .tableRowHeader,
 .tableRow {
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr 1fr 1fr 1fr;
-  gap: 0.5rem;
-  padding: 0.75rem 0;
-}
-
-.tableRow span{
-    color: var(--color-info)
+  grid-template-columns: 100px 1.5fr 100px 1fr 120px 120px 120px;
+  gap: 0.75rem;
+  padding: 0.75rem 0.5rem;
+  align-items: center;
+  min-width: 800px;
 }
 
 .tableRowHeader {
   font-weight: 700;
-  color: #64748B;
-  border-bottom: 1px solid #E2E8F0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  border-bottom: 2px solid var(--border-light);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 .tableRow {
-  border-bottom: 1px solid #F1F5F9;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.tableRow:hover {
+  background: var(--bg-light);
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+/* ─── Table cells ──────────────────────────────────────────── */
+.codigo {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.cliente {
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tipo {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.8rem;
+  background: var(--color-primary-light);
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: inline-block;
+  text-align: center;
+  width: fit-content;
+}
+
+.vendedor {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.valor {
+  color: var(--text-primary);
+  font-weight: 700;
   font-size: 0.9rem;
 }
 
-/* ───── STATUS ───── */
-
+/* ─── Status ──────────────────────────────────────────── */
 .status {
   font-weight: 700;
   font-size: 0.75rem;
+  padding: 4px 12px;
+  border-radius: 20px;
+  display: inline-block;
+  text-align: center;
+  width: fit-content;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
-.active {
-  color: #3CC83C;
+.status.ativo {
+  background: var(--color-success-light);
+  color: var(--color-success);
 }
 
-.completed {
-  color: #1E6EBE;
+.status.pendente {
+  background: var(--color-warning-light);
+  color: #B45309;
 }
 
-.cancelled {
-  color: #EF4444;
+.status.cancelado {
+  background: #FEE2E2;
+  color: #DC2626;
 }
 
-.pending {
-  color: #FAD228;
+.status.finalizado {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
 }
 
-/* ───── RESPONSIVE ───── */
+/* ─── Ações ──────────────────────────────────────────── */
+.acoes {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
 
-@media (max-width: 1024px) {
-  .mainContent {
-    margin-left: 0;
+.btnAcao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.btnAcao:hover {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  transform: scale(1.1);
+}
+
+.btnAcao.btnExcluir:hover {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+/* ─── Loading State ──────────────────────────────────────────── */
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  gap: 1rem;
+}
+
+.loadingState .spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border-light);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.loadingState span {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* ─── Empty State ──────────────────────────────────────────── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.emptyState p {
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.emptySubtext {
+  color: var(--text-muted) !important;
+  font-size: 0.85rem !important;
+  font-weight: 400 !important;
+  margin-top: 4px !important;
+}
+
+/* ─── Receita Mensal Card ──────────────────────────────────────────── */
+.receitaCard {
+  background: var(--bg-white);
+  border-radius: 1.5rem;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 4px 12px rgba(30, 110, 190, 0.06);
+  padding: 1.5rem;
+  width: 100%;
+  animation: cardIn 0.5s 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: all 0.2s ease;
+}
+
+.receitaCard:hover {
+  box-shadow: 0 8px 28px rgba(30, 110, 190, 0.1);
+  transform: translateY(-2px);
+}
+
+.receitaTitle {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 1.25rem 0;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.receitaBars {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 150px;
+  padding: 0 0.5rem;
+  gap: 0.75rem;
+}
+
+.receitaBarContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.receitaBar {
+  width: 100%;
+  max-width: 40px;
+  min-height: 4px;
+  border-radius: 4px 4px 0 0;
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.receitaBar:hover {
+  transform: scaleY(1.05);
+  opacity: 0.9;
+}
+
+.receitaMes {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.receitaValor {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ─── Modal ──────────────────────────────────────────── */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  background: var(--bg-white);
+  border-radius: 1.5rem;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: modalSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalSlide {
+  from { 
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1.5rem 0.75rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.modalHeader h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.modalClose:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  transform: rotate(90deg);
+}
+
+.modalBody {
+  padding: 1.5rem;
+}
+
+.modalFooter {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 0.75rem 1.5rem 1.5rem;
+  border-top: 1px solid var(--border-light);
+  flex-wrap: wrap;
+}
+
+.modalFooter button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.btnEditar {
+  background: var(--color-primary);
+  color: var(--text-white);
+}
+
+.btnEditar:hover {
+  background: #1557A0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30, 110, 190, 0.3);
+}
+
+.btnExcluir {
+  background: #EF4444;
+  color: var(--text-white);
+}
+
+.btnExcluir:hover {
+  background: #DC2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btnSalvar {
+  background: var(--color-success);
+  color: var(--text-white);
+}
+
+.btnSalvar:hover {
+  background: #2DA82D;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(60, 200, 60, 0.3);
+}
+
+.btnFechar {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+}
+
+.btnFechar:hover {
+  background: var(--border-light);
+}
+
+/* ─── Detalhes do Contrato ──────────────────────────────────────────── */
+.contratoDetalhes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  color: #1E293B;
+}
+
+.detalheLinha {
+  display: flex;
+  gap: 0.75rem;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--bg-hover);
+  font-size: 0.9rem;
+}
+
+.detalheLinha strong {
+  min-width: 120px;
+  color: black;
+  font-weight: 600;
+}
+
+.detalheLinha .status {
+  margin-left: 0;
+}
+
+.dependentesSection {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 2px solid var(--bg-hover);
+}
+
+.dependentesSection h4 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.dependenteItem {
+  display: flex;
+  gap: 0.5rem;
+  padding: 4px 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.dependenteItem span:first-child {
+  font-weight: 500;
+}
+
+/* ─── Form Container ──────────────────────────────────────────── */
+.formContainer {
+  padding: 0.5rem 0;
+}
+
+.formContainer p {
+  color: var(--text-muted);
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+/* ================================================================
+   📱 RESPONSIVIDADE
+================================================================ */
+
+/* Tablet Largo (até 1280px) */
+@media (max-width: 1280px) {
+  .statsGrid {
+    grid-template-columns: repeat(3, 1fr);
   }
 
-  .statsGrid {
+  .insightsGrid {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .insightsRow {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 640px) {
-  .statsGrid {
-    grid-template-columns: 1fr;
   }
 
   .tableRowHeader,
   .tableRow {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 80px 1.5fr 90px 1fr 100px 100px 100px;
+    gap: 0.6rem;
+    font-size: 0.85rem;
   }
 }
+
+/* Tablet (até 1024px) */
+@media (max-width: 1024px) {
+  .content {
+    padding: 1.5rem;
+    gap: 1.25rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .insightsGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .filtersSection {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.75rem 1rem;
+  }
+
+  .filtersGroup {
+    justify-content: space-between;
+  }
+
+  .searchBar {
+    width: 100%;
+  }
+
+  .tableRowHeader,
+  .tableRow {
+    grid-template-columns: 70px 1.2fr 80px 0.8fr 90px 90px 90px;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    padding: 0.6rem 0.3rem;
+  }
+
+  .tableHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .tableControls {
+    justify-content: space-between;
+  }
+}
+
+/* Tablet Pequeno (até 768px) */
+@media (max-width: 768px) {
+  .content {
+    padding: 1.25rem 1rem;
+    gap: 1rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .insightsGrid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .filtersGroup {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .filterSelect {
+    width: 100%;
+  }
+
+  .refreshButton {
+    justify-content: center;
+  }
+
+  .tableCard {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+
+  .tableRowHeader,
+  .tableRow {
+    grid-template-columns: 60px 1fr 70px 70px 80px 80px 80px;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    min-width: 650px;
+    padding: 0.5rem 0.2rem;
+  }
+
+  .tableRowHeader {
+    font-size: 0.7rem;
+  }
+
+  .tableControls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .totalRegistros {
+    text-align: center;
+  }
+
+  .paginationControls {
+    justify-content: center;
+  }
+
+  .receitaBars {
+    height: 120px;
+    gap: 0.5rem;
+  }
+
+  .receitaBar {
+    max-width: 30px;
+  }
+}
+
+/* Celular (até 640px) */
+@media (max-width: 640px) {
+  .content {
+    padding: 1rem 0.75rem 1.5rem;
+    gap: 0.75rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .insightsGrid {
+    gap: 0.5rem;
+  }
+
+  .insightCard {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+
+  .insightTitle {
+    font-size: 0.9rem;
+  }
+
+  .modal {
+    width: 95%;
+    margin: 0.5rem;
+    border-radius: 1rem;
+  }
+
+  .modalHeader {
+    padding: 1rem 1rem 0.5rem;
+  }
+
+  .modalBody {
+    padding: 1rem;
+  }
+
+  .modalFooter {
+    padding: 0.5rem 1rem 1rem;
+    justify-content: center;
+  }
+
+  .modalFooter button {
+    flex: 1;
+    justify-content: center;
+    min-width: 80px;
+    padding: 8px 14px;
+    font-size: 0.8rem;
+  }
+
+  .detalheLinha {
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 4px 0;
+  }
+
+  .detalheLinha strong {
+    min-width: auto;
+  }
+
+  .tableCard {
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+  }
+
+  .tableRowHeader,
+  .tableRow {
+    grid-template-columns: 50px 1fr 60px 60px 70px 70px 70px;
+    gap: 0.3rem;
+    font-size: 0.7rem;
+    min-width: 550px;
+    padding: 0.4rem 0.1rem;
+  }
+
+  .tableRowHeader {
+    font-size: 0.6rem;
+  }
+
+  .codigo {
+    font-size: 0.7rem;
+  }
+
+  .tipo {
+    font-size: 0.65rem;
+    padding: 2px 8px;
+  }
+
+  .status {
+    font-size: 0.6rem;
+    padding: 2px 8px;
+  }
+
+  .btnAcao {
+    padding: 4px;
+  }
+
+  .btnAcao svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .receitaBars {
+    height: 100px;
+    gap: 0.3rem;
+  }
+
+  .receitaBar {
+    max-width: 25px;
+    min-height: 3px;
+  }
+
+  .receitaMes {
+    font-size: 0.6rem;
+  }
+
+  .receitaValor {
+    font-size: 0.55rem;
+  }
+
+  .vendedorRank {
+    gap: 8px;
+    padding: 6px 0;
+  }
+
+  .rank {
+    min-width: 24px;
+    font-size: 0.8rem;
+  }
+
+  .vendedorNome {
+    font-size: 0.8rem;
+  }
+
+  .vendedorStats {
+    font-size: 0.7rem;
+  }
+
+  .tipoValor {
+    font-size: 1.1rem;
+  }
+
+  .metricasRapidas {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .metricaItem {
+    padding: 0.5rem;
+  }
+
+  .metricaValor {
+    font-size: 0.9rem; 
+    }}
