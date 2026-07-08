@@ -1,7 +1,9 @@
 import React from "react"; 
+import styles from './cardContract.module.css'
 
 function CardContract(){
-    retunr(
-        <div><p>Olá mundo</p></div>
+    return(
+        <div className={styles.contractPage}>
+        </div>
     )
-}
+}export default CardContract;
