@@ -39,20 +39,6 @@
     font-size:14px;
 }
 
-.closeButton{
-    width:36px;
-    height:36px;
-    border:none;
-    border-radius:10px;
-    background:#F3F4F6;
-    cursor:pointer;
-    transition:.2s;
-}
-
-.closeButton:hover{
-    background:#E5E7EB;
-}
-
 .body{
     padding:30px;
 }

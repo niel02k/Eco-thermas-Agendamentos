@@ -9,6 +9,17 @@ export default function NewAppointment({ onClose }) {
   const [step, setStep] = useState(1);
   const [amount, setAmount] = useState(1);
   const [companions, setCompanions] = useState([]);
+  const [from, setFrom] = useState({
+    codigo: "",
+    cliente: "",
+    nascimento: "",
+    cpf: "",
+    dataVisita: "",
+    horario: "",
+    vendedor: "",
+    cidade: "",
+    observacoes: "",
+  });
   const handleHorario = (e) => {
     const value = e.target.value;
 
@@ -47,17 +58,10 @@ export default function NewAppointment({ onClose }) {
                 <h2>Novo Agendamento</h2>
                 <p>Cadastre um novo agendamento para um visitante.</p>
               </div>
-
-              <button
-                className={styles.closeButton}
-                onClick={onClose}
-              >
-              </button>
             </div>
 
             <div className={styles.body}>
 
-              {/* Linha 1 */}
               <div className={styles.rowCode}>
                 <div className={`${styles.field} ${styles.codeField}`}>
                   <label>Código</label>
@@ -78,7 +82,6 @@ export default function NewAppointment({ onClose }) {
                 </div>
               </div>
 
-              {/* Linha 2 */}
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>Data de Nascimento</label>
@@ -98,7 +101,6 @@ export default function NewAppointment({ onClose }) {
                 </div>
               </div>
 
-              {/* Linha 3 */}
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>Data da Visita</label>
@@ -124,7 +126,6 @@ export default function NewAppointment({ onClose }) {
                 </div>
               </div>
 
-              {/* Linha 4 */}
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>Vendedor</label>
@@ -145,7 +146,6 @@ export default function NewAppointment({ onClose }) {
                 </div>
               </div>
 
-              {/* Observações */}
               <div className={styles.field}>
                 <label>Observações</label>
 
