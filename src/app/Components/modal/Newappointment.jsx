@@ -4,12 +4,14 @@ import styles from "./modal.module.css";
 import { useState } from 'react';
 
 export default function NewAppointment({ onClose }) {
-  const [time, setTime] = useState("");
   const [errorTime, setErrorTime] = useState('');
   const [step, setStep] = useState(1);
   const [amount, setAmount] = useState(1);
   const [companions, setCompanions] = useState([]);
-  const [from, setFrom] = useState({
+  const [confirmed, setConfirmed] = useState(false);
+  const [confirmedCompanions, setConfirmedCompanions] = useState(false);
+  const [currentCompanion, setCurrentCompanion] = useState(0);
+  const [form, setForm] = useState({
     codigo: "",
     cliente: "",
     nascimento: "",
@@ -18,18 +20,55 @@ export default function NewAppointment({ onClose }) {
     horario: "",
     vendedor: "",
     cidade: "",
-    observacoes: "",
   });
+  const formValid =
+    form.codigo.trim() !== "" &&
+    form.cliente.trim() !== "" &&
+    form.nascimento !== "" &&
+    form.cpf.trim() !== "" &&
+    form.dataVisita !== "" &&
+    form.horario !== "" &&
+    form.vendedor.trim() !== "" &&
+    form.cidade.trim() !== "" &&
+    errorTime === "";
+
+  const companionsValid =
+    companions.length === 0 ||
+    companions.every((person) =>
+      person.nome.trim() !== "" &&
+      person.nascimento !== "" &&
+      person.cpf.trim() !== ""
+    );
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const handleHorario = (e) => {
     const value = e.target.value;
 
     if (value < "10:00" || value > "17:00") {
-      setErrorTime('O parque não funciuona neste horario.')
-    } else {
-      setErrorTime('');
+      setErrorTime("O parque não funciona neste horário.");
+
+      setForm((prev) => ({
+        ...prev,
+        horario: "",
+      }));
+
+      return;
     }
 
-    setTime(value);
+    setErrorTime("");
+
+    setForm((prev) => ({
+      ...prev,
+      horario: value,
+    }));
   };
 
   const handleAmount = (e) => {
@@ -40,10 +79,20 @@ export default function NewAppointment({ onClose }) {
     setCompanions(
       Array.from({ length: qtd - 1 }, () => ({
         nome: '',
+        nascimento: '',
         cpf: '',
       }))
     );
   };
+
+  const handleCompanionChange = (field, value) => {
+    const list = [...companions];
+
+    list[currentCompanion][field] = value;
+
+    setCompanions(list);
+  };
+
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div
@@ -67,8 +116,12 @@ export default function NewAppointment({ onClose }) {
                   <label>Código</label>
                   <input
                     type="text"
+                    name="codigo"
+                    value={form.codigo}
+                    onChange={handleChange}
                     placeholder="AGD-0001"
                     maxLength={20}
+                    required
                   />
                 </div>
 
@@ -76,8 +129,12 @@ export default function NewAppointment({ onClose }) {
                   <label>Cliente</label>
                   <input
                     type="text"
+                    name="cliente"
+                    value={form.cliente}
+                    onChange={handleChange}
                     placeholder="Pesquisar cliente..."
                     maxLength={100}
+                    required
                   />
                 </div>
               </div>
@@ -87,7 +144,11 @@ export default function NewAppointment({ onClose }) {
                   <label>Data de Nascimento</label>
                   <input
                     type="date"
+                    name="nascimento"
+                    value={form.nascimento}
+                    onChange={handleChange}
                     max={new Date().toISOString().split("T")[0]}
+                    required
                   />
                 </div>
 
@@ -95,8 +156,12 @@ export default function NewAppointment({ onClose }) {
                   <label>CPF</label>
                   <input
                     type="text"
+                    name="cpf"
+                    value={form.cpf}
+                    onChange={handleChange}
                     placeholder="000.000.000-00"
                     maxLength={14}
+                    required
                   />
                 </div>
               </div>
@@ -106,7 +171,11 @@ export default function NewAppointment({ onClose }) {
                   <label>Data da Visita</label>
                   <input
                     type="date"
+                    name="dataVisita"
+                    value={form.dataVisita}
+                    onChange={handleChange}
                     min={new Date().toISOString().split("T")[0]}
+                    required
                   />
                 </div>
 
@@ -114,8 +183,10 @@ export default function NewAppointment({ onClose }) {
                   <label>Horário</label>
                   <input
                     type="time"
-                    value={time}
+                    name="horario"
+                    value={form.horario}
                     onChange={handleHorario}
+                    required
                   />
 
                   {errorTime && (
@@ -131,8 +202,12 @@ export default function NewAppointment({ onClose }) {
                   <label>Vendedor</label>
                   <input
                     type="text"
+                    name="vendedor"
+                    value={form.vendedor}
+                    onChange={handleChange}
                     placeholder="Pesquisar vendedor..."
                     maxLength={100}
+                    required
                   />
                 </div>
 
@@ -140,8 +215,12 @@ export default function NewAppointment({ onClose }) {
                   <label>Cidade</label>
                   <input
                     type="text"
+                    name="cidade"
+                    value={form.cidade}
+                    onChange={handleChange}
                     placeholder="Cidade"
                     maxLength={40}
+                    required
                   />
                 </div>
               </div>
@@ -156,6 +235,19 @@ export default function NewAppointment({ onClose }) {
                 />
               </div>
 
+              <div className={styles.confirmArea}>
+                <input
+                  type="checkbox"
+                  id="confirm"
+                  checked={confirmed}
+                  onChange={(e) => setConfirmed(e.target.checked)}
+                />
+
+                <label htmlFor="confirm">
+                  Declaro que revisei todas as informações acima e confirmo que estão corretas.
+                </label>
+              </div>
+
             </div>
 
             <div className={styles.footer}>
@@ -168,6 +260,7 @@ export default function NewAppointment({ onClose }) {
 
               <button
                 className={styles.saveButton}
+                disabled={!formValid || !confirmed}
                 onClick={() => setStep(2)}
               >
                 Continuar
@@ -186,7 +279,7 @@ export default function NewAppointment({ onClose }) {
             </div>
 
             <div className={styles.body}>
-              <div className={styles.field}>
+              <div className={styles.peopleSelect}>
                 <label>Quantidade de Pessoas</label>
 
                 <select
@@ -201,44 +294,108 @@ export default function NewAppointment({ onClose }) {
                 </select>
               </div>
 
-              {companions.map((person, index) => (
-                <div
-                  key={index}
-                  className={styles.cardPerson}
-                >
-                  <h3>Acompanhante {index + 1}</h3>
+              {companions.length > 0 && (
+                <div className={styles.cardPerson}>
+                  <h3>
+                    Acompanhante {currentCompanion + 1} de {companions.length}
+                  </h3>
 
                   <div className={styles.field}>
                     <label>Nome</label>
-
                     <input
                       type="text"
+                      value={companions[currentCompanion].nome}
+                      onChange={(e) =>
+                        handleCompanionChange("nome", e.target.value)
+                      }
                       placeholder="Nome completo"
                     />
                   </div>
 
                   <div className={styles.field}>
-                    <label>CPF</label>
+                    <label>Data de Nascimento</label>
+                    <input
+                      type="date"
+                      value={companions[currentCompanion].nascimento}
+                      onChange={(e) =>
+                        handleCompanionChange("nascimento", e.target.value)
+                      }
+                      max={new Date().toISOString().split("T")[0]}
+                    />
+                  </div>
 
+                  <div className={styles.field}>
+                    <label>CPF</label>
                     <input
                       type="text"
+                      value={companions[currentCompanion].cpf}
+                      onChange={(e) =>
+                        handleCompanionChange("cpf", e.target.value)
+                      }
                       placeholder="000.000.000-00"
                       maxLength={14}
                     />
                   </div>
+
+                  <div className={styles.navigationButtons}>
+                    <button
+                      type="button"
+                      className={styles.navButton}
+                      disabled={currentCompanion === 0}
+                      onClick={() =>
+                        setCurrentCompanion((prev) => prev - 1)
+                      }
+                    >
+                      Anterior
+                    </button>
+
+                    <span className={styles.pageIndicator}>
+                      {currentCompanion + 1} / {companions.length}
+                    </span>
+
+                    <button
+                      type="button"
+                      className={styles.navButton}
+                      disabled={currentCompanion === companions.length - 1}
+                      onClick={() =>
+                        setCurrentCompanion((prev) => prev + 1)
+                      }
+                    >
+                      Próximo
+                    </button>
+                  </div>
                 </div>
-              ))}
+              )}
+            </div>
+
+            <div className={styles.confirmArea}>
+              <input
+                type="checkbox"
+                id="confirmCompanions"
+                checked={confirmedCompanions}
+                onChange={(e) => setConfirmedCompanions(e.target.checked)}
+              />
+
+              <label htmlFor="confirmCompanions">
+                Declaro que revisei os dados dos acompanhantes e confirmo que estão corretos.
+              </label>
             </div>
 
             <div className={styles.footer}>
               <button
                 className={styles.cancelButton}
-                onClick={() => setStep(1)}
+                onClick={() => {
+                  setStep(1);
+                  setConfirmed(false);
+                }}
               >
                 Voltar
               </button>
 
-              <button className={styles.saveButton}>
+              <button
+                className={styles.saveButton}
+                disabled={!companionsValid || !confirmedCompanions}
+              >
                 Finalizar
               </button>
             </div>
