@@ -6,7 +6,7 @@ import { useState } from 'react';
 export default function NewAppointment({ onClose }) {
   const [errorTime, setErrorTime] = useState('');
   const [step, setStep] = useState(1);
-  const [amount, setAmount] = useState(1);
+  const [amount, setAmount] = useState(0);
   const [companions, setCompanions] = useState([]);
   const [confirmed, setConfirmed] = useState(false);
   const [confirmedCompanions, setConfirmedCompanions] = useState(false);
@@ -25,8 +25,8 @@ export default function NewAppointment({ onClose }) {
     form.codigo.trim() !== "" &&
     form.cliente.trim() !== "" &&
     form.nascimento !== "" &&
-    form.cpf.trim() !== "" &&
-    form.dataVisita !== "" &&
+    form.cpf.replace(/\D/g, "").length === 11 &&
+  form.dataVisita !== "" &&
     form.horario !== "" &&
     form.vendedor.trim() !== "" &&
     form.cidade.trim() !== "" &&
@@ -35,9 +35,9 @@ export default function NewAppointment({ onClose }) {
   const companionsValid =
     companions.length === 0 ||
     companions.every((person) =>
-      person.nome.trim() !== "" &&
+      person.nome.trim().length >= 3 &&
       person.nascimento !== "" &&
-      person.cpf.trim() !== ""
+      person.cpf.replace(/\D/g, "").length === 11
     );
 
   const handleChange = (e) => {
@@ -77,20 +77,63 @@ export default function NewAppointment({ onClose }) {
     setAmount(qtd);
 
     setCompanions(
-      Array.from({ length: qtd - 1 }, () => ({
-        nome: '',
-        nascimento: '',
-        cpf: '',
+      Array.from({ length: qtd }, () => ({
+        nome: "",
+        nascimento: "",
+        cpf: "",
       }))
     );
+
+    setCurrentCompanion(0);
   };
 
   const handleCompanionChange = (field, value) => {
     const list = [...companions];
 
+    if (field === "nome") {
+      value = value.replace(/[^A-Za-zÀ-ÿ\s]/g, "");
+    }
+
+    if (field === "cpf") {
+      value = value.replace(/\D/g, "");
+      value = value.slice(0, 11);
+
+      value = value
+        .replace(/^(\d{3})(\d)/, "$1.$2")
+        .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+        .replace(/\.(\d{3})(\d)/, ".$1-$2");
+    }
+
     list[currentCompanion][field] = value;
 
     setCompanions(list);
+  };
+
+  const handleLettersOnly = (e) => {
+    const { name, value } = e.target;
+
+    const onlyLetters = value.replace(/[^A-Za-zÀ-ÿ\s]/g, "");
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: onlyLetters,
+    }));
+  };
+
+  const handleCpf = (e) => {
+    let cpf = e.target.value.replace(/\D/g, "");
+
+    cpf = cpf.slice(0, 11);
+
+    cpf = cpf
+      .replace(/^(\d{3})(\d)/, "$1.$2")
+      .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/\.(\d{3})(\d)/, ".$1-$2");
+
+    setForm((prev) => ({
+      ...prev,
+      cpf,
+    }));
   };
 
   return (
@@ -131,7 +174,7 @@ export default function NewAppointment({ onClose }) {
                     type="text"
                     name="cliente"
                     value={form.cliente}
-                    onChange={handleChange}
+                    onChange={handleLettersOnly}
                     placeholder="Pesquisar cliente..."
                     maxLength={100}
                     required
@@ -158,7 +201,7 @@ export default function NewAppointment({ onClose }) {
                     type="text"
                     name="cpf"
                     value={form.cpf}
-                    onChange={handleChange}
+                    onChange={handleCpf}
                     placeholder="000.000.000-00"
                     maxLength={14}
                     required
@@ -204,7 +247,7 @@ export default function NewAppointment({ onClose }) {
                     type="text"
                     name="vendedor"
                     value={form.vendedor}
-                    onChange={handleChange}
+                    onChange={handleLettersOnly}
                     placeholder="Pesquisar vendedor..."
                     maxLength={100}
                     required
@@ -217,7 +260,7 @@ export default function NewAppointment({ onClose }) {
                     type="text"
                     name="cidade"
                     value={form.cidade}
-                    onChange={handleChange}
+                    onChange={handleLettersOnly}
                     placeholder="Cidade"
                     maxLength={40}
                     required
@@ -280,15 +323,15 @@ export default function NewAppointment({ onClose }) {
 
             <div className={styles.body}>
               <div className={styles.peopleSelect}>
-                <label>Quantidade de Pessoas</label>
+                <label>Acompanhantes</label>
 
                 <select
                   value={amount}
                   onChange={handleAmount}
                 >
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                  {[0, 1, 2, 3, 4, 5, 6, 7].map((num) => (
                     <option key={num} value={num}>
-                      {num} Pessoa{num > 1 ? "s" : ""}
+                      {num} Acompanhante{num !== 1 ? "s" : ""}
                     </option>
                   ))}
                 </select>
@@ -366,19 +409,20 @@ export default function NewAppointment({ onClose }) {
                   </div>
                 </div>
               )}
-            </div>
 
-            <div className={styles.confirmArea}>
-              <input
-                type="checkbox"
-                id="confirmCompanions"
-                checked={confirmedCompanions}
-                onChange={(e) => setConfirmedCompanions(e.target.checked)}
-              />
+              <div className={styles.confirmArea}>
+                <input
+                  type="checkbox"
+                  id="confirmCompanions"
+                  checked={confirmedCompanions}
+                  onChange={(e) => setConfirmedCompanions(e.target.checked)}
+                />
 
-              <label htmlFor="confirmCompanions">
-                Declaro que revisei os dados dos acompanhantes e confirmo que estão corretos.
-              </label>
+                <label htmlFor="confirmCompanions">
+                  Declaro que revisei os dados dos acompanhantes e confirmo que estão corretos.
+                </label>
+              </div>
+
             </div>
 
             <div className={styles.footer}>
