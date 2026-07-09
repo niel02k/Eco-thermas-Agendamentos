@@ -5,7 +5,7 @@ import {Plus,CalendarCheck,CircleDollarSign,CheckCircle2,CalendarDays,Eye,Pencil
 
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
 import StatCard from "@/app/Components/StatCard/StatCard.jsx";
-import { useAgendamentos } from "./useAgendamentos";
+import { useAgendamentos } from "@/app/hooks/useAgendamentos.js";
 import styles from "./Appointments.module.css";
 import NewAppointment from "@/app/Components/modal/Newappointment";
 

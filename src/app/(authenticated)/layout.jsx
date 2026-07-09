@@ -11,7 +11,7 @@ import styles from './authenticated.module.css';
 export default function AuthenticatedLayout({ children }) {
   const { usuario, loading } = useAuth();
   const pathname = usePathname();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Fechada por padrão
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
 
   const activeItem = useMemo(() => {
     const segments = pathname.split('/').filter(Boolean);

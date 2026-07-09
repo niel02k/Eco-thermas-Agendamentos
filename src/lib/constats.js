@@ -1,6 +1,7 @@
+// src/app/lib/constants.js
 export const CARGO = {
-  SDR: 'SDR',
-  VENDEDOR: 'VENDEDOR',
+  ADM: 'ADM',
+  CONSULTOR: 'CONSULTOR',
 }
 
 export const STATUS_USUARIO = {
@@ -21,6 +22,13 @@ export const STATUS_AGENDAMENTO = {
   CONFIRMADO: 'CONFIRMADO',
   CANCELADO: 'CANCELADO',
   REALIZADO: 'REALIZADO',
+}
+
+export const RESULTADO_VENDA = {
+  PENDENTE: 'PENDENTE',
+  VENDA_REALIZADA: 'VENDA_REALIZADA',
+  VENDA_PERDIDA: 'VENDA_PERDIDA',
+  NAO_APLICAVEL: 'NAO_APLICAVEL',
 }
 
 export const STATUS_CONTRATO = {
@@ -47,4 +55,39 @@ export const ACAO = {
   CREATE: 'CREATE',
   UPDATE: 'UPDATE',
   DELETE: 'DELETE',
+}
+
+export const TIPO_REGRA = {
+  FUNCIONAMENTO: 'FUNCIONAMENTO',
+  CAPACIDADE: 'CAPACIDADE',
+  RESERVA: 'RESERVA',
+  HORARIO: 'HORARIO',
+  FERIADO: 'FERIADO',
+  GERAL: 'GERAL',
+}
+
+// Labels para exibição
+export const CARGO_LABELS = {
+  ADM: 'Administrador',
+  CONSULTOR: 'Consultor',
+}
+
+export const STATUS_CONTRATO_LABELS = {
+  PENDENTE: 'Pendente',
+  ATIVO: 'Ativo',
+  BLOQUEADO: 'Bloqueado',
+  ENCERRADO: 'Encerrado',
+  CANCELADO: 'Cancelado',
+}
+
+export const PAGAMENTO_LABELS = {
+  PIX: 'PIX',
+  DINHEIRO: 'Dinheiro',
+  CARTAO_CREDITO: 'Cartão de Crédito',
+  CARTAO_DEBITO: 'Cartão de Débito',
+}
+
+export const COBRANCA_LABELS = {
+  UNICO: 'Único',
+  RECORRENTE: 'Recorrente',
 }

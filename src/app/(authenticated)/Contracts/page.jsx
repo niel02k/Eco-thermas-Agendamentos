@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Plus, TrendingUp, Award, Activity, DollarSign, BarChart3,
   Filter, Search, RefreshCw, ChevronLeft, ChevronRight,
@@ -10,20 +10,10 @@ import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
 import StatCard from "@/app/Components/StatCard/StatCard.jsx";
 import styles from "./Contracts.module.css";
 import ReceitaMensalChart from "@/app/Components/ReceitaMensal/ReceitaMensalChart.jsx";
-import { buscarContratoPorId, listarContratos, buscarContratosPorNome, criarContrato, atualizarContrato, excluirContrato, receitaPorMes, ticketMedio } from "@/app/services/contratosServices.js";
-
-const CONTRACT_TYPES = {
-  EFV: "Vitalício",
-  PM: "3 Anos",
-  GD: "Gold"
-};
-
-const CONTRACT_STATUS = {
-  ATIVO: "Ativo",
-  PENDENTE: "Pendente",
-  CANCELADO: "Cancelado",
-  FINALIZADO: "Finalizado"
-};
+import CriarContrato from "@/app/Components/CriarContrato/CriarContrato.jsx";
+import EditarContrato from "@/app/Components/EditarContrato/EditarContrato.jsx";
+import { useContratosPage } from "@/app/hooks/useContratosPage";
+import { STATUS_CONTRATO, STATUS_CONTRATO_LABELS, PAGAMENTO, PAGAMENTO_LABELS } from "@/lib/constats";
 
 const formatCurrency = (value) =>
   Number(value || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -31,24 +21,44 @@ const formatCurrency = (value) =>
 export default function Contracts() {
   const [visible, setVisible] = useState(false);
 
-  // Estados principais
-  const [contratos, setContratos] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [pagina, setPagina] = useState(1);
-  const [limite] = useState(10);
-  const [busca, setBusca] = useState("");
-  const [filtroStatus, setFiltroStatus] = useState("todos");
-  const [loading, setLoading] = useState(true);
-  const [erro, setErro] = useState(null);
-
-  // Estados para métricas
-  const [receita8m, setReceita8m] = useState([]);
-  const [ticketInfo, setTicketInfo] = useState(null);
-
-  // Estados para modal/detalhes
-  const [contratoSelecionado, setContratoSelecionado] = useState(null);
-  const [modalAberto, setModalAberto] = useState(false);
-  const [modalTipo, setModalTipo] = useState('visualizar');
+  const {
+    // Dados
+    contratos,
+    total,
+    pagina,
+    busca,
+    filtroStatus,
+    receita8m,
+    ticketInfo,
+    loading,
+    error,
+    
+    // Modal
+    contratoSelecionado,
+    modalAberto,
+    showCriarContrato,
+    showEditarContrato,
+    contratoParaEditar,
+    
+    // Setters
+    setPagina,
+    setBusca,
+    setFiltroStatus,
+    setError,
+    setModalAberto,
+    setShowCriarContrato,
+    setShowEditarContrato,
+    setContratoParaEditar,
+    
+    // Ações
+    carregarContratos,
+    carregarMetricas,
+    buscarContrato,
+    handleEditar,
+    handleExcluir,
+    handleContratoCriado,
+    handleContratoEditado
+  } = useContratosPage();
 
   // Efeito de animação
   useEffect(() => {
@@ -56,117 +66,21 @@ export default function Contracts() {
     return () => clearTimeout(t);
   }, []);
 
-  // Carregar contratos com filtros
-  const carregarContratos = useCallback(async () => {
-    setLoading(true);
-    setErro(null);
-    try {
-      let params = { pagina, limite };
-
-      // Se tiver busca, usar o serviço de busca por nome
-      if (busca && busca.length > 2) {
-        const resultados = await buscarContratosPorNome(busca);
-        setContratos(resultados || []);
-        setTotal(resultados?.length || 0);
-      } else {
-        const resp = await listarContratos({
-          pagina,
-          limite,
-          busca: busca || undefined
-        });
-        setContratos(resp.contratos || []);
-        setTotal(resp.total || 0);
-      }
-    } catch (e) {
-      setErro(e.message || "Erro ao carregar contratos");
-    } finally {
-      setLoading(false);
-    }
-  }, [pagina, limite, busca]);
-
-  // Carregar métricas
-  const carregarMetricas = useCallback(async () => {
-    try {
-      const hoje = new Date();
-      const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-
-      const [r8m, tm] = await Promise.all([
-        receitaPorMes(),
-        ticketMedio({
-          inicio: inicioMes.toISOString().split('T')[0],
-          fim: hoje.toISOString().split('T')[0],
-          status: ['ATIVO']
-        })
-      ]);
-
-      setReceita8m(r8m || []);
-      setTicketInfo(tm || null);
-    } catch (error) {
-      console.error('Erro ao carregar métricas:', error);
-    }
-  }, []);
-
-  // Buscar contrato específico
-  const buscarContrato = useCallback(async (id) => {
-    try {
-      const contrato = await buscarContratoPorId(id);
-      setContratoSelecionado(contrato);
-      setModalAberto(true);
-      setModalTipo('visualizar');
-    } catch (error) {
-      setErro('Erro ao buscar contrato: ' + error.message);
-    }
-  }, []);
-
-  // Excluir contrato
-  const handleExcluir = useCallback(async (id) => {
-    if (!confirm('Tem certeza que deseja excluir este contrato?')) return;
-
-    try {
-      await excluirContrato(id);
-      await carregarContratos();
-      await carregarMetricas();
-    } catch (error) {
-      setErro('Erro ao excluir contrato: ' + error.message);
-    }
-  }, [carregarContratos, carregarMetricas]);
-
-  // Carregar dados iniciais
-  useEffect(() => {
-    carregarContratos();
-  }, [carregarContratos]);
-
-  useEffect(() => {
-    carregarMetricas();
-  }, [carregarMetricas]);
-
-  // Aplicar filtros ao buscar
-  const aplicarFiltros = useCallback(() => {
-    setPagina(1);
-    carregarContratos();
-  }, [carregarContratos]);
-
-  // KPIs melhorados
+  // KPIs
   const kpis = useMemo(() => {
     const hoje = new Date().toISOString().split('T')[0];
-    const hojeStr = new Date().toDateString();
 
     const hojeCount = contratos.filter(c =>
       c.data_criacao?.startsWith(hoje) ||
       c.data_inicio?.startsWith(hoje)
     ).length;
 
-    const ativos = contratos.filter(c => c.status === "ATIVO").length;
+    const ativos = contratos.filter(c => c.status === STATUS_CONTRATO.ATIVO).length;
     const totalPagina = contratos.length;
 
-    // Receita total da página
     const receitaPagina = contratos.reduce((acc, c) => acc + Number(c.valor_total || 0), 0);
-
-    // Dados do ticket médio
     const ticketMedioGeral = ticketInfo?.ticket_medio || (totalPagina ? receitaPagina / totalPagina : 0);
     const receitaTotal = ticketInfo?.valor_total || receitaPagina;
-
-    // Cálculo de conversão mais realista
     const conversion = totalPagina ? Math.round((ativos / totalPagina) * 100) : 0;
 
     return [
@@ -176,7 +90,7 @@ export default function Contracts() {
         label: "Contratos hoje",
         icon: Activity,
         color: "blue",
-        tooltip: `Contratos criados em ${hojeStr}`
+        tooltip: `Contratos criados hoje`
       },
       {
         title: "Ativos",
@@ -223,13 +137,11 @@ export default function Contracts() {
 
   // Insights com dados reais
   const insights = useMemo(() => {
-    // Análise por vendedor
     const porVendedor = {};
-    const porTipo = {};
     const porStatus = {};
 
     contratos.forEach((c) => {
-      const nomeVend = c.vendedor?.nome || "Sem vendedor";
+      const nomeVend = c.vendedor?.nome || "Sem consultor";
       const valor = Number(c.valor_total || 0);
 
       porVendedor[nomeVend] = {
@@ -237,14 +149,10 @@ export default function Contracts() {
         quantidade: (porVendedor[nomeVend]?.quantidade || 0) + 1
       };
 
-      const tipo = c.tipo || c.plano || "EFV";
-      porTipo[tipo] = (porTipo[tipo] || 0) + 1;
-
-      const status = c.status || "PENDENTE";
+      const status = c.status || STATUS_CONTRATO.PENDENTE;
       porStatus[status] = (porStatus[status] || 0) + 1;
     });
 
-    // Top vendedores
     const topVendedores = Object.entries(porVendedor)
       .map(([nome, dados]) => ({
         nome,
@@ -254,31 +162,44 @@ export default function Contracts() {
       .sort((a, b) => b.total - a.total)
       .slice(0, 3);
 
-    // Análise de tipos
-    const tipoMaisVendido = Object.entries(porTipo)
-      .sort((a, b) => b[1] - a[1])[0];
-
-    // Status distribution
     const statusDist = Object.entries(porStatus)
       .map(([status, count]) => ({
         status,
         count,
-        label: CONTRACT_STATUS[status] || status
+        label: STATUS_CONTRATO_LABELS[status] || status
       }))
       .sort((a, b) => b.count - a.count);
 
     return {
       topVendedores,
-      tipoMaisVendido,
       statusDist,
       totalVendedores: Object.keys(porVendedor).length
     };
   }, [contratos]);
 
   // Paginação
-  const totalPaginas = Math.max(1, Math.ceil(total / limite));
+  const totalPaginas = Math.max(1, Math.ceil(total / 10));
 
-  // Renderizar modal
+  // Função para obter a classe CSS do status
+  const getStatusClass = (status) => {
+    const statusLower = String(status || "").toLowerCase();
+    switch (statusLower) {
+      case 'ativo':
+        return styles.ativo;
+      case 'pendente':
+        return styles.pendente;
+      case 'bloqueado':
+        return styles.bloqueado;
+      case 'encerrado':
+        return styles.encerrado;
+      case 'cancelado':
+        return styles.cancelado;
+      default:
+        return styles.pendente;
+    }
+  };
+
+  // Renderizar modal de detalhes
   const renderModal = () => {
     if (!modalAberto) return null;
 
@@ -286,11 +207,7 @@ export default function Contracts() {
       <div className={styles.modalOverlay} onClick={() => setModalAberto(false)}>
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <div className={styles.modalHeader}>
-            <h3>
-              {modalTipo === 'visualizar' && 'Detalhes do Contrato'}
-              {modalTipo === 'editar' && 'Editar Contrato'}
-              {modalTipo === 'novo' && 'Novo Contrato'}
-            </h3>
+            <h3>Detalhes do Contrato</h3>
             <button
               className={styles.modalClose}
               onClick={() => setModalAberto(false)}
@@ -303,7 +220,7 @@ export default function Contracts() {
             {contratoSelecionado && (
               <div className={styles.contratoDetalhes}>
                 <div className={styles.detalheLinha}>
-                  <strong>Código:</strong> {contratoSelecionado.codigo || contratoSelecionado.id}
+                  <strong>Código:</strong> {contratoSelecionado.id}
                 </div>
                 <div className={styles.detalheLinha}>
                   <strong>Titular:</strong> {contratoSelecionado.titular_nome}
@@ -318,33 +235,33 @@ export default function Contracts() {
                   <strong>Telefone:</strong> {contratoSelecionado.titular_telefone || 'Não informado'}
                 </div>
                 <div className={styles.detalheLinha}>
-                  <strong>Tipo:</strong> {CONTRACT_TYPES[contratoSelecionado.tipo] || contratoSelecionado.tipo}
+                  <strong>Cidade:</strong> {contratoSelecionado.cidade || 'Não informada'}
                 </div>
                 <div className={styles.detalheLinha}>
                   <strong>Valor:</strong> {formatCurrency(contratoSelecionado.valor_total)}
                 </div>
                 <div className={styles.detalheLinha}>
                   <strong>Status:</strong>
-                  <span className={`${styles.status} ${styles[String(contratoSelecionado.status || "").toLowerCase()]}`}>
-                    {contratoSelecionado.status}
+                  <span className={`${styles.status} ${getStatusClass(contratoSelecionado.status)}`}>
+                    {STATUS_CONTRATO_LABELS[contratoSelecionado.status] || contratoSelecionado.status}
                   </span>
                 </div>
                 <div className={styles.detalheLinha}>
-                  <strong>Forma Pagamento:</strong> {contratoSelecionado.forma_pagamento || 'Não definida'}
+                  <strong>Forma Pagamento:</strong> {PAGAMENTO_LABELS[contratoSelecionado.forma_pagamento] || contratoSelecionado.forma_pagamento}
                 </div>
                 <div className={styles.detalheLinha}>
                   <strong>Parcelas:</strong> {contratoSelecionado.parcelas || 1}
                 </div>
                 <div className={styles.detalheLinha}>
-                  <strong>Data Início:</strong> {new Date(contratoSelecionado.data_inicio).toLocaleDateString()}
+                  <strong>Data Início:</strong> {new Date(contratoSelecionado.data_inicio).toLocaleDateString('pt-BR')}
                 </div>
                 {contratoSelecionado.data_fim && (
                   <div className={styles.detalheLinha}>
-                    <strong>Data Fim:</strong> {new Date(contratoSelecionado.data_fim).toLocaleDateString()}
+                    <strong>Data Fim:</strong> {new Date(contratoSelecionado.data_fim).toLocaleDateString('pt-BR')}
                   </div>
                 )}
                 <div className={styles.detalheLinha}>
-                  <strong>Vendedor:</strong> {contratoSelecionado.vendedor?.nome || 'Não informado'}
+                  <strong>Consultor:</strong> {contratoSelecionado.vendedor?.nome || 'Não informado'}
                 </div>
                 {contratoSelecionado.observacoes && (
                   <div className={styles.detalheLinha}>
@@ -368,16 +285,22 @@ export default function Contracts() {
           </div>
 
           <div className={styles.modalFooter}>
-            {modalTipo === 'visualizar' && (
-              <>
-                <button
-                  className={styles.btnFechar}
-                  onClick={() => setModalAberto(false)}
-                >
-                  Fechar
-                </button>
-              </>
-            )}
+            <button
+              className={styles.btnEditar}
+              onClick={() => {
+                setModalAberto(false);
+                handleEditar(contratoSelecionado.id);
+              }}
+            >
+              <Edit size={16} />
+              Editar
+            </button>
+            <button
+              className={styles.btnFechar}
+              onClick={() => setModalAberto(false)}
+            >
+              Fechar
+            </button>
           </div>
         </div>
       </div>
@@ -393,11 +316,7 @@ export default function Contracts() {
             subtitle="Gestão e análise de contratos emitidos"
             actionLabel="Novo Contrato"
             actionIcon={Plus}
-            onAction={() => {
-              setModalTipo('novo');
-              setModalAberto(true);
-              setContratoSelecionado(null);
-            }}
+            onAction={() => setShowCriarContrato(true)}
           />
 
           {/* Busca e Filtros */}
@@ -441,15 +360,14 @@ export default function Contracts() {
               <select
                 className={styles.filterSelect}
                 value={filtroStatus}
-                onChange={(e) => {
-                  setFiltroStatus(e.target.value);
-                }}
+                onChange={(e) => setFiltroStatus(e.target.value)}
               >
                 <option value="todos">Todos os status</option>
-                <option value="ATIVO">Ativo</option>
-                <option value="PENDENTE">Pendente</option>
-                <option value="CANCELADO">Cancelado</option>
-                <option value="FINALIZADO">Finalizado</option>
+                {Object.entries(STATUS_CONTRATO).map(([key, value]) => (
+                  <option key={key} value={value}>
+                    {STATUS_CONTRATO_LABELS[key]}
+                  </option>
+                ))}
               </select>
 
               <button
@@ -467,10 +385,10 @@ export default function Contracts() {
           </div>
 
           {/* Mensagem de erro */}
-          {erro && (
+          {error && (
             <div className={styles.errorMessage}>
-              {erro}
-              <button onClick={() => setErro(null)}><X size={16} /></button>
+              {error}
+              <button onClick={() => setError(null)}><X size={16} /></button>
             </div>
           )}
 
@@ -485,9 +403,8 @@ export default function Contracts() {
 
           {/* Insights Avançados */}
           <div className={styles.insightsGrid}>
-            {/* Top Vendedores */}
             <div className={styles.insightCard}>
-              <h3 className={styles.insightTitle}>🏆 Top Vendedores</h3>
+              <h3 className={styles.insightTitle}>🏆 Top Consultores</h3>
               {insights.topVendedores.map((vendedor, idx) => (
                 <div key={idx} className={styles.vendedorRank}>
                   <span className={styles.rank}>{idx + 1}º</span>
@@ -498,11 +415,10 @@ export default function Contracts() {
                 </div>
               ))}
               {insights.topVendedores.length === 0 && (
-                <p className={styles.semDados}>Nenhum vendedor com vendas no período</p>
+                <p className={styles.semDados}>Nenhum consultor com vendas no período</p>
               )}
             </div>
 
-            {/* Distribuição de Status */}
             <div className={styles.insightCard}>
               <h3 className={styles.insightTitle}>📊 Distribuição de Status</h3>
               {insights.statusDist.map((item) => (
@@ -510,7 +426,7 @@ export default function Contracts() {
                   <span className={styles.statusLabel}>{item.label}</span>
                   <div className={styles.progressBar}>
                     <div
-                      className={`${styles.progressFill} ${styles[item.status.toLowerCase()]}`}
+                      className={`${styles.progressFill} ${getStatusClass(item.status)}`}
                       style={{
                         width: `${(item.count / (contratos.length || 1)) * 100}%`
                       }}
@@ -524,29 +440,23 @@ export default function Contracts() {
               )}
             </div>
 
-            {/* Tipo Mais Vendido e Métricas */}
             <div className={styles.insightCard}>
-              <h3 className={styles.insightTitle}>📦 Análise de Produtos</h3>
-              {insights.tipoMaisVendido && (
-                <div className={styles.tipoDestaque}>
-                  <p className={styles.tipoLabel}>Tipo mais vendido</p>
-                  <p className={styles.tipoValor}>
-                    {CONTRACT_TYPES[insights.tipoMaisVendido[0]] || insights.tipoMaisVendido[0]}
-                  </p>
-                  <p className={styles.tipoQuantidade}>
-                    {insights.tipoMaisVendido[1]} contratos
-                  </p>
-                </div>
-              )}
+              <h3 className={styles.insightTitle}>📦 Métricas Gerais</h3>
               <div className={styles.metricasRapidas}>
                 <div className={styles.metricaItem}>
-                  <span className={styles.metricaLabel}>Total Vendedores</span>
+                  <span className={styles.metricaLabel}>Total Consultores</span>
                   <span className={styles.metricaValor}>{insights.totalVendedores}</span>
                 </div>
                 <div className={styles.metricaItem}>
                   <span className={styles.metricaLabel}>Ticket Médio</span>
                   <span className={styles.metricaValor}>
                     {formatCurrency(ticketInfo?.ticket_medio || 0)}
+                  </span>
+                </div>
+                <div className={styles.metricaItem}>
+                  <span className={styles.metricaLabel}>Contratos Ativos</span>
+                  <span className={styles.metricaValor}>
+                    {contratos.filter(c => c.status === STATUS_CONTRATO.ATIVO).length}
                   </span>
                 </div>
               </div>
@@ -593,8 +503,8 @@ export default function Contracts() {
                 <div className={styles.tableRowHeader}>
                   <span>Código</span>
                   <span>Cliente</span>
-                  <span>Tipo</span>
-                  <span>Vendedor</span>
+                  <span>Cidade</span>
+                  <span>Consultor</span>
                   <span>Valor</span>
                   <span>Status</span>
                   <span>Ações</span>
@@ -602,15 +512,13 @@ export default function Contracts() {
 
                 {contratos.map((c) => (
                   <div key={c.id} className={styles.tableRow}>
-                    <span className={styles.codigo}>{c.codigo || c.id}</span>
+                    <span className={styles.codigo}>{c.id}</span>
                     <span className={styles.cliente}>{c.titular_nome}</span>
-                    <span className={styles.tipo}>
-                      {CONTRACT_TYPES[c.tipo] || CONTRACT_TYPES[c.plano] || c.tipo || c.plano || "—"}
-                    </span>
+                    <span className={styles.cidade}>{c.cidade || "—"}</span>
                     <span className={styles.vendedor}>{c.vendedor?.nome || "—"}</span>
                     <span className={styles.valor}>{formatCurrency(c.valor_total)}</span>
-                    <span className={`${styles.status} ${styles[String(c.status || "").toLowerCase()]}`}>
-                      {c.status}
+                    <span className={`${styles.status} ${getStatusClass(c.status)}`}>
+                      {STATUS_CONTRATO_LABELS[c.status] || c.status}
                     </span>
                     <span className={styles.acoes}>
                       <button
@@ -619,6 +527,13 @@ export default function Contracts() {
                         title="Visualizar"
                       >
                         <Eye size={16} />
+                      </button>
+                      <button
+                        className={styles.btnAcao}
+                        onClick={() => handleEditar(c.id)}
+                        title="Editar"
+                      >
+                        <Edit size={16} />
                       </button>
                       <button
                         className={`${styles.btnAcao} ${styles.btnExcluir}`}
@@ -643,7 +558,7 @@ export default function Contracts() {
             )}
           </div>
 
-          {/* Mini gráfico de receita mensal (simplificado) */}
+          {/* Mini gráfico de receita mensal */}
           {receita8m.length > 0 && (
             <ReceitaMensalChart
               data={receita8m}
@@ -654,8 +569,32 @@ export default function Contracts() {
             />
           )}
 
-          {/* Modal */}
+          {/* Modal de detalhes */}
           {renderModal()}
+
+          {/* Modal de criação de contrato */}
+          {showCriarContrato && (
+            <div className={styles.modalOverlay}>
+              <CriarContrato
+                onClose={() => setShowCriarContrato(false)}
+                onSuccess={handleContratoCriado}
+              />
+            </div>
+          )}
+
+          {/* Modal de edição de contrato */}
+          {showEditarContrato && contratoParaEditar && (
+            <div className={styles.modalOverlay}>
+              <EditarContrato
+                contrato={contratoParaEditar}
+                onClose={() => {
+                  setShowEditarContrato(false);
+                  setContratoParaEditar(null);
+                }}
+                onSuccess={handleContratoEditado}
+              />
+            </div>
+          )}
         </div>
       </main>
     </div>

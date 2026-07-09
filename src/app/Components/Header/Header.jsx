@@ -6,8 +6,7 @@ import CardNotification from '@/app/Components/notifications/Card.jsx';
 import styles from './Header.module.css';
 
 /**
- * Header Global - Eco Manager
- * 
+
  * @param {Object} props
  * @param {string} props.userName - Nome do usuário
  * @param {string} props.userRole - Cargo do usuário
