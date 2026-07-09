@@ -142,7 +142,7 @@ export function exportToPDF(data, title = 'Relatório', columns = null) {
         6: { cellWidth: 'auto' }
       }
     });
-    
+      
     // Adicionar rodapé
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {

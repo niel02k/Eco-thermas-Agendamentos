@@ -1,31 +1,59 @@
 // src/app/services/usuariosServices.js
-
 import { createClient } from '@/lib/supabase/client';
 
 const supabase = createClient();
 
-/* ===========================================================
-   LISTAR USUÁRIOS
-=========================================================== */
-
-export async function listarUsuarios({
-  pagina = 1,
-  limite = 100,
-  busca = '',
-  status = '',
-  cargo = ''
-} = {}) {
+export async function listarConsultores({ status = 'ATIVO' } = {}) {
   try {
-    const inicio = (pagina - 1) * limite;
-    const fim = inicio + limite - 1;
-
     let query = supabase
       .from('usuarios')
-      .select('*', { count: 'exact' });
+      .select('*')
+      .eq('cargo', 'CONSULTOR'); // Usando o campo 'cargo' da sua tabela
 
-    if (busca) {
-      query = query.or(`nome.ilike.%${busca}%,email.ilike.%${busca}%`);
+    if (status) {
+      query = query.eq('status', status);
     }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    // Garante que sempre retorna um array
+    return data || [];
+  } catch (error) {
+    console.error('Erro ao listar consultores:', error);
+    return []; // Retorna array vazio em caso de erro
+  }
+}
+
+export async function listarUsuariosPorCargo(cargo, status = 'ATIVO') {
+  try {
+    let query = supabase
+      .from('usuarios')
+      .select('*')
+      .eq('cargo', cargo);
+
+    if (status) {
+      query = query.eq('status', status);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return data || [];
+  } catch (error) {
+    console.error(`Erro ao listar usuários com cargo ${cargo}:`, error);
+    return [];
+  }
+}
+
+// Se você quiser listar todos os usuários
+export async function listarUsuarios({ status = 'ATIVO', cargo = null } = {}) {
+  try {
+    let query = supabase
+      .from('usuarios')
+      .select('*');
 
     if (status) {
       query = query.eq('status', status);
@@ -35,24 +63,14 @@ export async function listarUsuarios({
       query = query.eq('cargo', cargo);
     }
 
-    const { data, count, error } = await query
-      .order('data_criacao', { ascending: false })
-      .range(inicio, fim);
+    const { data, error } = await query;
 
-    if (error) {
-      console.warn('Erro ao buscar usuários:', error);
-      return { usuarios: [], total: 0, pagina, totalPaginas: 0 };
-    }
+    if (error) throw error;
 
-    return {
-      usuarios: data || [],
-      total: count || 0,
-      pagina,
-      totalPaginas: Math.ceil((count || 0) / limite)
-    };
+    return data || [];
   } catch (error) {
-    console.error('Erro no listarUsuarios:', error);
-    return { usuarios: [], total: 0, pagina, totalPaginas: 0 };
+    console.error('Erro ao listar usuários:', error);
+    return [];
   }
 }
 

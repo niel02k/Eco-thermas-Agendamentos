@@ -22,8 +22,7 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // O método setAll pode ser chamado de Server Components,
-            // onde os cookies não podem ser modificados.
+           
           }
         },
       },

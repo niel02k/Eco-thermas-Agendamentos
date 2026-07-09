@@ -77,49 +77,79 @@ export async function buscarContratosPorNome(busca) {
 
 // CRIAR
 export async function criarContrato(dados) {
+  console.log("=== DADOS RECEBIDOS NO SERVIÇO ===");
+  console.log("dados:", dados);
+  console.log("dados.cidade:", dados.cidade);
+  
+  // Garantir que cidade não seja undefined ou null
+  const cidade = dados.cidade?.trim() || "";
+  
+  if (!cidade) {
+    console.error("ERRO: cidade está vazia!");
+    throw new Error("Cidade é obrigatória e não pode estar vazia");
+  }
+
+  const dadosInsert = {
+    agendamento_id: dados.agendamento_id || null,
+    vendedor_id: dados.vendedor_id,
+    titular_nome: dados.titular_nome,
+    titular_cpf: dados.titular_cpf,
+    titular_email: dados.titular_email || null,
+    titular_telefone: dados.titular_telefone || null,
+    titular_data_nascimento: dados.titular_data_nascimento,
+    valor_total: dados.valor_total,
+    forma_pagamento: dados.forma_pagamento,
+    tipo_cobranca: dados.tipo_cobranca || null,
+    parcelas: dados.parcelas || 1,
+    status: dados.status || 'PENDENTE',
+    data_inicio: dados.data_inicio,
+    data_fim: dados.data_fim || null,
+    observacoes: dados.observacoes || null,
+    cidade: cidade  // VARCHAR(30) NOT NULL
+  };
+
+  console.log("=== DADOS PARA INSERT ===");
+  console.log(JSON.stringify(dadosInsert, null, 2));
+
   const { data, error } = await supabase
     .from('contratos')
-    .insert([{
-      agendamento_id: dados.agendamento_id || null,
-      vendedor_id: dados.vendedor_id,
-      titular_nome: dados.titular_nome,
-      titular_cpf: dados.titular_cpf,
-      titular_email: dados.titular_email || null,
-      titular_telefone: dados.titular_telefone || null,
-      titular_data_nascimento: dados.titular_data_nascimento,
-      valor_total: dados.valor_total,
-      forma_pagamento: dados.forma_pagamento,
-      tipo_cobranca: dados.tipo_cobranca || null,
-      parcelas: dados.parcelas || 1,
-      status: dados.status || 'PENDENTE',
-      data_inicio: dados.data_inicio,
-      data_fim: dados.data_fim || null,
-      observacoes: dados.observacoes || null
-    }])
+    .insert([dadosInsert])
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error("Erro do Supabase:", error);
+    console.error("Detalhes:", error.details);
+    console.error("Hint:", error.hint);
+    console.error("Dados que tentamos inserir:", dadosInsert);
+    throw error;
+  }
 
-  // Dependentes
+  console.log("Contrato criado com sucesso:", data);
+
+  // Inserir dependentes se existirem
   if (dados.dependentes && dados.dependentes.length > 0) {
     const deps = dados.dependentes.map(d => ({
       contrato_id: data.id,
       nome: d.nome,
       cpf: d.cpf || null,
-      data_nascimento: d.data_nascimento
+      data_nascimento: d.data_nascimento || null
     }));
 
     const { error: depError } = await supabase
       .from('contrato_dependentes')
       .insert(deps);
 
-    if (depError) throw depError;
+    if (depError) {
+      console.error("Erro ao inserir dependentes:", depError);
+      throw depError;
+    }
+    
+    console.log("Dependentes inseridos com sucesso:", deps);
   }
 
   return data;
 }
-
 // ATUALIZAR
 export async function atualizarContrato(id, dados) {
   const { data, error } = await supabase
