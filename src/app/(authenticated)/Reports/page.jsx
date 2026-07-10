@@ -550,40 +550,54 @@ export default function Reports() {
 
                 {dadosExibicao.length > 0 ? (
                   dadosExibicao.map((item, index) => (
-                    <div key={index} className={styles.tableRow}>
-                      <span>{item.codigo || item.id || '-'}</span>
-                      <span>
-                        <span className={styles.moduleBadge}>
-                          {item.module || 'Contrato'}
-                        </span>
+                  <div key={index} className={styles.tableRow}>
+
+                    <span data-label="Código">
+                      {item.codigo || item.id || '-'}
+                    </span>
+
+                    <span data-label="Módulo">
+                      <span className={styles.moduleBadge}>
+                        {item.module || 'Contrato'}
                       </span>
-                      <span>{item.titular_nome || item.cliente?.nome || item.cliente || '-'}</span>
-                      <span>{item.vendedor?.nome || item.seller || '-'}</span>
-                      <span className={styles.valorCell}>
-                        {formatCurrency(item.valor_total || item.value || 0)}
+                    </span>
+
+                    <span data-label="Cliente">
+                      {item.titular_nome || item.cliente?.nome || item.cliente || '-'}
+                    </span>
+
+                    <span data-label="Consultor">
+                      {item.vendedor?.nome || item.seller || '-'}
+                    </span>
+
+                    <span data-label="Valor" className={styles.valorCell}>
+                      {formatCurrency(item.valor_total || item.value || 0)}
+                    </span>
+
+                    <span data-label="Status">
+                      <span
+                        className={styles.statusBadge}
+                        style={{
+                          backgroundColor: STATUS_COLORS[item.status]
+                            ? `${STATUS_COLORS[item.status]}20`
+                            : '#E2E8F0',
+                          color: STATUS_COLORS[item.status] || '#475569'
+                        }}
+                      >
+                        {item.status || 'PENDENTE'}
                       </span>
-                      <span>
-                        <span
-                          className={styles.statusBadge}
-                          style={{
-                            backgroundColor: STATUS_COLORS[item.status]
-                              ? `${STATUS_COLORS[item.status]}20`
-                              : '#E2E8F0',
-                            color: STATUS_COLORS[item.status] || '#475569'
-                          }}
-                        >
-                          {item.status || 'PENDENTE'}
-                        </span>
-                      </span>
-                      <span>
-                        {formatDate(
-                            item.data_criacao ||
-                            item.data_inicio ||
-                            item.data_visita ||
-                            item.date
-                        )}
-                      </span>
-                    </div>
+                    </span>
+
+                    <span data-label="Data">
+                      {formatDate(
+                        item.data_criacao ||
+                        item.data_inicio ||
+                        item.data_visita ||
+                        item.date
+                      )}
+                    </span>
+
+                  </div>
                   ))
                 ) : (
                   <div className={styles.emptyState}>
