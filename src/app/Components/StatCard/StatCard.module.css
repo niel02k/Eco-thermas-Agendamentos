@@ -63,8 +63,8 @@
 }
 
 .value {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.75rem;
+  font-weight: 800;
   color: #1E293B;
   margin: 0;
   max-width: 100%;
@@ -76,3 +76,26 @@
   color: #64748B;
   margin: 0;
 }
+
+
+/* Celular (até 640px) */
+@media (max-width: 640px) { 
+  .card {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+
+  .iconContainer {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+
+  .value {
+    font-size: 1.4rem;
+  }
+
+  .label {
+    font-size: 0.75rem;
+  }
+} 
