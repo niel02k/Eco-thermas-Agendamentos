@@ -1,11 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  Plus, TrendingUp, Award, Activity, DollarSign, BarChart3,
-  Filter, Search, RefreshCw, ChevronLeft, ChevronRight,
-  Eye, Edit, Trash2, X
-} from "lucide-react";
+import {Plus, TrendingUp, Award, Activity, DollarSign, BarChart3,Filter, Search, RefreshCw, ChevronLeft, ChevronRight,Eye, Edit, Trash2, X , Pencil} from "lucide-react";
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
 import StatCard from "@/app/Components/StatCard/StatCard.jsx";
 import styles from "./Contracts.module.css";
@@ -292,7 +288,7 @@ export default function Contracts() {
                 handleEditar(contratoSelecionado.id);
               }}
             >
-              <Edit size={16} />
+              <Pencil size={16} />
               Editar
             </button>
             <button
@@ -533,7 +529,7 @@ export default function Contracts() {
                         onClick={() => handleEditar(c.id)}
                         title="Editar"
                       >
-                        <Edit size={16} />
+                        <Pencil size={16} />
                       </button>
                       <button
                         className={`${styles.btnAcao} ${styles.btnExcluir}`}

@@ -1,13 +1,11 @@
 "use client";
 
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import {FileText,Download,TrendingUp,TrendingDown,DollarSign,Users,Activity,Calendar,Filter,Search,X,FileSpreadsheet,File,Printer,RefreshCw,ChevronLeft,ChevronRight,Eye,AlertCircle} from "lucide-react";
+import {FileText,TrendingUp,DollarSign,Activity,Search,X,FileSpreadsheet,File,RefreshCw,Eye,AlertCircle , Pencil } from "lucide-react";
 
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
 import StatCard from "@/app/Components/StatCard/StatCard.jsx";
 import styles from "./Reports.module.css";
-
-// Services
 import { listarContratos, buscarContratosPorNome, ticketMedio } from "@/app/services/contratosServices.js";
 import { listarAgendamentos, buscarAgendamentosPorNome } from "@/app/services/agendamentosServices.js";
 import { listarUsuarios } from "@/app/services/usuarioServices.js";
@@ -598,13 +596,15 @@ const handleExportPDF = () => {
                 {dadosExibicao.length > 0 ? (
                   dadosExibicao.map((item, index) => (
                     <div key={index} className={styles.tableRow}>
-                      <span>{item.codigo || item.id || '-'}</span>
+                      <span className={styles.tableRowspan} >{item.codigo || item.id || '-'}</span>
                       <span>
                         <span className={styles.moduleBadge}>
                           {item.module || 'Contrato'}
                         </span>
                       </span>
-                      <span>{item.titular_nome || item.cliente?.nome || item.cliente || '-'}</span>
+                      <span> 
+                        
+                        {item.titular_nome || item.cliente?.nome || item.cliente || '-'}</span>
                       <span>{item.vendedor?.nome || item.seller || '-'}</span>
                       <span className={styles.valorCell}>
                         {formatCurrency(item.valor_total || item.value || 0)}
