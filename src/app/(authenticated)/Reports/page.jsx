@@ -26,6 +26,11 @@ const STATUS_COLORS = {
   REALIZADO: '#3CC83C',
   CONFIRMADO: '#1E6EBE'
 };
+const formatDate =(date) =>{
+  if (!date) return "-";
+  return new Date(date).toLocaleDateString("pt-BR");
+
+};
 
 export default function Reports() {
   const [visible, setVisible] = useState(false);
@@ -571,7 +576,12 @@ export default function Reports() {
                         </span>
                       </span>
                       <span>
-                        {item.data_criacao || item.data_inicio || item.data_visita || item.date || '-'}
+                        {formatDate(
+                            item.data_criacao ||
+                            item.data_inicio ||
+                            item.data_visita ||
+                            item.date
+                        )}
                       </span>
                     </div>
                   ))
