@@ -1,80 +1,84 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Plus, Users, CalendarCheck, TrendingUp, TrendingDown, Activity } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import PageHeader from '@/app/Components/PageHeader/PageHeader.jsx';
 import StatCard from '@/app/Components/StatCard/StatCard.jsx';
 import styles from './Dashboard.module.css';
-import { agendamentosHoje, proximosDiasComAgendamentos, totalClientesAtendidos, agendamentosPorDiaSemana, taxaDeConversao } from '@/app/services/agendamentosServices.js';
-import { receitaPorMes, ticketMedio} from '@/app/services/contratosServices.js';
+import { useAgendamentos } from '@/app/hooks/useAgendamentos';
+import { useContratos } from '@/app/hooks/useContratos';
+import { taxaDeConversao } from '@/app/services/agendamentosServices.js';
 
 /* ── Dashboard ── */
 const Dashboard = () => {
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Stats
-  const [totalClientes, setTotalClientes] = useState(0);
-  const [totalHoje, setTotalHoje] = useState(0);
-  const [diasAgendamentos, setDiasAgendamentos] = useState([]);
+  // Hooks
+  const { totalHoje, semanaData, loadingStats } = useAgendamentos();
+  const { fetchMetrics, loading: loadingContratos } = useContratos();
 
-  // Gráficos
+  // Estados locais
+  const [totalClientes, setTotalClientes] = useState(0);
+  const [diasAgendamentos, setDiasAgendamentos] = useState([]);
   const [dadosReceita, setDadosReceita] = useState([]);
   const [dadosSemana, setDadosSemana] = useState([]);
-
-  // Activity feed
-
   const [ticketMedioValor, setTicketMedioValor] = useState(null);
-  const [taxaConversao, setTaxaConversao] = useState(0);
+  const [taxaConversao, setTaxaConversao] = useState(null);
+  const [totalContratos, setTotalContratos] = useState(0);
 
+  // Carregar dados do Dashboard
+  const carregarDados = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Dados dos contratos (métricas)
+      const metricas = await fetchMetrics();
+      
+      setDadosReceita(metricas.receitaMensal || []);
+      setTicketMedioValor(metricas.ticketMedio);
+      setTotalContratos(metricas.ticketMedio?.total_contratos || 0);
 
+      // Taxa de conversão (ainda usa service direto)
+      const taxa = await taxaDeConversao();
+      setTaxaConversao(taxa);
 
-  useEffect(() => {
-    async function carregarDados() {
-      try {
-        const [clientes, hoje, dias, receita, semana, ticket , taxa] = await Promise.all([
-          totalClientesAtendidos(),
-          agendamentosHoje(),
-          proximosDiasComAgendamentos(2),
-          receitaPorMes(),
-          agendamentosPorDiaSemana(),
-          ticketMedio(),
-          taxaDeConversao()
-        ]);
-
-        setTotalClientes(clientes);
-        setTotalHoje(hoje);
-        setDiasAgendamentos(dias);
-        setDadosReceita(receita);
-        setDadosSemana(semana);
-        setTicketMedioValor(ticket);
-        setTaxaConversao(taxa);
-      } catch (error) {
-        console.error('Erro ao carregar dados:', error);
-      } finally {
-        setLoading(false);
-      }
+      // Dados dos agendamentos (vem do hook useAgendamentos)
+      setDadosSemana(semanaData);
+      
+      // Total de clientes atendidos (calculado do statusCount)
+      // Se precisar, pode adicionar no hook useAgendamentos
+      
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+    } finally {
+      setLoading(false);
     }
+  }, [fetchMetrics, semanaData]);
 
-    carregarDados();
-  }, []);
+  // Efeito inicial
+  useEffect(() => {
+    if (!loadingStats) {
+      carregarDados();
+    }
+  }, [loadingStats, carregarDados]);
 
-
+  // Animação de entrada
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80);
     return () => clearTimeout(t);
   }, []);
 
+  // Formatações
   const formatarNumero = (valor) => new Intl.NumberFormat('pt-BR').format(valor);
   const formatarMoeda = (valor) => `R$ ${Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-// Transforma o array para o Recharts
-   const dadosSemanaFormatado = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].map((dia, i) => ({
-    dia,
-    total: dadosSemana[i] ?? 0
-  }))
 
-  
+  // Dados para gráfico de semana
+  const dadosSemanaFormatado = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map((dia, i) => ({
+    dia,
+    total: dadosSemana[i]?.total ?? 0
+  }));
+
   return (
     <div className={styles.container}>
       <main className={`${styles.mainContent} ${visible ? styles.mainVisible : ''}`}>
@@ -96,7 +100,7 @@ const Dashboard = () => {
               <StatCard
                 title="Atendidos"
                 value={loading ? '...' : formatarNumero(totalClientes)}
-                label="Atendimento totais "
+                label="Atendimento totais"
                 trend={12}
                 icon={Users}
                 color="green"
@@ -177,17 +181,11 @@ const Dashboard = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
                   <XAxis dataKey="dia" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: '#000000' }} axisLine={false} tickLine={false} allowDecimals={false} />
-                  <Tooltip formatter={(v) => [v, 'Agendamentos']}
-                    labelStyle={{ color: '#252424' }}
-                   itemStyle={{ color: '#56f3aa' }}
-                    />
-                   <Bar dataKey="total" fill="#6EC8F0" radius={[4, 4, 0, 0]} />
+                  <Tooltip formatter={(v) => [v, 'Agendamentos']} />
+                  <Bar dataKey="total" fill="#6EC8F0" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-
-            {/* Activity Feed */}
-          
 
           </div>
 
@@ -195,26 +193,25 @@ const Dashboard = () => {
           <div className={styles.quickStrip}>
             <div className={styles.stripCard}>
               <span className={styles.stripLabel}>Taxa de Conversão</span>
-              <span className={styles.stripValue}>{loading ? '...' : taxaConversao ? `${taxaConversao.toFixed(2)} % ` : ' 0 %'}</span>
-              <span className={`${styles.stripSub} ${styles.stripGood}`}>
+              <span className={styles.stripValue}>
+                {loading ? '...' : taxaConversao ? `${taxaConversao.toFixed(1)}%` : '0%'}
               </span>
-            
             </div>
+
             <div className={styles.stripCard}>
               <span className={styles.stripLabel}>Ticket Médio</span>
               <span className={styles.stripValue}>
-                {loading ? '...' : ticketMedioValor ? `R$ ${ticketMedioValor.ticket_medio.toFixed(2)}` : 'R$ 0,00'}
-              </span>
-
-              <span className={`${styles.stripSub} ${styles.stripGood}`}>
+                {loading ? '...' : ticketMedioValor?.ticket_medio ? `R$ ${ticketMedioValor.ticket_medio.toFixed(2)}` : 'R$ 0,00'}
               </span>
             </div>
+
             <div className={styles.stripCard}>
               <span className={styles.stripLabel}>Contratos Vendidos</span>
-               <span className={`${styles.stripValue} `}>
-                {ticketMedioValor ? `${ticketMedioValor.total_contratos} contratos` : ' 0' }
+              <span className={styles.stripValue}>
+                {totalContratos || 0}
               </span>
             </div>
+
             
           </div>
 

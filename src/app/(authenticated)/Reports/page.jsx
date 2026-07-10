@@ -1,15 +1,19 @@
 "use client";
 
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import {FileText,TrendingUp,DollarSign,Activity,Search,X,FileSpreadsheet,File,RefreshCw,Eye,AlertCircle , Pencil } from "lucide-react";
+import {
+  FileText, TrendingUp, DollarSign, Activity,
+  Search, X, FileSpreadsheet, File, RefreshCw,
+  AlertCircle
+} from "lucide-react";
 
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
 import StatCard from "@/app/Components/StatCard/StatCard.jsx";
 import styles from "./Reports.module.css";
-import { listarContratos, buscarContratosPorNome, ticketMedio } from "@/app/services/contratosServices.js";
-import { listarAgendamentos, buscarAgendamentosPorNome } from "@/app/services/agendamentosServices.js";
-import { listarUsuarios } from "@/app/services/usuarioServices.js";
-import { exportToExcel, exportToPDF, formatDataForExport } from "@/app/services/exportServices.js";
+import { useContratos } from "@/app/hooks/useContratos";
+import { useAgendamentos } from "@/app/hooks/useAgendamentos";
+import { useConsultores } from "@/app/hooks/useConsultores";
+import { exportToExcel, exportToPDF } from "@/app/services/exportServices.js";
 
 const formatCurrency = (value) =>
   Number(value || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -25,32 +29,51 @@ const STATUS_COLORS = {
 
 export default function Reports() {
   const [visible, setVisible] = useState(false);
-  
-  // Estados de dados
+
+  // ── Hooks ────────────────────────────────────────────────────
+  const {
+    fetchContratos,
+    fetchContratoById,
+    loading: loadingContratos
+  } = useContratos();
+
+  const {
+    agendamentos,
+    total: totalAgendamentos,
+    loadingTabela: loadingAgendamentos,
+    handleBusca: buscaAgendamentos,
+    setPagina: setPaginaAgendamentos
+  } = useAgendamentos();
+
+  const {
+    consultores,
+    loading: loadingConsultores,
+    error: erroConsultores
+  } = useConsultores();
+
+  // ── Estados locais ───────────────────────────────────────────
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(null);
   const [dadosExibicao, setDadosExibicao] = useState([]);
-  const [totalRegistros, setTotalRegistros] = useState(0);
-  const [pagina, setPagina] = useState(1);
-  const [limite] = useState(10);
-  
-  // Estados de filtros
+
+  // Filtros
   const [filtros, setFiltros] = useState({
     tipo: 'contratos',
     busca: '',
     status: '',
     dataInicio: '',
     dataFim: '',
-    consultor: '', // Mudado de vendedor para consultor
+    consultor: '',
     valorMin: '',
     valorMax: ''
   });
-  
-  // Estado de consultores
-  const [consultores, setConsultores] = useState([]);
-  const [carregandoConsultores, setCarregandoConsultores] = useState(false);
-  
-  // Estado de métricas
+
+  // Paginação
+  const [pagina, setPagina] = useState(1);
+  const [limite] = useState(10);
+  const [totalRegistros, setTotalRegistros] = useState(0);
+
+  // Métricas
   const [metricas, setMetricas] = useState({
     totalValor: 0,
     totalRegistros: 0,
@@ -58,54 +81,33 @@ export default function Reports() {
     conversao: 0
   });
 
+  // ── Efeitos ──────────────────────────────────────────────────
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80);
     return () => clearTimeout(t);
   }, []);
 
-  // Carregar consultores (corrigido para CONSULTOR)
-  const carregarConsultores = useCallback(async () => {
-    setCarregandoConsultores(true);
-    try {
-      const response = await listarUsuarios({ 
-        status: 'ATIVO',
-        cargo: 'CONSULTOR' // Mudado de VENDEDOR para CONSULTOR
-      });
-      
-      if (response && response.usuarios) {
-        setConsultores(response.usuarios);
-      } else {
-        // Se não encontrar consultores, tenta buscar todos os usuários ativos
-        const allUsers = await listarUsuarios({ status: 'ATIVO' });
-        if (allUsers && allUsers.usuarios) {
-          setConsultores(allUsers.usuarios);
-        } else {
-          setConsultores([]);
-        }
-      }
-    } catch (error) {
-      console.error('Erro ao carregar consultores:', error);
-      setConsultores([]);
-    } finally {
-      setCarregandoConsultores(false);
-    }
-  }, []);
-
-  // Carregar dados
+  // ── Carregar dados ───────────────────────────────────────────
   const carregarDados = useCallback(async () => {
     setLoading(true);
     setErro(null);
-    
+
     try {
       let dados = [];
       let total = 0;
-      
-      // Busca por nome se tiver busca
-      if (filtros.busca && filtros.busca.length > 2) {
-        if (filtros.tipo === 'contratos' || filtros.tipo === 'todos') {
-          const contratos = await buscarContratosPorNome(filtros.busca);
-          if (contratos && contratos.length > 0) {
-            const contratosComTipo = contratos.map(c => ({
+
+      // Buscar contratos
+      if (filtros.tipo === 'contratos' || filtros.tipo === 'todos') {
+        try {
+          const result = await fetchContratos({
+            pagina,
+            limite,
+            busca: filtros.busca,
+            status: filtros.status || null
+          });
+
+          if (result?.contratos) {
+            const contratosFormatados = result.contratos.map(c => ({
               ...c,
               module: 'Contrato',
               cliente: c.titular_nome,
@@ -113,13 +115,27 @@ export default function Reports() {
               value: c.valor_total,
               date: c.data_criacao
             }));
-            dados = [...dados, ...contratosComTipo];
+            dados = [...dados, ...contratosFormatados];
+            total += result.total || 0;
           }
+        } catch (error) {
+          console.error('Erro ao carregar contratos:', error);
         }
-        if (filtros.tipo === 'agendamentos' || filtros.tipo === 'todos') {
-          const agendamentos = await buscarAgendamentosPorNome(filtros.busca);
-          if (agendamentos && agendamentos.length > 0) {
-            const agendamentosComTipo = agendamentos.map(a => ({
+      }
+
+      // Buscar agendamentos
+      if (filtros.tipo === 'agendamentos' || filtros.tipo === 'todos') {
+        try {
+          const result = await fetchContratos({
+            pagina,
+            limite,
+            busca: filtros.busca,
+            status: filtros.status || null
+          });
+          
+          // Buscar agendamentos também
+          if (agendamentos?.length > 0) {
+            const agendamentosFormatados = agendamentos.map(a => ({
               ...a,
               module: 'Agendamento',
               cliente: a.cliente?.nome,
@@ -128,156 +144,94 @@ export default function Reports() {
               date: a.data_visita,
               codigo: a.codigo
             }));
-            dados = [...dados, ...agendamentosComTipo];
-          }
-        }
-        total = dados.length;
-      } else {
-        // Busca com paginação
-        if (filtros.tipo === 'contratos' || filtros.tipo === 'todos') {
-          try {
-            const response = await listarContratos({
-              pagina,
-              limite,
-              busca: filtros.busca
-            });
-            
-            if (response && response.contratos) {
-              const contratosComTipo = response.contratos.map(c => ({
-                ...c,
-                module: 'Contrato',
-                cliente: c.titular_nome,
-                seller: c.vendedor?.nome,
-                value: c.valor_total,
-                date: c.data_criacao
-              }));
-              dados = [...dados, ...contratosComTipo];
-              total = response.total || 0;
+
+            if (filtros.tipo === 'todos') {
+              dados = [...dados, ...agendamentosFormatados];
+              total += totalAgendamentos || 0;
+            } else {
+              dados = agendamentosFormatados;
+              total = totalAgendamentos || 0;
             }
-          } catch (error) {
-            console.error('Erro ao carregar contratos:', error);
           }
-        }
-        
-        if (filtros.tipo === 'agendamentos' || filtros.tipo === 'todos') {
-          try {
-            const response = await listarAgendamentos({
-              pagina,
-              limite,
-              busca: filtros.busca
-            });
-            
-            if (response && response.agendamentos) {
-              const agendamentosComTipo = response.agendamentos.map(a => ({
-                ...a,
-                module: 'Agendamento',
-                cliente: a.cliente?.nome,
-                seller: a.vendedor_id,
-                value: 0,
-                date: a.data_visita,
-                codigo: a.codigo
-              }));
-              
-              if (filtros.tipo === 'todos') {
-                dados = [...dados, ...agendamentosComTipo];
-                total = total + (response.total || 0);
-              } else {
-                dados = agendamentosComTipo;
-                total = response.total || 0;
-              }
-            }
-          } catch (error) {
-            console.error('Erro ao carregar agendamentos:', error);
-          }
+        } catch (error) {
+          console.error('Erro ao carregar agendamentos:', error);
         }
       }
-      
-      // Aplicar filtros adicionais em memória
+
+      // Aplicar filtros em memória
       let dadosFiltrados = dados;
-      
-      // Filtrar por status
-      if (filtros.status) {
-        dadosFiltrados = dadosFiltrados.filter(item => 
-          item.status === filtros.status
-        );
-      }
-      
-      // Filtrar por consultor (mudado de vendedor)
+
+      // Filtrar por consultor
       if (filtros.consultor) {
-        dadosFiltrados = dadosFiltrados.filter(item => 
-          item.vendedor_id === filtros.consultor || 
-          item.vendedor?.id === filtros.consultor ||
-          item.seller === filtros.consultor
+        dadosFiltrados = dadosFiltrados.filter(item =>
+          item.vendedor_id === filtros.consultor ||
+          item.vendedor?.id === filtros.consultor
         );
       }
-      
+
       // Filtrar por valor
       if (filtros.valorMin) {
-        dadosFiltrados = dadosFiltrados.filter(item => 
-          Number(item.value || item.valor_total || 0) >= Number(filtros.valorMin)
+        dadosFiltrados = dadosFiltrados.filter(item =>
+          Number(item.valor_total || item.value || 0) >= Number(filtros.valorMin)
         );
       }
       if (filtros.valorMax) {
-        dadosFiltrados = dadosFiltrados.filter(item => 
-          Number(item.value || item.valor_total || 0) <= Number(filtros.valorMax)
+        dadosFiltrados = dadosFiltrados.filter(item =>
+          Number(item.valor_total || item.value || 0) <= Number(filtros.valorMax)
         );
       }
-      
+
       // Filtrar por data
       if (filtros.dataInicio) {
         dadosFiltrados = dadosFiltrados.filter(item => {
-          const data = item.data_inicio || item.data_visita || item.date;
+          const data = item.data_criacao || item.data_visita || item.date;
           return data && data >= filtros.dataInicio;
         });
       }
       if (filtros.dataFim) {
         dadosFiltrados = dadosFiltrados.filter(item => {
-          const data = item.data_inicio || item.data_visita || item.date;
+          const data = item.data_criacao || item.data_visita || item.date;
           return data && data <= filtros.dataFim;
         });
       }
-      
+
       setDadosExibicao(dadosFiltrados);
       setTotalRegistros(dadosFiltrados.length);
-      
+
       // Calcular métricas
       const valores = dadosFiltrados
-        .map(item => Number(item.value || item.valor_total || 0))
+        .map(item => Number(item.valor_total || item.value || 0))
         .filter(v => v > 0);
-      
+
       const totalValor = valores.reduce((acc, v) => acc + v, 0);
       const mediaValor = valores.length > 0 ? totalValor / valores.length : 0;
-      
-      // Calcular conversão (apenas para contratos)
+
       const contratosFiltrados = dadosFiltrados.filter(item => item.module === 'Contrato');
       const ativos = contratosFiltrados.filter(item => item.status === 'ATIVO').length;
-      const conversao = contratosFiltrados.length > 0 ? (ativos / contratosFiltrados.length) * 100 : 0;
-      
+      const conversao = contratosFiltrados.length > 0
+        ? (ativos / contratosFiltrados.length) * 100
+        : 0;
+
       setMetricas({
         totalValor,
         totalRegistros: dadosFiltrados.length,
         mediaValor,
         conversao
       });
-      
+
     } catch (error) {
       setErro(error.message || 'Erro ao carregar dados');
       console.error('Erro ao carregar dados:', error);
     } finally {
       setLoading(false);
     }
-  }, [filtros, pagina, limite]);
-
-  // Carregar dados iniciais
-  useEffect(() => {
-    carregarConsultores();
-  }, [carregarConsultores]);
+  }, [filtros, pagina, limite, fetchContratos, agendamentos, totalAgendamentos]);
 
   useEffect(() => {
     carregarDados();
   }, [carregarDados]);
 
-  // Handlers
+  // ── Handlers ─────────────────────────────────────────────────
   const handleFiltroChange = (campo, valor) => {
     setFiltros(prev => ({ ...prev, [campo]: valor }));
     setPagina(1);
@@ -290,55 +244,54 @@ export default function Reports() {
       status: '',
       dataInicio: '',
       dataFim: '',
-      consultor: '', // Mudado de vendedor
+      consultor: '',
       valorMin: '',
       valorMax: ''
     });
     setPagina(1);
   };
 
- const handleExportExcel = () => {
-  if (dadosExibicao.length === 0) {
-    alert('Não há dados para exportar!');
-    return;
-  }
+  // ── Exportação ───────────────────────────────────────────────
+  const handleExportExcel = () => {
+    if (dadosExibicao.length === 0) {
+      alert('Não há dados para exportar!');
+      return;
+    }
 
-  // Preparar dados para exportação
-  const dadosExport = dadosExibicao.map(item => ({
-    'Código': item.codigo || item.id || '-',
-    'Módulo': item.module || 'Contrato',
-    'Cliente': item.titular_nome || item.cliente?.nome || item.cliente || '-',
-    'Consultor': item.vendedor?.nome || item.seller || '-', // Nome do consultor
-    'Valor': formatCurrency(item.valor_total || item.value || 0),
-    'Status': item.status || '-',
-    'Data': item.data_criacao || item.data_inicio || item.data_visita || item.date || '-'
-  }));
+    const dadosExport = dadosExibicao.map(item => ({
+      'Código': item.codigo || item.id || '-',
+      'Módulo': item.module || 'Contrato',
+      'Cliente': item.titular_nome || item.cliente?.nome || item.cliente || '-',
+      'Consultor': item.vendedor?.nome || item.seller || '-',
+      'Valor': formatCurrency(item.valor_total || item.value || 0),
+      'Status': item.status || '-',
+      'Data': item.data_criacao || item.data_inicio || item.data_visita || item.date || '-'
+    }));
 
-  exportToExcel(dadosExport, `relatorio_${filtros.tipo}_${new Date().toISOString().split('T')[0]}`);
-};
+    exportToExcel(dadosExport, `relatorio_${filtros.tipo}_${new Date().toISOString().split('T')[0]}`);
+  };
 
-const handleExportPDF = () => {
-  if (dadosExibicao.length === 0) {
-    alert('Não há dados para exportar!');
-    return;
-  }
+  const handleExportPDF = () => {
+    if (dadosExibicao.length === 0) {
+      alert('Não há dados para exportar!');
+      return;
+    }
 
-  // Preparar dados para exportação
-  const dadosExport = dadosExibicao.map(item => ({
-    'Código': item.codigo || item.id || '-',
-    'Módulo': item.module || 'Contrato',
-    'Cliente': item.titular_nome || item.cliente?.nome || item.cliente || '-',
-    'Consultor': item.vendedor?.nome || item.seller || '-', // Nome do consultor
-    'Valor': formatCurrency(item.valor_total || item.value || 0),
-    'Status': item.status || '-',
-    'Data': item.data_criacao || item.data_inicio || item.data_visita || item.date || '-'
-  }));
+    const dadosExport = dadosExibicao.map(item => ({
+      'Código': item.codigo || item.id || '-',
+      'Módulo': item.module || 'Contrato',
+      'Cliente': item.titular_nome || item.cliente?.nome || item.cliente || '-',
+      'Consultor': item.vendedor?.nome || item.seller || '-',
+      'Valor': formatCurrency(item.valor_total || item.value || 0),
+      'Status': item.status || '-',
+      'Data': item.data_criacao || item.data_inicio || item.data_visita || item.date || '-'
+    }));
 
-  const columns = ['Código', 'Módulo', 'Cliente', 'Consultor', 'Valor', 'Status', 'Data'];
-  exportToPDF(dadosExport, `Relatório ${filtros.tipo.charAt(0).toUpperCase() + filtros.tipo.slice(1)}`, columns);
-};
+    const columns = ['Código', 'Módulo', 'Cliente', 'Consultor', 'Valor', 'Status', 'Data'];
+    exportToPDF(dadosExport, `Relatório ${filtros.tipo}`, columns);
+  };
 
-  // KPIs
+  // ── KPIs ─────────────────────────────────────────────────────
   const kpis = useMemo(() => [
     {
       title: "Total Registros",
@@ -370,11 +323,14 @@ const handleExportPDF = () => {
     }
   ], [metricas]);
 
+  const isLoading = loading || loadingContratos || loadingAgendamentos || loadingConsultores;
+
+  // ── Render ───────────────────────────────────────────────────
   return (
     <div className={styles.container}>
       <main className={`${styles.mainContent} ${visible ? styles.mainVisible : ""}`}>
         <div className={styles.content}>
-          
+
           {/* Header */}
           <PageHeader
             title="Relatórios"
@@ -433,22 +389,21 @@ const handleExportPDF = () => {
                   <option value="ATIVO">Ativo</option>
                   <option value="PENDENTE">Pendente</option>
                   <option value="CANCELADO">Cancelado</option>
-                  <option value="FINALIZADO">Finalizado</option>
                   <option value="REALIZADO">Realizado</option>
                   <option value="CONFIRMADO">Confirmado</option>
                 </select>
               </div>
 
-              {/* Consultor (mudado de Vendedor) */}
+              {/* Consultor */}
               <div className={styles.filterGroup}>
                 <label>Consultor</label>
                 <select
                   value={filtros.consultor}
                   onChange={(e) => handleFiltroChange('consultor', e.target.value)}
                   className={styles.filterSelect}
-                  disabled={carregandoConsultores}
+                  disabled={loadingConsultores}
                 >
-                  <option value="">{carregandoConsultores ? 'Carregando...' : 'Todos'}</option>
+                  <option value="">{loadingConsultores ? 'Carregando...' : 'Todos'}</option>
                   {consultores.map(c => (
                     <option key={c.id} value={c.id}>{c.nome}</option>
                   ))}
@@ -507,9 +462,9 @@ const handleExportPDF = () => {
               <button
                 className={styles.btnFilter}
                 onClick={carregarDados}
-                disabled={loading}
+                disabled={isLoading}
               >
-                <RefreshCw size={16} className={loading ? styles.spinning : ''} />
+                <RefreshCw size={16} className={isLoading ? styles.spinning : ''} />
                 Aplicar Filtros
               </button>
               <button
@@ -533,7 +488,7 @@ const handleExportPDF = () => {
 
           {/* KPIs */}
           <div className={styles.statsGrid}>
-            {kpis.map((k, i) => (
+            {kpis.map((k) => (
               <div key={k.title} className={styles.cardEntry}>
                 <StatCard {...k} />
               </div>
@@ -564,14 +519,14 @@ const handleExportPDF = () => {
           <div className={styles.tableCard}>
             <div className={styles.tableHeader}>
               <h3>
-                Resultados 
+                Resultados
                 <span className={styles.totalCount}>
                   {totalRegistros} registro{totalRegistros !== 1 ? 's' : ''}
                 </span>
               </h3>
             </div>
 
-            {loading ? (
+            {isLoading ? (
               <div className={styles.loadingState}>
                 <div className={styles.spinner} />
                 <span>Carregando dados...</span>
@@ -582,7 +537,7 @@ const handleExportPDF = () => {
                   <span>Código</span>
                   <span>Módulo</span>
                   <span>Cliente</span>
-                  <span>Consultor</span> {/* Mudado de Vendedor para Consultor */}
+                  <span>Consultor</span>
                   <span>Valor</span>
                   <span>Status</span>
                   <span>Data</span>
@@ -591,24 +546,24 @@ const handleExportPDF = () => {
                 {dadosExibicao.length > 0 ? (
                   dadosExibicao.map((item, index) => (
                     <div key={index} className={styles.tableRow}>
-                      <span className={styles.tableRowspan} >{item.codigo || item.id || '-'}</span>
+                      <span>{item.codigo || item.id || '-'}</span>
                       <span>
                         <span className={styles.moduleBadge}>
                           {item.module || 'Contrato'}
                         </span>
                       </span>
-                      <span> 
-                        
-                        {item.titular_nome || item.cliente?.nome || item.cliente || '-'}</span>
+                      <span>{item.titular_nome || item.cliente?.nome || item.cliente || '-'}</span>
                       <span>{item.vendedor?.nome || item.seller || '-'}</span>
                       <span className={styles.valorCell}>
                         {formatCurrency(item.valor_total || item.value || 0)}
                       </span>
                       <span>
-                        <span 
+                        <span
                           className={styles.statusBadge}
-                          style={{ 
-                            backgroundColor: STATUS_COLORS[item.status] ? `${STATUS_COLORS[item.status]}20` : '#E2E8F0',
+                          style={{
+                            backgroundColor: STATUS_COLORS[item.status]
+                              ? `${STATUS_COLORS[item.status]}20`
+                              : '#E2E8F0',
                             color: STATUS_COLORS[item.status] || '#475569'
                           }}
                         >
