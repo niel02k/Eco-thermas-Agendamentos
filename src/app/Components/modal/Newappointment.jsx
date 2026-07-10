@@ -328,6 +328,7 @@ export default function NewAppointment({ onClose }) {
                 <select
                   value={amount}
                   onChange={handleAmount}
+                  className={styles.peopleSelectInput}
                 >
                   {[0, 1, 2, 3, 4, 5, 6, 7].map((num) => (
                     <option key={num} value={num}>

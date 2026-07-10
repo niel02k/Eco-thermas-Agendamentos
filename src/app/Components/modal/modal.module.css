@@ -229,13 +229,42 @@
     background: #F3F4F6;
 }
 
-.peopleSelect {
-    width: 180px;
-    margin-bottom: 24px;
+.peopleSelect{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:8px;
+    margin-bottom:24px;
 }
 
-.peopleSelect select {
-    width: 100%;
+.peopleSelect label{
+    font-size:14px;
+    font-weight:600;
+    color:#374151;
+}
+
+.peopleSelectInput{
+    width:100%;
+    height:48px;
+    padding:0 16px;
+    border:1px solid #D1D5DB;
+    border-radius:12px;
+    background:#fff;
+    font-size:14px;
+    color:#111827;
+    box-sizing:border-box;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.peopleSelectInput:hover{
+    border-color:#ea580c;
+}
+
+.peopleSelectInput:focus{
+    outline:none;
+    border-color:#ea580c;
+    box-shadow:0 0 0 4px rgba(234,88,12,.15);
 }
 
 .cardPerson {
@@ -244,7 +273,6 @@
     border-radius: 12px;
     padding: 24px;
     background: #fff;
-
     display: flex;
     flex-direction: column;
     gap: 18px;
