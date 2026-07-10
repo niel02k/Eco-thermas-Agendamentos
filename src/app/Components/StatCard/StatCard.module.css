@@ -76,3 +76,24 @@
   color: #64748B;
   margin: 0;
 }
+
+@media (max-width: 640px) { 
+  .card {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+
+  .iconContainer {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+
+  .value {
+    font-size: 1.4rem;
+  }
+
+  .label {
+    font-size: 0.75rem;
+  }
+} 
