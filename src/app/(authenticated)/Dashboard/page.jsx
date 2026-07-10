@@ -8,7 +8,8 @@ import StatCard from '@/app/Components/StatCard/StatCard.jsx';
 import styles from './Dashboard.module.css';
 import { useAgendamentos } from '@/app/hooks/useAgendamentos';
 import { useContratos } from '@/app/hooks/useContratos';
-import { taxaDeConversao } from '@/app/services/agendamentosServices.js';
+import { taxaDeConversao } from '@/app/services/agendamentosServices.js'
+import NewAppointment from "@/app/Components/modal/Newappointment";;
 
 /* ── Dashboard ── */
 const Dashboard = () => {
@@ -27,6 +28,7 @@ const Dashboard = () => {
   const [ticketMedioValor, setTicketMedioValor] = useState(null);
   const [taxaConversao, setTaxaConversao] = useState(null);
   const [totalContratos, setTotalContratos] = useState(0);
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
 
   // Carregar dados do Dashboard
   const carregarDados = useCallback(async () => {
@@ -34,7 +36,7 @@ const Dashboard = () => {
     try {
       // Dados dos contratos (métricas)
       const metricas = await fetchMetrics();
-      
+
       setDadosReceita(metricas.receitaMensal || []);
       setTicketMedioValor(metricas.ticketMedio);
       setTotalContratos(metricas.ticketMedio?.total_contratos || 0);
@@ -45,10 +47,10 @@ const Dashboard = () => {
 
       // Dados dos agendamentos (vem do hook useAgendamentos)
       setDadosSemana(semanaData);
-      
+
       // Total de clientes atendidos (calculado do statusCount)
       // Se precisar, pode adicionar no hook useAgendamentos
-      
+
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
     } finally {
@@ -90,7 +92,7 @@ const Dashboard = () => {
             badge={{ text: "Parque Aberto", type: "success" }}
             actionLabel="Novo Agendamento"
             actionIcon={Plus}
-            onAction={() => console.log('clicado')}
+            onAction={() => setShowAppointmentModal(true)}
           />
 
           {/* Stats Grid */}
@@ -212,11 +214,16 @@ const Dashboard = () => {
               </span>
             </div>
 
-            
+
           </div>
 
         </div>
       </main>
+      {showAppointmentModal && (
+        <NewAppointment
+          onClose={() => setShowAppointmentModal(false)}
+        />
+      )}
     </div>
   );
 };
