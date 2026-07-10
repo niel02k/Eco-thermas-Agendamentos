@@ -1,13 +1,7 @@
 import React from 'react';
 import styles from './CardAllow.module.css';
 
-import {
-  FilePenLine,
-  User,
-  Mail,
-  Briefcase,
-  FileText
-} from 'lucide-react';
+import { FilePenLine, User, Mail, Briefcase, FileText} from 'lucide-react';
 
 const CardAllow = () => {
   return (

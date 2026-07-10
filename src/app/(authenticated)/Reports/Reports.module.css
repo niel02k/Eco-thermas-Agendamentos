@@ -320,6 +320,12 @@
   border-bottom: none;
 }
 
+.tableRowspan {
+  display: block;
+  font-weight: 600;
+  color: #06080c;
+}
+
 .moduleBadge {
   display: inline-block;
   padding: 2px 10px;

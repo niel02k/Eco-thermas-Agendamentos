@@ -15,17 +15,7 @@ import styles from './Input.module.css';
  * @param {React.ReactNode} [props.rightElement] - Elemento opcional à direita (ex: toggle de senha)
  * @param {boolean} [props.required] - Se o campo é obrigatório
  */
-const Input = ({ 
-  label, 
-  id, 
-  type = 'text', 
-  placeholder, 
-  value, 
-  onChange, 
-  icon: Icon, 
-  rightElement,
-  required = false 
-}) => {
+const Input = ({ label, id, type = 'text', placeholder, value, onChange, icon: Icon, rightElement,required = false }) => {
   return (
     <div className={styles.inputGroup}>
       <label htmlFor={id} className={styles.label}>{label}</label>

@@ -1,16 +1,5 @@
 import React from 'react';
-import { 
-  LayoutDashboard, 
-  CalendarRange, 
-  FileText, 
-  Users, 
-  Ticket, 
-  Map, 
-  DollarSign, 
-  BarChart3, 
-  Settings,
-  X
-} from 'lucide-react';
+import { LayoutDashboard, CalendarRange, FileText, Ticket, BarChart3, Settings, X} from 'lucide-react';
 import styles from './Sidebar.module.css';
 
 /**

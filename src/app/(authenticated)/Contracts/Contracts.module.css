@@ -1263,7 +1263,10 @@
 
   .btnAcao {
     padding: 4px;
+    color: var(--color-primary);
   }
+
+
 
   .btnAcao svg {
     width: 14px;
