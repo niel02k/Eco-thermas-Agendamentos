@@ -246,6 +246,15 @@
   gap: 1.25rem;
   width: 100%;
   animation: cardIn 0.5s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+   font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.statsGrid value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .cardEntry {
