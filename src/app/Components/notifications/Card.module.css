@@ -14,7 +14,6 @@
     opacity: 0;
     transform: translateY(-10px) scale(0.95);
   }
-
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -173,12 +172,10 @@
 
 @media (max-width: 640px) {
   .cardContainer {
-    position: absolute;
-
-    top: calc(100% + 12px);
-    width: calc(100vw - 32px);
-    right: -10px;
+    position: fixed;
+    top: 75px;
     left: auto;
+    right: 16px;
 
     width: calc(100vw - 32px);
     max-width: 360px;
