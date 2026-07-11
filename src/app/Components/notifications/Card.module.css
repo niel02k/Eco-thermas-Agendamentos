@@ -178,8 +178,7 @@
   .cardContainer {
     position: absolute;
     top: calc(100% + 12px);
-    right: -5px;
-    left: auto;
+    right: -150px;
     width: 320px;
     max-width: calc(100vw - 32px);
     transform: none;
