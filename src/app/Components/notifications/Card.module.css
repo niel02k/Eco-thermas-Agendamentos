@@ -173,9 +173,13 @@
 @media (max-width: 640px) {
   .cardContainer {
     position: fixed;
-    top: 70px;
+    top: 75px;
+    left: auto;
     right: 16px;
-    left: 16px;
-    width: auto;
+
+    width: calc(100vw - 32px);
+    max-width: 360px;
+
+    transform: none;
   }
 }
