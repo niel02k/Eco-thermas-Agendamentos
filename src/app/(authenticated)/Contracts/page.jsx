@@ -509,7 +509,9 @@ export default function Contracts() {
                 {contratos.map((c) => (
                   <div key={c.id} className={styles.tableRow}>
                     <span className={styles.codigo}>{c.id}</span>
-                    <span className={styles.cliente}>{c.titular_nome}</span>
+                    <span className={`${styles.cliente} ${getStatusClass(c.status)}`}>
+                      {c.titular_nome}
+                    </span>
                     <span className={styles.cidade}>{c.cidade || "—"}</span>
                     <span className={styles.vendedor}>{c.vendedor?.nome || "—"}</span>
                     <span className={styles.valor}>{formatCurrency(c.valor_total)}</span>
