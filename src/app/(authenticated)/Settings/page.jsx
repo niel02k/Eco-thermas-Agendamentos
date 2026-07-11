@@ -8,6 +8,7 @@ import styles from "./settings.module.css";
 import Calendary from "@/app/Components/Calendary/Calendary";
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 /* -------------------------------------------------------------------------- */
 /* HELPERS                                                                     */
@@ -42,6 +43,7 @@ function FeedbackMsg({ msg }) {
   );
 }
 
+
 function SkeletonLine({ w = "100%" }) {
   return <div className={styles.skeletonLine} style={{ width: w }} />;
 }
@@ -53,6 +55,11 @@ function SkeletonLine({ w = "100%" }) {
 export default function Settings() {
   const router = useRouter();
   const { usuario } = useAuth();
+  const supabase = createClient();
+  const handleLogout = async () => {
+  await supabase.auth.signOut();
+  router.replace("/Login")
+}
   const [showPass, setShowPass] = useState(false);
   const [hoveredDate, setHoveredDate] = useState(null); // Date | null
 
@@ -519,7 +526,7 @@ export default function Settings() {
           <div className={styles.logout}>
               <button 
                 className={styles.logoutBtn}
-                onClick={() => router.push("/Login")}
+                onClick={handleLogout}
               >
                 <LogOut size={18} />
                 <span>Sair do Usuário</span>
