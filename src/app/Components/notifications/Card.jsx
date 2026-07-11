@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { CalendarCheck, UserCheck, CreditCard, AlertCircle,Bell,CheckCheck,FileCheck2,} from 'lucide-react';
+import { CalendarCheck, UserCheck, CreditCard, AlertCircle, Bell, CheckCheck, FileCheck2, } from 'lucide-react';
 import Notification from './Notification';
 import styles from './Card.module.css';
 import { useRouter } from 'next/navigation';
@@ -11,12 +11,12 @@ import { useRouter } from 'next/navigation';
  * Componente principal do Card de Notificações com Gerenciamento de Estado
  */
 
-const router = useRouter
 
 const CardNotification = () => {
+  const router = useRouter();
   // Dados iniciais mockados
   const [notifications, setNotifications] = useState([
-   { id: 1, title: "Novo Agendamento", description: "Carlos Mendes confirmou para amanhã às 14h.", time: "2 min atrás", icon: CalendarCheck, iconColor: "#1E6EBE", isUnread: true, category: "agendamento" },
+    { id: 1, title: "Novo Agendamento", description: "Carlos Mendes confirmou para amanhã às 14h.", time: "2 min atrás", icon: CalendarCheck, iconColor: "#1E6EBE", isUnread: true, category: "agendamento" },
     { id: 2, title: "Contrato Assinado", description: "Ana Paula assinou o contrato de fidelidade.", time: "15 min atrás", icon: UserCheck, iconColor: "#3CC83C", isUnread: true, category: "contrato" },
     { id: 3, title: "Pagamento Pendente", description: "O boleto de Bruno Leite vence hoje.", time: "1h atrás", icon: CreditCard, iconColor: "#FA643C", isUnread: false, category: "financeiro" },
     { id: 4, title: "Alerta de Capacidade", description: "O parque atingiu 85% da capacidade permitida.", time: "3h atrás", icon: AlertCircle, iconColor: "#FAD228", isUnread: false, category: "alerta" },
@@ -31,7 +31,7 @@ const CardNotification = () => {
 
   // Função para marcar uma individual como lida
   const markAsRead = (id) => {
-    setNotifications(prev => prev.map(n => 
+    setNotifications(prev => prev.map(n =>
       n.id === id ? { ...n, isUnread: false } : n
     ));
   };
@@ -56,7 +56,7 @@ const CardNotification = () => {
           </button>
         )}
       </div>
-      
+
       <div className={styles.notificationList}>
         {notifications.length > 0 ? (
           notifications.map(notif => (
