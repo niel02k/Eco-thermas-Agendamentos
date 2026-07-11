@@ -1,5 +1,3 @@
-/* Header.module.css */
-
 .header {
   height: 80px;
   background: white;
@@ -8,6 +6,7 @@
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid #E2E8F0;
+
   position: sticky;
   top: 0;
   z-index: 90;
@@ -21,14 +20,13 @@
 }
 
 .menuBtn {
-  display: none; /* Escondido no desktop */
+  display: none;
   background: transparent;
   border: none;
   color: #1E293B;
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 0.5rem;
-  transition: background 0.2s;
 }
 
 .menuBtn:hover {
@@ -44,7 +42,6 @@
   width: 100%;
   max-width: 400px;
   gap: 0.75rem;
-  transition: all 0.3s ease;
 }
 
 .searchBar:focus-within {
@@ -66,111 +63,151 @@
   color: #1E293B;
 }
 
+
 .userActions {
   display: flex;
   align-items: center;
   gap: 2rem;
 }
 
-/* Wrapper para o Dropdown de Notificações */
+
+/* Área do sino */
 .notificationWrapper {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
 }
+
 
 .notificationBtn {
   background: transparent;
   border: none;
   color: #64748B;
   cursor: pointer;
+
   position: relative;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   padding: 8px;
   border-radius: 50%;
-  transition: all 0.2s;
 }
 
-.notificationBtn:hover, .notificationBtn.active {
+
+.notificationBtn:hover,
+.notificationBtn.active {
   background-color: #F1F5F9;
   color: #1E6EBE;
 }
+
 
 .notificationBadge {
   position: absolute;
   top: 6px;
   right: 6px;
+
   width: 8px;
   height: 8px;
+
   background-color: #FA643C;
   border-radius: 50%;
   border: 2px solid white;
 }
 
+
 .userProfile {
   display: flex;
   align-items: center;
   gap: 1rem;
+
   padding-left: 1.5rem;
   border-left: 1px solid #E2E8F0;
 }
 
+
 .avatar {
   width: 42px;
   height: 42px;
+
   background-color: #1E293B;
   color: white;
+
   border-radius: 50%;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   font-weight: 700;
-  font-size: 0.9rem;
 }
+
 
 .userInfo {
   display: flex;
   flex-direction: column;
 }
 
+
 .userName {
   font-weight: 700;
   color: #1E293B;
-  font-size: 0.95rem;
 }
+
 
 .userRole {
   font-size: 0.8rem;
-  color: #64748b;
+  color: #64748B;
 }
 
-/* RESPONSIVIDADE MOBILE */
+
+
+/* TABLET */
 @media (max-width: 1024px) {
+
   .header {
     padding: 0 1.25rem;
   }
 
   .menuBtn {
-    display: flex; /* Mostra no mobile */
+    display: flex;
   }
 
   .searchBar {
     max-width: 200px;
   }
+
 }
 
+
+
+/* CELULAR */
 @media (max-width: 640px) {
-  .searchBar {
-    display: none; /* Esconde busca em telas muito pequenas */
+
+  .header {
+    padding: 0 1rem;
   }
+
+
+  .searchBar {
+    display: none;
+  }
+
+
   .userInfo {
     display: none;
   }
+
+
   .userActions {
     gap: 1rem;
   }
+
+
+  .notificationWrapper {
+    position: relative;
+  }
+
 }
