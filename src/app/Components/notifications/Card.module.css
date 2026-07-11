@@ -5,8 +5,7 @@
   width: 360px;
   background: #ffffff;
   border-radius: 16px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  border: 1px solid #f1f5f9;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   overflow: hidden;
   animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -18,6 +17,7 @@
     opacity: 0;
     transform: translateY(-10px) scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -172,4 +172,16 @@
 .notificationList::-webkit-scrollbar-thumb {
   background: #e2e8f0;
   border-radius: 10px;
+}
+
+@media (max-width: 640px) {
+  .cardContainer {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: -5px;
+    left: auto;
+    width: 320px;
+    max-width: calc(100vw - 32px);
+    transform: none;
+  }
 }

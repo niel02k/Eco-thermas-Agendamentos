@@ -95,7 +95,7 @@ export default function NewAppointment({
     }
   }, [dadosEdicao]);
 
-  // Validações
+  // ── Validações ─────────────────────────────────────────────────
   const formValid =
     form.cliente.trim() !== "" &&
     form.nascimento !== "" &&
@@ -112,23 +112,10 @@ export default function NewAppointment({
       person.cpf.replace(/\D/g, "").length === 11
     );
 
+  // ── Handlers ───────────────────────────────────────────────────
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleHorario = (e) => {
-    const value = e.target.value;
-    const horariosPermitidos = ["09:30", "10:00", "10:30", "11:00", "11:30"];
-
-    if (!horariosPermitidos.includes(value)) {
-      setErrorTime("Horário não disponível. Escolha: 09:30, 10:00, 10:30, 11:00 ou 11:30");
-      setForm((prev) => ({ ...prev, horario: "" }));
-      return;
-    }
-
-    setErrorTime("");
-    setForm((prev) => ({ ...prev, horario: value }));
   };
 
   const handleAmount = (e) => {
@@ -164,26 +151,6 @@ export default function NewAppointment({
     setForm((prev) => ({ ...prev, cpf }));
   };
 
-  const handleFinalizar = async () => {
-    const dados = {
-      cliente_id: form.cliente_id,
-      vendedor_id: form.vendedor_id || null,
-      data_visita: form.dataVisita,
-      horario_visita: form.horario,
-      quantidade_pessoas: 1 + companions.length,
-      observacoes: form.observacoes,
-      cidade: form.cidade,
-      status: form.status,
-      dependentes: companions.map(c => ({
-        nome: c.nome,
-        idade: calcularIdade(c.nascimento),
-        cpf: c.cpf,
-      })),
-    };
-
-    await onSubmit(dados);
-  };
-
   const calcularIdade = (dataNasc) => {
     if (!dataNasc) return 0;
     const hoje = new Date();
@@ -194,7 +161,28 @@ export default function NewAppointment({
     return idade;
   };
 
-  // 👇 Tela de sucesso
+  // ── Finalizar (chamado pelo step 2) ───────────────────────────
+  const handleFinalizar = async () => {
+    const dados = {
+      cliente_id: form.cliente_id,
+      vendedor_id: form.vendedor_id || null,
+      data_visita: form.dataVisita,
+      horario_visita: form.horario,
+      quantidade_pessoas: 1 + companions.length,
+      observacoes: form.observacoes || null,
+      cidade: form.cidade || "Não informada",
+      status: form.status || "PENDENTE",
+      dependentes: companions.map(c => ({
+        nome: c.nome,
+        idade: calcularIdade(c.nascimento),
+        cpf: c.cpf || null,
+      })),
+    };
+
+    await onSubmit(dados);
+  };
+
+  // ── Tela de Sucesso ────────────────────────────────────────────
   if (sucesso && agendamentoCriado) {
     return (
       <div className={styles.overlay} onClick={onClose}>
@@ -223,6 +211,7 @@ export default function NewAppointment({
     );
   }
 
+  // ── Render Principal ───────────────────────────────────────────
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -272,18 +261,10 @@ export default function NewAppointment({
                   {loadingDias ? (
                     <p style={{ color: '#94a3b8', fontSize: '0.875rem', padding: '0.5rem 0' }}>Carregando datas disponíveis...</p>
                   ) : (
-                    <select
-                      name="dataVisita"
-                      value={form.dataVisita}
-                      onChange={handleChange}
-                      className={styles.select}
-                      required
-                    >
+                    <select name="dataVisita" value={form.dataVisita} onChange={handleChange} className={styles.select} required>
                       <option value="">Selecione uma data...</option>
                       {datasDisponiveis.map(d => (
-                        <option key={d.value} value={d.value}>
-                          {d.label}
-                        </option>
+                        <option key={d.value} value={d.value}>{d.label}</option>
                       ))}
                     </select>
                   )}
@@ -315,7 +296,7 @@ export default function NewAppointment({
                 </div>
               </div>
 
-              {/* Status (só aparece na edição) */}
+              {/* Status (só na edição) */}
               {dadosEdicao && (
                 <div className={styles.row}>
                   <div className={styles.field}>
