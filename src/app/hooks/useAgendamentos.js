@@ -1,7 +1,18 @@
-'use client';
+// src/app/hooks/useAgendamentos.js
+"use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import {listarAgendamentos,agendamentosHoje,agendamentosPorDiaSemana,atualizarAgendamento,excluirAgendamento,} from '@/app/services/agendamentosServices';
+import {
+  listarAgendamentos,
+  agendamentosHoje,
+  agendamentosPorDiaSemana,
+  atualizarAgendamento,
+  excluirAgendamento,
+  criarAgendamento,
+  buscarAgendamentoPorCodigo,
+  atualizarResultadoVenda,
+  marcarComoRealizado,
+} from '@/app/services/agendamentosServices';
 
 const DIAS_SEMANA = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 const LIMITE = 10;
@@ -14,29 +25,42 @@ export function useAgendamentos() {
   const [busca, setBusca] = useState('');
   const [loadingTabela, setLoadingTabela] = useState(true);
 
+  // ── Visualizar/Editar ────────────────────────────────────────
+  const [agendamentoSelecionado, setAgendamentoSelecionado] = useState(null);
+  const [loadingDetalhe, setLoadingDetalhe] = useState(false);
+  const [modoModal, setModoModal] = useState(null);
+
   // ── Stats ─────────────────────────────────────────────────────
   const [totalHoje, setTotalHoje] = useState(0);
   const [semanaData, setSemanaData] = useState([]);
   const [statusCount, setStatusCount] = useState({
-    CONFIRMADO: 0,
-    PENDENTE: 0,
-    CANCELADO: 0,
-    REALIZADO: 0,
+    CONFIRMADO: 0, PENDENTE: 0, CANCELADO: 0, REALIZADO: 0,
   });
   const [loadingStats, setLoadingStats] = useState(true);
+
+  // ── Criar Agendamento ─────────────────────────────────────────
+  const [loadingCriar, setLoadingCriar] = useState(false);
+  const [erroCriar, setErroCriar] = useState(null);
+  const [sucessoCriar, setSucessoCriar] = useState(false);
+  const [agendamentoCriado, setAgendamentoCriado] = useState(null);
+
+  // ── Resultado de Venda ────────────────────────────────────────
+  const [showResultadoVenda, setShowResultadoVenda] = useState(false);
+  const [agendamentoParaResultado, setAgendamentoParaResultado] = useState(null);
+  const [loadingResultado, setLoadingResultado] = useState(false);
 
   // ── Erros ─────────────────────────────────────────────────────
   const [erro, setErro] = useState(null);
 
-  // ── Carregar tabela ───────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════
+  // CARREGAR TABELA
+  // ═══════════════════════════════════════════════════════════════
   const carregarAgendamentos = useCallback(async (pag = 1, buscar = '') => {
     setLoadingTabela(true);
     setErro(null);
     try {
       const resultado = await listarAgendamentos({
-        pagina: pag,
-        limite: LIMITE,
-        busca: buscar,
+        pagina: pag, limite: LIMITE, busca: buscar,
       });
       setAgendamentos(resultado.agendamentos ?? []);
       setTotal(resultado.total ?? 0);
@@ -48,26 +72,19 @@ export function useAgendamentos() {
     }
   }, []);
 
-  // ── Carregar stats (roda uma vez) ─────────────────────────────
+  // ═══════════════════════════════════════════════════════════════
+  // CARREGAR STATS
+  // ═══════════════════════════════════════════════════════════════
   const carregarStats = useCallback(async () => {
     setLoadingStats(true);
     try {
       const [hoje, semana, todos] = await Promise.all([
         agendamentosHoje(),
         agendamentosPorDiaSemana(),
-        // busca sem limite só para calcular status — head:true seria ideal,
-        // mas como a função retorna 10 registros vamos pegar 200 para o cálculo
         listarAgendamentos({ pagina: 1, limite: 200 }),
       ]);
-
       setTotalHoje(hoje);
-
-      // Formata para o weekGrid
-      setSemanaData(
-        DIAS_SEMANA.map((dia, i) => ({ day: dia, total: semana[i] ?? 0 }))
-      );
-
-      // Calcula contagem de status a partir dos registros retornados
+      setSemanaData(DIAS_SEMANA.map((dia, i) => ({ day: dia, total: semana[i] ?? 0 })));
       const counts = { CONFIRMADO: 0, PENDENTE: 0, CANCELADO: 0, REALIZADO: 0 };
       (todos.agendamentos ?? []).forEach((a) => {
         if (counts[a.status] !== undefined) counts[a.status]++;
@@ -80,22 +97,121 @@ export function useAgendamentos() {
     }
   }, []);
 
-  // ── Efeito principal ─────────────────────────────────────────
-  useEffect(() => {
-    carregarStats();
-  }, [carregarStats]);
+  // ═══════════════════════════════════════════════════════════════
+  // BUSCAR DETALHE
+  // ═══════════════════════════════════════════════════════════════
+  const buscarDetalhe = useCallback(async (codigo) => {
+    setLoadingDetalhe(true);
+    try {
+      const agendamento = await buscarAgendamentoPorCodigo(codigo);
+      setAgendamentoSelecionado(agendamento);
+      return { agendamento, erro: null };
+    } catch (e) {
+      setErro('Erro ao carregar detalhes do agendamento.');
+      return { agendamento: null, erro: e.message };
+    } finally {
+      setLoadingDetalhe(false);
+    }
+  }, []);
 
-  useEffect(() => {
-    carregarAgendamentos(pagina, busca);
-  }, [pagina, busca, carregarAgendamentos]);
+  const abrirVisualizar = useCallback(async (codigo) => {
+    setModoModal('visualizar');
+    await buscarDetalhe(codigo);
+  }, [buscarDetalhe]);
 
-  // ── Debounce na busca ─────────────────────────────────────────
+  const abrirEditar = useCallback(async (codigo) => {
+    setModoModal('editar');
+    await buscarDetalhe(codigo);
+  }, [buscarDetalhe]);
+
+  const fecharModal = useCallback(() => {
+    setModoModal(null);
+    setAgendamentoSelecionado(null);
+  }, []);
+
+  // ═══════════════════════════════════════════════════════════════
+  // CRIAR AGENDAMENTO
+  // ═══════════════════════════════════════════════════════════════
+  const handleCriarAgendamento = useCallback(async (dados) => {
+    setLoadingCriar(true);
+    setErroCriar(null);
+    setSucessoCriar(false);
+    setAgendamentoCriado(null);
+    try {
+      const agendamento = await criarAgendamento(dados);
+      setAgendamentoCriado(agendamento);
+      setSucessoCriar(true);
+      await carregarAgendamentos(pagina, busca);
+      await carregarStats();
+      return { agendamento, erro: null };
+    } catch (e) {
+      const mensagem = e.message || 'Erro ao criar agendamento';
+      setErroCriar(mensagem);
+      return { agendamento: null, erro: mensagem };
+    } finally {
+      setLoadingCriar(false);
+    }
+  }, [pagina, busca, carregarAgendamentos, carregarStats]);
+
+  const resetarCriacao = useCallback(() => {
+    setLoadingCriar(false);
+    setErroCriar(null);
+    setSucessoCriar(false);
+    setAgendamentoCriado(null);
+  }, []);
+
+  // ═══════════════════════════════════════════════════════════════
+  // RESULTADO DE VENDA
+  // ═══════════════════════════════════════════════════════════════
+  const abrirResultadoVenda = useCallback((agendamento) => {
+    setAgendamentoParaResultado(agendamento);
+    setShowResultadoVenda(true);
+  }, []);
+
+  const fecharResultadoVenda = useCallback(() => {
+    setShowResultadoVenda(false);
+    setAgendamentoParaResultado(null);
+  }, []);
+
+  const confirmarResultadoVenda = useCallback(async (codigo, resultado) => {
+    setLoadingResultado(true);
+    try {
+      await atualizarResultadoVenda(codigo, resultado);
+      await carregarAgendamentos(pagina, busca);
+      await carregarStats();
+      fecharResultadoVenda();
+      return { sucesso: true, erro: null };
+    } catch (e) {
+      setErro('Erro ao atualizar resultado da venda.');
+      return { sucesso: false, erro: e.message };
+    } finally {
+      setLoadingResultado(false);
+    }
+  }, [pagina, busca, carregarAgendamentos, carregarStats, fecharResultadoVenda]);
+
+  // ═══════════════════════════════════════════════════════════════
+  // MARCAR COMO REALIZADO
+  // ═══════════════════════════════════════════════════════════════
+  const confirmarRealizado = useCallback(async (codigo) => {
+    try {
+      await marcarComoRealizado(codigo);
+      await carregarAgendamentos(pagina, busca);
+      await carregarStats();
+      return { sucesso: true, erro: null };
+    } catch (e) {
+      setErro('Erro ao confirmar agendamento.');
+      return { sucesso: false, erro: e.message };
+    }
+  }, [pagina, busca, carregarAgendamentos, carregarStats]);
+
+  // ═══════════════════════════════════════════════════════════════
+  // HANDLERS DE AÇÕES
+  // ═══════════════════════════════════════════════════════════════
   const handleBusca = useCallback((termo) => {
     setBusca(termo);
     setPagina(1);
   }, []);
 
-  // ── Ações ─────────────────────────────────────────────────────
   const cancelarAgendamento = useCallback(async (codigo) => {
     try {
       await atualizarAgendamento(codigo, { status: 'CANCELADO' });
@@ -110,7 +226,6 @@ export function useAgendamentos() {
   const excluir = useCallback(async (codigo) => {
     try {
       await excluirAgendamento(codigo);
-      // Se a página ficou vazia, volta uma página
       const novaPag = agendamentos.length === 1 && pagina > 1 ? pagina - 1 : pagina;
       setPagina(novaPag);
       await carregarAgendamentos(novaPag, busca);
@@ -121,31 +236,50 @@ export function useAgendamentos() {
     }
   }, [agendamentos.length, pagina, busca, carregarAgendamentos, carregarStats]);
 
+  // ═══════════════════════════════════════════════════════════════
+  // EFEITOS
+  // ═══════════════════════════════════════════════════════════════
+  useEffect(() => {
+    carregarStats();
+  }, [carregarStats]);
+
+  useEffect(() => {
+    carregarAgendamentos(pagina, busca);
+  }, [pagina, busca, carregarAgendamentos]);
+
   const totalPaginas = Math.ceil(total / LIMITE);
 
+  // ═══════════════════════════════════════════════════════════════
+  // RETORNO COMPLETO
+  // ═══════════════════════════════════════════════════════════════
   return {
     // Tabela
-    agendamentos,
-    total,
-    pagina,
-    totalPaginas,
-    busca,
-    loadingTabela,
-    handleBusca,
-    setPagina,
+    agendamentos, total, pagina, totalPaginas,
+    busca, loadingTabela, handleBusca, setPagina,
 
     // Stats
-    totalHoje,
-    semanaData,
-    statusCount,
-    loadingStats,
+    totalHoje, semanaData, statusCount, loadingStats,
+
+    // Criar
+    criarAgendamento: handleCriarAgendamento,
+    loadingCriar, erroCriar, sucessoCriar,
+    agendamentoCriado, resetarCriacao,
+
+    // Visualizar/Editar
+    agendamentoSelecionado, loadingDetalhe, modoModal,
+    abrirVisualizar, abrirEditar, fecharModal, buscarDetalhe,
+
+    // Resultado de Venda
+    showResultadoVenda, agendamentoParaResultado, loadingResultado,
+    abrirResultadoVenda, fecharResultadoVenda, confirmarResultadoVenda,
+
+    // Confirmar Realizado
+    confirmarRealizado,
 
     // Ações
-    cancelarAgendamento,
-    excluir,
+    cancelarAgendamento, excluir,
 
     // Util
-    erro,
-    recarregar: () => carregarAgendamentos(pagina, busca),
+    erro, recarregar: () => carregarAgendamentos(pagina, busca),
   };
 }

@@ -59,6 +59,39 @@ export async function agendamentosHoje() {
   return count ?? 0
 }
 
+
+
+export async function atualizarResultadoVenda(codigo, resultadoVenda) {
+  const { data, error } = await supabase
+    .from('agendamentos')
+    .update({
+      status: 'REALIZADO',
+      resultado_venda: resultadoVenda
+    })
+    .eq('codigo', codigo)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+
+export async function marcarComoRealizado(codigo) {
+  const { data, error } = await supabase
+    .from('agendamentos')
+    .update({
+      status: 'REALIZADO',
+      resultado_venda: 'PENDENTE'
+    })
+    .eq('codigo', codigo)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 // PRÓXIMOS DIAS COM AGENDAMENTOS (agrupado por data, excluindo hoje)
 export async function proximosDiasComAgendamentos(quantidade = 2) {
   const amanha = new Date()

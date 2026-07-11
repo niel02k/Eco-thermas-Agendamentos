@@ -983,3 +983,280 @@
   .table td:nth-child(4) {display: none;}
   .clienteTel{display:none;}
 }
+
+
+
+
+.modalDetalhe {
+  background: #ffffff;
+  border-radius: 1.5rem;
+  max-width: 650px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.2);
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.modalDetalheHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.75rem 1.75rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.modalDetalheHeader h2 {
+  margin: 0 0 0.5rem;
+  color: #1e293b;
+  font-size: 1.2rem;
+  font-weight: 800;
+  font-family: "Montserrat", sans-serif;
+}
+
+.closeBtn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 0.75rem;
+  background: #f1f5f9;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.closeBtn:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+/* Body */
+.modalDetalheBody {
+  padding: 1.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Seções */
+.detalheSection {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 1.25rem;
+}
+
+.detalheSection h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+  color: #1e6ebe;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Grid de detalhes */
+.detalheGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.875rem;
+}
+
+.detalheGrid div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.detalheGrid label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detalheGrid p {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Dependentes */
+.dependentesList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.dependenteItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.625rem 0.875rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  transition: all 0.15s ease;
+}
+
+.dependenteItem:hover {
+  border-color: #1e6ebe;
+  background: #eff6ff;
+}
+
+.dependenteNome {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.dependenteInfo {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Observações */
+.observacoes {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #475569;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+/* Footer */
+.modalDetalheFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1.25rem 1.75rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.btnFechar {
+  padding: 0.7rem 1.5rem;
+  background: #f1f5f9;
+  color: #64748b;
+  border: none;
+  border-radius: 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnFechar:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.btnEditar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.5rem;
+  background: #1e6ebe;
+  color: #ffffff;
+  border: none;
+  border-radius: 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnEditar:hover {
+  background: #1557a0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30, 110, 190, 0.3);
+}
+
+/* Responsivo do Modal */
+@media (max-width: 640px) {
+  .modalDetalhe {
+    max-width: 95%;
+    max-height: 90vh;
+    border-radius: 1.25rem;
+  }
+
+  .modalDetalheHeader {
+    padding: 1.25rem 1.25rem 0.875rem;
+  }
+
+  .modalDetalheHeader h2 {
+    font-size: 1rem;
+  }
+
+  .modalDetalheBody {
+    padding: 1rem 1.25rem;
+    gap: 1rem;
+  }
+
+  .detalheGrid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .modalDetalheFooter {
+    padding: 1rem 1.25rem;
+    flex-direction: column;
+  }
+
+  .btnFechar,
+  .btnEditar {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem;
+  }
+}
+
+
+/* Botão de resultado */
+.resultadoButton {
+  background: #f0fdf4 !important;
+  color: #16a34a !important;
+}
+
+.resultadoButton:hover:not(:disabled) {
+  background: #dcfce7 !important;
+}
+
+/* Badges de resultado */
+.resultadoBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.resultadoVendido {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.resultadoPerdido {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.resultadoNA {
+  background: #f1f5f9;
+  color: #64748b;
+}
