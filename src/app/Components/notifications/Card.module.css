@@ -180,10 +180,11 @@
 
     top: calc(100% + 12px);
 
-    right: 50%;
-    transform: translateX(50%);
+    right: -40px;
 
     width: 320px;
     max-width: calc(100vw - 32px);
+
+    transform: none;
   }
 }
