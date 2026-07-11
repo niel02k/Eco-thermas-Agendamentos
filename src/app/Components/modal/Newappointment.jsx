@@ -2,6 +2,7 @@
 
 import styles from "./modal.module.css";
 import { useState } from 'react';
+import { criarAgendamento } from "@/app/services/agendamentosServices.js";
 
 export default function NewAppointment({ onClose }) {
   const [errorTime, setErrorTime] = useState('');
@@ -21,12 +22,13 @@ export default function NewAppointment({ onClose }) {
     vendedor: "",
     cidade: "",
   });
+  
   const formValid =
     form.codigo.trim() !== "" &&
     form.cliente.trim() !== "" &&
     form.nascimento !== "" &&
     form.cpf.replace(/\D/g, "").length === 11 &&
-  form.dataVisita !== "" &&
+    form.dataVisita !== "" &&
     form.horario !== "" &&
     form.vendedor.trim() !== "" &&
     form.cidade.trim() !== "" &&
@@ -136,6 +138,31 @@ export default function NewAppointment({ onClose }) {
     }));
   };
 
+  const handleSubmit = async () => {
+    try {
+
+      const dados = {
+        cliente_id: 1,
+        vendedor_id: null,
+        data_visita: form.dataVisita,
+        horario_visita: form.horario,
+        quantidade_pessoas: amount + 1,
+        observacoes: "",
+        dependentes: []
+      };
+
+
+      const resultado = await criarAgendamento(dados);
+
+      console.log("Agendamento criado:", resultado);
+
+      onClose();
+
+    } catch (error) {
+      console.error("Erro ao criar agendamento:", JSON.stringify(error, null, 2));
+      console.log(error);
+    }
+  };
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div
@@ -440,6 +467,7 @@ export default function NewAppointment({ onClose }) {
               <button
                 className={styles.saveButton}
                 disabled={!companionsValid || !confirmedCompanions}
+                onClick={handleSubmit}
               >
                 Finalizar
               </button>
