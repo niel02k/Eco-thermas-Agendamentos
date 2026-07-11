@@ -8,8 +8,6 @@
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   overflow: hidden;
-  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  transform-origin: top right;
 }
 
 @keyframes slideDown {
@@ -176,15 +174,8 @@
 
 @media (max-width: 640px) {
   .cardContainer {
-    position: absolute;
-
-    top: calc(100% + 12px);
-
     right: -40px;
-
     width: 320px;
     max-width: calc(100vw - 32px);
-
-    transform: none;
   }
 }
