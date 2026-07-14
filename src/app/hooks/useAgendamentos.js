@@ -132,26 +132,49 @@ export function useAgendamentos() {
   // ═══════════════════════════════════════════════════════════════
   // CRIAR AGENDAMENTO
   // ═══════════════════════════════════════════════════════════════
-  const handleCriarAgendamento = useCallback(async (dados) => {
-    setLoadingCriar(true);
-    setErroCriar(null);
-    setSucessoCriar(false);
-    setAgendamentoCriado(null);
-    try {
-      const agendamento = await criarAgendamento(dados);
-      setAgendamentoCriado(agendamento);
-      setSucessoCriar(true);
-      await carregarAgendamentos(pagina, busca);
-      await carregarStats();
-      return { agendamento, erro: null };
-    } catch (e) {
-      const mensagem = e.message || 'Erro ao criar agendamento';
-      setErroCriar(mensagem);
-      return { agendamento: null, erro: mensagem };
-    } finally {
-      setLoadingCriar(false);
+  // useAgendamentos.js
+
+const handleCriarAgendamento = useCallback(async (dados) => {
+  setLoadingCriar(true);
+  setErroCriar(null);
+  setSucessoCriar(false);
+  setAgendamentoCriado(null);
+  
+  try {
+    let agendamento;
+    
+    // 👇 Verifica se é edição ou criação
+    if (dados.codigo && modoModal === 'editar') {
+      // Atualizar existente (incluindo dependentes)
+      agendamento = await atualizarAgendamento(dados.codigo, {
+        cliente_id: dados.cliente_id,
+        vendedor_id: dados.vendedor_id,
+        data_visita: dados.data_visita,
+        horario_visita: dados.horario_visita,
+        quantidade_pessoas: dados.quantidade_pessoas,
+        status: dados.status,
+        observacoes: dados.observacoes,
+        cidade: dados.cidade,
+        dependentes: dados.dependentes, // 👈 Passa os dependentes
+      });
+    } else {
+      // Criar novo
+      agendamento = await criarAgendamento(dados);
     }
-  }, [pagina, busca, carregarAgendamentos, carregarStats]);
+    
+    setAgendamentoCriado(agendamento);
+    setSucessoCriar(true);
+    await carregarAgendamentos(pagina, busca);
+    await carregarStats();
+    return { agendamento, erro: null };
+  } catch (e) {
+    const mensagem = e.message || 'Erro ao salvar agendamento';
+    setErroCriar(mensagem);
+    return { agendamento: null, erro: mensagem };
+  } finally {
+    setLoadingCriar(false);
+  }
+}, [pagina, busca, modoModal, carregarAgendamentos, carregarStats]);
 
   const resetarCriacao = useCallback(() => {
     setLoadingCriar(false);

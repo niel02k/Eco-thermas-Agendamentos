@@ -13,7 +13,6 @@ import { useAgendamentos } from "@/app/hooks/useAgendamentos.js";
 import styles from "./Appointments.module.css";
 import NewAppointment from "@/app/Components/modal/Newappointment";
 import ResultCard from "@/app/Components/ResultCard/ResultCard.jsx";
-
 /* -------------------------------------------------------------------------- */
 /* HELPERS                                                                     */
 /* -------------------------------------------------------------------------- */
@@ -288,19 +287,9 @@ export default function AppointmentsPage() {
     setConfirm(null);
   };
 
-  const handleCriarAgendamento = async (dados) => {
-    await criarAgendamento({
-      cliente_id: dados.cliente_id,
-      vendedor_id: dados.vendedor_id,
-      data_visita: dados.data_visita,
-      horario_visita: dados.horario_visita,
-      quantidade_pessoas: dados.quantidade_pessoas,
-      observacoes: dados.observacoes,
-      cidade: dados.cidade,
-      dependentes: dados.dependentes,
-    });
-  };
-
+const handleCriarAgendamento = async (dados) => {
+  await criarAgendamento(dados);
+};
   // ── Handler para editar (abre modal de criação em modo edição) ──
 
 

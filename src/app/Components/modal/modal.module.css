@@ -5,7 +5,7 @@
     display:flex;
     justify-content:center;
     align-items:flex-start;
-    padding-top:90px;
+    padding-top: 3vh;
     z-index:9999;
 }
 
@@ -74,7 +74,9 @@
 }
 
 .field input,
-.field textarea{
+.field textarea ,
+.field select,
+.field option {
     width:100%;
     padding:13px 16px;
     border:1px solid #D1D5DB;
@@ -83,6 +85,8 @@
     box-sizing:border-box;
     transition:.2s;
 }
+
+
 
 .field input:focus,
 .field textarea:focus{

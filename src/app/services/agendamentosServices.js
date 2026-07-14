@@ -1,16 +1,15 @@
+// src/app/services/agendamentosServices.js
 import { createClient } from '@/lib/supabase/client';
-
+import { buscarClientePorCpf, criarCliente } from '@/app/services/clientesService';
 
 const supabase = createClient();
-
 
 // ============ GERAR CÓDIGO ============
 async function gerarCodigoAgendamento() {
   const hoje = new Date();
   const ano = String(hoje.getFullYear()).slice(-2);
   const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-  const prefixo = `${ano}.${mes}.`;
-
+  const prefixo = `${ano}${mes}`;
 
   const { data, error } = await supabase
     .from('agendamentos')
@@ -19,337 +18,273 @@ async function gerarCodigoAgendamento() {
     .order('codigo', { ascending: false })
     .limit(1);
 
-
   if (error) throw error;
-
 
   let sequencial = 100;
   if (data && data.length > 0) {
-    const ultimoNumero = parseInt(data[0].codigo.split('.').pop());
+    const ultimoNumero = parseInt(data[0].codigo.slice(-3));
     sequencial = ultimoNumero + 1;
   }
-
 
   return `${prefixo}${sequencial}`;
 }
 
-
+// ============ STATS ============
 export async function totalClientesAtendidos() {
   const { data, error } = await supabase
     .from('agendamentos')
     .select('quantidade_pessoas')
-    .eq('status', 'REALIZADO')
-
-  if (error) throw error
-
-  return data?.reduce((acc, a) => acc + (a.quantidade_pessoas || 1), 0) ?? 0
+    .eq('status', 'REALIZADO');
+  if (error) throw error;
+  return data?.reduce((acc, a) => acc + (a.quantidade_pessoas || 1), 0) ?? 0;
 }
 
-// AGENDAMENTOS DE HOJE (CONFIRMADO)
 export async function agendamentosHoje() {
-  const hoje = new Date().toISOString().split('T')[0]
-
+  const hoje = new Date().toISOString().split('T')[0];
   const { count, error } = await supabase
     .from('agendamentos')
     .select('*', { count: 'exact', head: true })
     .eq('data_visita', hoje)
-    .in('status', ['PENDENTE', 'CONFIRMADO'])
-
-  if (error) throw error
-  return count ?? 0
-}
-
-
-
-export async function atualizarResultadoVenda(codigo, resultadoVenda) {
-  const { data, error } = await supabase
-    .from('agendamentos')
-    .update({
-      status: 'REALIZADO',
-      resultado_venda: resultadoVenda
-    })
-    .eq('codigo', codigo)
-    .select()
-    .single();
-
+    .in('status', ['PENDENTE', 'CONFIRMADO']);
   if (error) throw error;
-  return data;
+  return count ?? 0;
 }
 
-
-export async function marcarComoRealizado(codigo) {
-  const { data, error } = await supabase
-    .from('agendamentos')
-    .update({
-      status: 'REALIZADO',
-      resultado_venda: 'PENDENTE'
-    })
-    .eq('codigo', codigo)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
-}
-
-// PRÓXIMOS DIAS COM AGENDAMENTOS (agrupado por data, excluindo hoje)
-export async function proximosDiasComAgendamentos(quantidade = 2) {
-  const amanha = new Date()
-  amanha.setDate(amanha.getDate() + 1)
-  amanha.setHours(0, 0, 0, 0)
-
-  const { data, error } = await supabase
-    .from('agendamentos')
-    .select('data_visita')
-    .gte('data_visita', amanha.toISOString().split('T')[0])
-    .in('status', ['PENDENTE', 'CONFIRMADO'])
-    .order('data_visita', { ascending: true })
-
-  if (error) throw error
-
-  const agrupado = {}
-  data.forEach(a => {
-    agrupado[a.data_visita] = (agrupado[a.data_visita] || 0) + 1
-  })
-
-  return Object.entries(agrupado)
-    .slice(0, quantidade)
-    .map(([data_visita, total]) => ({
-      data_visita,
-      total,
-      label: new Date(data_visita + 'T12:00:00').toLocaleDateString('pt-BR', {
-        weekday: 'short',
-        day: '2-digit',
-        month: '2-digit',
-      })
-    }))
-}
-
-// LISTAR com busca por nome do titular ou dependente
-export async function listarAgendamentos({ pagina = 1, limite = 10, busca = '' } = {}) {
-  const inicio = (pagina - 1) * limite;
-  const fim = inicio + limite - 1;
-
-
-  let query = supabase
-    .from('agendamentos')
-    .select(`
-      *,
-      cliente:cliente_id (nome, cpf, telefone),
-      dependentes:agendamento_dependentes (nome, idade)
-    `, { count: 'exact' });
-
-
-  // Busca por nome do titular OU nome do dependente
-  if (busca) {
-    query = query.or(
-      `cliente_id.in.(SELECT id FROM clientes WHERE nome.ilike.%${busca}%),` +
-      `codigo.in.(SELECT agendamento_id FROM agendamento_dependentes WHERE nome.ilike.%${busca}%)`
-    );
-  }
-
-
-  const { data, count, error } = await query
-    .order('data_visita', { ascending: false })
-    .range(inicio, fim);
-
-
-  if (error) throw error;
-
-
-  return {
-    agendamentos: data,
-    total: count,
-    pagina,
-    totalPaginas: Math.ceil(count / limite)
-  };
-}
-
-
-// BUSCAR por código (ID)
-export async function buscarAgendamentoPorCodigo(codigo) {
-  const { data, error } = await supabase
-    .from('agendamentos')
-    .select(`
-      *,
-      cliente:cliente_id (*),
-      dependentes:agendamento_dependentes (*)
-    `)
-    .eq('codigo', codigo)
-    .single();
-
-
-  if (error) throw error;
-  return data;
-}
-
-
-// BUSCAR por nome do titular ou dependente (sem paginação)
-export async function buscarAgendamentosPorNome(busca) {
-  const { data, error } = await supabase
-    .from('agendamentos').select(`*,cliente:cliente_id (nome, cpf, telefone),dependentes:agendamento_dependentes (nome, idade)`)
-    .or(
-      `cliente_id.in.(SELECT id FROM clientes WHERE nome.ilike.%${busca}%),` +
-      `codigo.in.(SELECT agendamento_id FROM agendamento_dependentes WHERE nome.ilike.%${busca}%)`
-    )
-    .order('data_visita', { ascending: false })
-    .limit(20);
-
-
-  if (error) throw error;
-  return data;
-}
-
-
-// CRIAR
-export async function criarAgendamento(dados) {
-
-
-  const codigo = await gerarCodigoAgendamento();
-
-
-  const { data, error } = await supabase
-    .from('agendamentos')
-    .insert([{
-      codigo,
-      cliente_id: dados.cliente_id,
-      vendedor_id: dados.vendedor_id || null,
-      data_visita: dados.data_visita,
-      horario_visita: dados.horario_visita,
-      quantidade_pessoas: dados.quantidade_pessoas || 1,
-      status: 'PENDENTE',
-      resultado_venda: 'PENDENTE',
-      observacoes: dados.observacoes || null
-    }])
-    .select()
-    .single();
-
-
-  if (error) throw error;
-
-
-  // Dependentes
-  if (dados.dependentes && dados.dependentes.length > 0) {
-    const deps = dados.dependentes.map(d => ({
-      agendamento_id: codigo,
-      nome: d.nome,
-      idade: d.idade,
-      cpf: d.cpf || null
-    }));
-
-
-    const { error: depError } = await supabase.from('agendamento_dependentes')
-      .insert(deps);
-
-
-    if (depError) throw depError;
-  }
-
-
-  return data;
-}
-
-
-// ATUALIZAR
-export async function atualizarAgendamento(codigo, dados) {
-  const { data, error } = await supabase
-    .from('agendamentos')
-    .update({
-      cliente_id: dados.cliente_id,
-      vendedor_id: dados.vendedor_id,
-      data_visita: dados.data_visita,
-      horario_visita: dados.horario_visita,
-      quantidade_pessoas: dados.quantidade_pessoas,
-      status: dados.status,
-      resultado_venda: dados.resultado_venda,
-      observacoes: dados.observacoes
-    })
-    .eq('codigo', codigo)
-    .select()
-    .single();
-
-
-  if (error) throw error;
-  return data;
-}
-
-
-// EXCLUIR
-export async function excluirAgendamento(codigo) {
-  const { error } = await supabase
-    .from('agendamentos')
-    .delete()
-    .eq('codigo', codigo);
-
-
-  if (error) throw error;
-  return true;
-}
-
-// AGENDAMENTOS POR DIA DA SEMANA ATUAL
 export async function agendamentosPorDiaSemana() {
-  const hoje = new Date()
-  const diaSemana = hoje.getDay()
-
-  const inicioSemana = new Date(hoje)
-  inicioSemana.setDate(hoje.getDate() - (diaSemana === 0 ? 6 : diaSemana - 1))
-  inicioSemana.setHours(0, 0, 0, 0)
-
-  const fimSemana = new Date(inicioSemana)
-  fimSemana.setDate(inicioSemana.getDate() + 6)
-  fimSemana.setHours(23, 59, 59, 999)
+  const hoje = new Date();
+  const diaSemana = hoje.getDay();
+  const inicioSemana = new Date(hoje);
+  inicioSemana.setDate(hoje.getDate() - (diaSemana === 0 ? 6 : diaSemana - 1));
+  inicioSemana.setHours(0, 0, 0, 0);
+  const fimSemana = new Date(inicioSemana);
+  fimSemana.setDate(inicioSemana.getDate() + 6);
+  fimSemana.setHours(23, 59, 59, 999);
 
   const { data, error } = await supabase
     .from('agendamentos')
     .select('data_visita, quantidade_pessoas')
     .gte('data_visita', inicioSemana.toISOString().split('T')[0])
-    .lte('data_visita', fimSemana.toISOString().split('T')[0])
+    .lte('data_visita', fimSemana.toISOString().split('T')[0]);
+  if (error) throw error;
 
-  if (error) throw error
-
-  // Inicializa os 7 dias da semana com 0
-  const contagem = [0, 0, 0, 0, 0, 0, 0] // [Seg, Ter, Qua, Qui, Sex, Sáb, Dom]
-
+  const contagem = [0, 0, 0, 0, 0, 0, 0];
   data.forEach(a => {
-    const d = new Date(a.data_visita + 'T12:00:00')
-    const idx = d.getDay()
-    const posicao = idx === 0 ? 6 : idx - 1
-    contagem[posicao] += 1
-  })
-
-  return contagem
+    const d = new Date(a.data_visita + 'T12:00:00');
+    const idx = d.getDay();
+    const posicao = idx === 0 ? 6 : idx - 1;
+    contagem[posicao] += 1;
+  });
+  return contagem;
 }
 
-export async function taxaDeConversao({
-  inicio,
-  fim,
-} = {}) {
+export async function proximosDiasComAgendamentos(quantidade = 2) {
+  const amanha = new Date();
+  amanha.setDate(amanha.getDate() + 1);
+  amanha.setHours(0, 0, 0, 0);
+  const { data, error } = await supabase
+    .from('agendamentos')
+    .select('data_visita')
+    .gte('data_visita', amanha.toISOString().split('T')[0])
+    .in('status', ['PENDENTE', 'CONFIRMADO'])
+    .order('data_visita', { ascending: true });
+  if (error) throw error;
+
+  const agrupado = {};
+  data.forEach(a => { agrupado[a.data_visita] = (agrupado[a.data_visita] || 0) + 1; });
+  return Object.entries(agrupado).slice(0, quantidade).map(([data_visita, total]) => ({
+    data_visita, total,
+    label: new Date(data_visita + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })
+  }));
+}
+
+export async function taxaDeConversao({ inicio, fim } = {}) {
   const hoje = new Date();
   const dataInicio = inicio || new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().split('T')[0];
+  
   const dataFim = fim || hoje.toISOString().split('T')[0];
+  const { count: vendasrealizada, error } = await supabase
+    .from('agendamentos').select('*', { count: 'exact', head: true })
+    .eq('status', 'REALIZADO').eq('resultado_venda', 'VENDA_REALIZADA')
+    .gte('data_visita', dataInicio).lte('data_visita', dataFim);
+  if (error) throw error;
+  const { count: atendidos, error: totalError } = await supabase
+    .from('agendamentos').select('*', { count: 'exact', head: true })
+    .eq('status', 'REALIZADO').gte('data_visita', dataInicio).lte('data_visita', dataFim);
+  if (totalError) throw totalError;
+  return atendidos > 0 ? Number(((vendasrealizada / atendidos) * 100).toFixed(2)) : 0;
+}
 
-  const { count: vendasrealizada , error } = await supabase
+// ============ CRUD ============
+
+export async function listarAgendamentos({ pagina = 1, limite = 10, busca = '' } = {}) {
+  const inicio = (pagina - 1) * limite;
+  const fim = inicio + limite - 1;
+  let query = supabase.from('agendamentos')
+    .select(`*, cliente:cliente_id (nome, cpf, telefone), dependentes:agendamento_dependentes (nome, idade)`, { count: 'exact' });
+  if (busca) {
+    query = query.or(`cliente_id.in.(SELECT id FROM clientes WHERE nome.ilike.%${busca}%),codigo.in.(SELECT agendamento_id FROM agendamento_dependentes WHERE nome.ilike.%${busca}%)`);
+  }
+  const { data, count, error } = await query.order('data_visita', { ascending: false }).range(inicio, fim);
+  if (error) throw error;
+  return { agendamentos: data, total: count, pagina, totalPaginas: Math.ceil(count / limite) };
+}
+
+export async function buscarAgendamentoPorCodigo(codigo) {
+  const { data: agendamento, error } = await supabase
+    .from('agendamentos').select(`*, cliente:cliente_id (*)`)
+    .eq('codigo', codigo).single();
+  if (error) throw error;
+  const { data: dependentes } = await supabase
+    .from('agendamento_dependentes').select('*')
+    .eq('agendamento_id', codigo);
+  return { ...agendamento, dependentes: dependentes || [] };
+}
+
+export async function buscarAgendamentosPorNome(busca) {
+  const { data, error } = await supabase.from('agendamentos')
+    .select(`*, cliente:cliente_id (nome, cpf, telefone), dependentes:agendamento_dependentes (nome, idade)`)
+    .or(`cliente_id.in.(SELECT id FROM clientes WHERE nome.ilike.%${busca}%),codigo.in.(SELECT agendamento_id FROM agendamento_dependentes WHERE nome.ilike.%${busca}%)`)
+    .order('data_visita', { ascending: false }).limit(20);
+  if (error) throw error;
+  return data;
+}
+
+// ============ CRIAR ============
+export async function criarAgendamento(dados) {
+  const codigo = await gerarCodigoAgendamento();
+
+  let cliente_id = null;
+  let origem = 'OUTRO';
+
+  if (dados.cliente?.cpf) {
+    const existente = await buscarClientePorCpf(dados.cliente.cpf);
+    
+    if (existente) {
+      cliente_id = existente.id;
+      origem = existente.origem || 'OUTRO'; // 👈 Pega origem do cliente
+    } else {
+      cliente_id = await criarCliente({
+        cpf: dados.cliente.cpf,
+        nome: dados.cliente.nome || dados.nome,
+        data_nascimento: dados.cliente.data_nascimento || dados.nascimento,
+        origem: dados.origem || 'OUTRO', // 👈 Salva origem
+      });
+    }
+  }
+
+  if (!cliente_id) {
+    throw new Error('Não foi possível identificar/criar o cliente.');
+  }
+
+  const { data, error } = await supabase
     .from('agendamentos')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'REALIZADO')
-    .eq('resultado_venda', 'VENDA_REALIZADA')
-    .gte('data_visita', dataInicio)
-    .lte('data_visita', dataFim);
+    .insert([{
+      codigo,
+      cliente_id: Number(cliente_id),
+      vendedor_id: dados.vendedor_id || null,
+      data_visita: dados.data_visita,
+      horario_visita: dados.horario_visita,
+      quantidade_pessoas: dados.quantidade_pessoas || 1,
+      status: dados.status || 'PENDENTE',
+      resultado_venda: 'PENDENTE',
+      observacoes: dados.observacoes || null,
+      cidade: dados.cidade || "Não informada",
+      origem: origem, // 👈 Adiciona origem
+    }])
+    .select()
+    .single();
 
   if (error) throw error;
 
-   const { count: atendidos, error: totalError } = await supabase
+  // Dependentes (apenas insere na tabela, não cria clientes)
+  if (dados.dependentes && dados.dependentes.length > 0) {
+    const deps = dados.dependentes.map(dep => ({
+      agendamento_id: codigo,
+      nome: dep.nome,
+      idade: Number(dep.idade) || 0,
+      cpf: dep.cpf || null,
+    }));
+
+    const { error: depError } = await supabase
+      .from('agendamento_dependentes')
+      .insert(deps);
+
+    if (depError) throw depError;
+  }
+
+  return data;
+}
+
+// ============ ATUALIZAR ============
+export async function atualizarAgendamento(codigo, dados) {
+  // 👇 Na edição, NÃO altera cliente_id (já existe)
+  const updateData = {
+    vendedor_id: dados.vendedor_id || null,
+    data_visita: dados.data_visita,
+    horario_visita: dados.horario_visita,
+    quantidade_pessoas: dados.quantidade_pessoas,
+    status: dados.status,
+    observacoes: dados.observacoes,
+    cidade: dados.cidade,
+    origem: dados.origem, // 👈 Permite atualizar origem
+  };
+
+  const { data, error } = await supabase
     .from('agendamentos')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'REALIZADO')
-    .gte('data_visita', dataInicio)
-    .lte('data_visita', dataFim);
+    .update(updateData)
+    .eq('codigo', codigo)
+    .select()
+    .single();
 
-    const resultado = atendidos > 0
-    ? Number(((vendasrealizada / atendidos) * 100).toFixed(2))
-    : 0;
+  if (error) throw error;
 
-  if (totalError) throw totalError;
 
-  return resultado ?? 0;
+  // Atualizar dependentes (remove antigos e insere novos)
+  if (dados.dependentes !== undefined) {
+    await supabase
+      .from('agendamento_dependentes')
+      .delete()
+      .eq('agendamento_id', codigo);
+
+    if (dados.dependentes && dados.dependentes.length > 0) {
+      const deps = dados.dependentes.map(dep => ({
+        agendamento_id: codigo,
+        nome: dep.nome,
+        idade: Number(dep.idade) || 0,
+        cpf: dep.cpf || null,
+      }));
+
+      const { error: depError } = await supabase
+        .from('agendamento_dependentes')
+        .insert(deps);
+
+      if (depError) throw depError;
+    }
+  }
+
+  return data;
+}
+
+// ============ RESULTADO DE VENDA ============
+export async function atualizarResultadoVenda(codigo, resultadoVenda) {
+  const { data, error } = await supabase.from('agendamentos')
+    .update({ status: 'REALIZADO', resultado_venda: resultadoVenda })
+    .eq('codigo', codigo).select().single();
+  if (error) throw error;
+  return data;
+}
+
+export async function marcarComoRealizado(codigo) {
+  const { data, error } = await supabase.from('agendamentos')
+    .update({ status: 'REALIZADO', resultado_venda: 'PENDENTE' })
+    .eq('codigo', codigo).select().single();
+  if (error) throw error;
+  return data;
+}
+
+// ============ EXCLUIR ============
+export async function excluirAgendamento(codigo) {
+  const { error } = await supabase.from('agendamentos').delete().eq('codigo', codigo);
+  if (error) throw error;
+  return true;
 }

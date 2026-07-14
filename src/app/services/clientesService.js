@@ -95,23 +95,71 @@ export async function buscarCliente(id) {
 // ============ CRIAR ============
 
 
+export async function buscarClientePorCpf(cpf) {
+  const cpfLimpo = cpf?.replace(/\D/g, '') || '';
+  if (!cpfLimpo || cpfLimpo.length !== 11) return null;
+
+  const { data, error } = await supabase
+    .from('clientes')
+    .select('*')
+    .eq('cpf', cpf)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Erro ao buscar cliente:', error);
+    return null;
+  }
+
+  return data;
+}
+
+// ============ CRIAR CLIENTE ============
 export async function criarCliente(dados) {
+  // 👇 Verificar NOVAMENTE se o CPF já existe (evitar race condition)
+  const cpfLimpo = dados.cpf?.replace(/\D/g, '') || '';
+  
+  if (cpfLimpo.length === 11) {
+    const { data: existente } = await supabase
+      .from('clientes')
+      .select('id')
+      .eq('cpf', dados.cpf)
+      .maybeSingle();
+
+    if (existente) {
+      console.log('⚠️ Cliente já existe, retornando ID:', existente.id);
+      return existente.id;
+    }
+  }
+
+  // Criar novo cliente (sem enviar id, o banco gera)
   const { data, error } = await supabase
     .from('clientes')
     .insert([{
-      nome: dados.nome,
+      nome: dados.nome || 'Cliente',
       cpf: dados.cpf,
-      email: dados.email,
-      telefone: dados.telefone,
-      data_nascimento: dados.data_nascimento,
-      origem: dados.origem || 'OUTRO'
+      data_nascimento: dados.data_nascimento || null,
+      email: dados.email || null,
+      telefone: dados.telefone || null,
+      origem: dados.origem || 'OUTRO',
     }])
-    .select()
+    .select('id')
     .single();
 
+  if (error) {
+    // Se mesmo assim der duplicate, busca o existente
+    if (error.code === '23505') {
+      const { data: existente } = await supabase
+        .from('clientes')
+        .select('id')
+        .eq('cpf', dados.cpf)
+        .single();
+      
+      if (existente) return existente.id;
+    }
+    throw error;
+  }
 
-  if (error) throw error;
-  return data;
+  return data.id;
 }
 
 

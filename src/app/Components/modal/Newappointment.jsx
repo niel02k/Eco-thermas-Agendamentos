@@ -34,6 +34,7 @@ export default function NewAppointment({
     horario: "",
     vendedor_id: "",
     cidade: "",
+    origem: "OUTRO",
     observacoes: "",
     status: "PENDENTE",
   });
@@ -78,19 +79,25 @@ export default function NewAppointment({
         horario: dadosEdicao.horario_visita?.slice(0, 5) || "",
         vendedor_id: dadosEdicao.vendedor_id || "",
         cidade: dadosEdicao.cidade || "",
+        origem: dadosEdicao.origem || "OUTRO",
         observacoes: dadosEdicao.observacoes || "",
         status: dadosEdicao.status || "PENDENTE",
       });
 
-      if (dadosEdicao.dependentes?.length > 0) {
-        setAmount(dadosEdicao.dependentes.length);
-        setCompanions(
-          dadosEdicao.dependentes.map(dep => ({
-            nome: dep.nome || "",
-            nascimento: dep.data_nascimento || "",
-            cpf: dep.cpf || "",
-          }))
-        );
+      // Preencher dependentes
+      if (dadosEdicao.dependentes && dadosEdicao.dependentes.length > 0) {
+        const deps = dadosEdicao.dependentes.map(dep => ({
+          nome: dep.nome || "",
+          nascimento: dep.data_nascimento || "",
+          cpf: dep.cpf || "",
+        }));
+        setAmount(deps.length);
+        setCompanions(deps);
+        setCurrentCompanion(0);
+      } else {
+        setAmount(0);
+        setCompanions([]);
+        setCurrentCompanion(0);
       }
     }
   }, [dadosEdicao]);
@@ -161,16 +168,16 @@ export default function NewAppointment({
     return idade;
   };
 
-  // ── Finalizar (chamado pelo step 2) ───────────────────────────
+  // ── Finalizar ─────────────────────────────────────────────────
   const handleFinalizar = async () => {
     const dados = {
-      cliente_id: form.cliente_id,
       vendedor_id: form.vendedor_id || null,
       data_visita: form.dataVisita,
       horario_visita: form.horario,
       quantidade_pessoas: 1 + companions.length,
       observacoes: form.observacoes || null,
       cidade: form.cidade || "Não informada",
+      origem: form.origem || "OUTRO",
       status: form.status || "PENDENTE",
       dependentes: companions.map(c => ({
         nome: c.nome,
@@ -178,6 +185,17 @@ export default function NewAppointment({
         cpf: c.cpf || null,
       })),
     };
+
+    if (dadosEdicao) {
+      dados.codigo = dadosEdicao.codigo;
+      dados.cliente_id = dadosEdicao.cliente_id;
+    } else {
+      dados.cliente = {
+        nome: form.cliente,
+        cpf: form.cpf,
+        data_nascimento: form.nascimento,
+      };
+    }
 
     await onSubmit(dados);
   };
@@ -227,7 +245,6 @@ export default function NewAppointment({
             </div>
 
             <div className={styles.body}>
-              {/* Código + Cliente */}
               <div className={styles.rowCode}>
                 <div className={`${styles.field} ${styles.codeField}`}>
                   <label>Código</label>
@@ -242,7 +259,6 @@ export default function NewAppointment({
                 </div>
               </div>
 
-              {/* Nascimento + CPF */}
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>Data de Nascimento</label>
@@ -254,7 +270,6 @@ export default function NewAppointment({
                 </div>
               </div>
 
-              {/* Data + Horário */}
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>Data da Visita</label>
@@ -279,7 +294,6 @@ export default function NewAppointment({
                 </div>
               </div>
 
-              {/* Consultor + Cidade */}
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>Consultor</label>
@@ -296,9 +310,22 @@ export default function NewAppointment({
                 </div>
               </div>
 
-              {/* Status (só na edição) */}
-              {dadosEdicao && (
-                <div className={styles.row}>
+              {/* 👇 CAMPO ORIGEM */}
+              <div className={styles.row}>
+                <div className={styles.field}>
+                  <label>Origem</label>
+                  <select name="origem" value={form.origem} onChange={handleChange} className={styles.select}>
+                    <option value="OUTRO">Selecione...</option>
+                    <option value="Leads SDR">Leads SDR</option>
+                    <option value="Direto">Direto</option>
+                    <option value="Orgânico">Orgânico</option>
+                    <option value="Day use">Day use</option>
+                    <option value="OUTRO">Outro</option>
+                  </select>
+                </div>
+
+                 {dadosEdicao && (
+                
                   <div className={styles.field}>
                     <label>Status</label>
                     <select name="status" value={form.status} onChange={handleChange} className={styles.select}>
@@ -308,16 +335,19 @@ export default function NewAppointment({
                       <option value="CANCELADO">Cancelado</option>
                     </select>
                   </div>
-                </div>
+               
               )}
 
-              {/* Observações */}
+
+              </div>
+
+             
+
               <div className={styles.field}>
                 <label>Observações</label>
                 <textarea name="observacoes" value={form.observacoes} onChange={handleChange} rows="4" placeholder="Digite alguma observação..." maxLength={500} />
               </div>
 
-              {/* Confirmação */}
               <div className={styles.confirmArea}>
                 <input type="checkbox" id="confirm" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} />
                 <label htmlFor="confirm">Declaro que revisei todas as informações acima e confirmo que estão corretas.</label>
