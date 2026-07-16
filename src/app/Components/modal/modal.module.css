@@ -76,12 +76,12 @@
 .field input,
 .field textarea ,
 .field select,
-.field option {
+.field option{
     width:100%;
-    padding:13px 16px;
+    padding:13px ;
     border:1px solid #D1D5DB;
     border-radius:12px;
-    font-size:14px;
+    font-size:13px;
     box-sizing:border-box;
     transition:.2s;
 }
