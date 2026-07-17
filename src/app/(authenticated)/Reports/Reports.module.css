@@ -283,7 +283,7 @@
 }
 
 .tableContainer {
-  overflow-x: auto;
+  overflow-x: fixed;
   width: 100%;
 }
 
