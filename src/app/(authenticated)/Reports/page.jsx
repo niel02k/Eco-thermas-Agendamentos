@@ -544,60 +544,72 @@ export default function Reports() {
                   <span>Cliente</span>
                   <span>Consultor</span>
                   <span>Valor</span>
-                  <span>Status</span>
+                  <span className={styles.statusCell}>Status</span>
                   <span>Data</span>
                 </div>
 
                 {dadosExibicao.length > 0 ? (
                   dadosExibicao.map((item, index) => (
-                  <div key={index} className={styles.tableRow}>
+                    <div key={index} className={styles.tableRow}>
 
-                    <span data-label="Código">
-                      {item.codigo || item.id || '-'}
-                    </span>
-
-                    <span data-label="Módulo">
-                      <span className={styles.moduleBadge}>
-                        {item.module || 'Contrato'}
+                      <span data-label="Código">
+                        {item.codigo || item.id || "-"}
                       </span>
-                    </span>
 
-                    <span data-label="Cliente">
-                      {item.titular_nome || item.cliente?.nome || item.cliente || '-'}
-                    </span>
+                      <span data-label="Módulo">
+                        <span className={styles.moduleBadge}>
+                          {item.module || "Contrato"}
+                        </span>
+                      </span>
 
-                    <span data-label="Consultor">
-                      {item.vendedor?.nome || item.seller || '-'}
-                    </span>
-
-                    <span data-label="Valor" className={styles.valorCell}>
-                      {formatCurrency(item.valor_total || item.value || 0)}
-                    </span>
-
-                    <span data-label="Status">
                       <span
-                        className={styles.statusBadge}
+                        data-label="Cliente"
+                        className={styles.clientName}
                         style={{
-                          backgroundColor: STATUS_COLORS[item.status]
-                            ? `${STATUS_COLORS[item.status]}20`
-                            : '#E2E8F0',
-                          color: STATUS_COLORS[item.status] || '#475569'
+                          "--status-color": STATUS_COLORS[item.status] || "#1E293B"
                         }}
                       >
-                        {item.status || 'PENDENTE'}
+                        {item.titular_nome || item.cliente?.nome || item.cliente || "-"}
                       </span>
-                    </span>
 
-                    <span data-label="Data">
-                      {formatDate(
-                        item.data_criacao ||
-                        item.data_inicio ||
-                        item.data_visita ||
-                        item.date
-                      )}
-                    </span>
+                      <span data-label="Consultor">
+                        {item.vendedor?.nome || item.seller || "-"}
+                      </span>
 
-                  </div>
+                      <span
+                        data-label="Valor"
+                        className={styles.valorCell}
+                      >
+                        {formatCurrency(item.valor_total || item.value || 0)}
+                      </span>
+
+                      <span
+                        data-label="Status"
+                        className={styles.statusCell}
+                      >
+                        <span
+                          className={styles.statusBadge}
+                          style={{
+                            backgroundColor: STATUS_COLORS[item.status]
+                              ? `${STATUS_COLORS[item.status]}20`
+                              : "#E2E8F0",
+                            color: STATUS_COLORS[item.status] || "#475569"
+                          }}
+                        >
+                          {item.status || "PENDENTE"}
+                        </span>
+                      </span>
+
+                      <span data-label="Data">
+                        {formatDate(
+                          item.data_criacao ||
+                          item.data_inicio ||
+                          item.data_visita ||
+                          item.date
+                        )}
+                      </span>
+
+                    </div>
                   ))
                 ) : (
                   <div className={styles.emptyState}>
