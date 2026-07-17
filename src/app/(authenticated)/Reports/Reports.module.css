@@ -310,6 +310,7 @@
   border-bottom: 1px solid #F1F5F9;
   font-size: 0.85rem;
   transition: background 0.2s;
+  color:#1e293b
 }
 
 .tableRow:hover {
