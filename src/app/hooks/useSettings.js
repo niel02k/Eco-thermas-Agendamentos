@@ -181,30 +181,42 @@ export function useSettings() {
     }
   }, []);
 
-  const handleCriarUsuario = useCallback(async () => {
-    if (!newUser.name || !newUser.email || !newUser.password) {
-      setUserMsg({ tipo: 'erro', texto: 'Preencha todos os campos.' });
-      return;
-    }
-    setSavingUser(true);
-    setUserMsg(null);
-    try {
-      await criarUsuario({
-        nome:  newUser.name,
-        email: newUser.email,
-        senha: newUser.password,
-        cargo: newUser.role,
-      });
-      setNewUser({ name: '', email: '', password: '', role: 'CONSULTOR' });
-      setUserMsg({ tipo: 'ok', texto: 'Usuário criado com sucesso!' });
-      await carregarUsuarios();
-    } catch (e) {
-      setUserMsg({ tipo: 'erro', texto: e.message ?? 'Erro ao criar usuário.' });
-    } finally {
-      setSavingUser(false);
-      setTimeout(() => setUserMsg(null), 4000);
-    }
-  }, [newUser, carregarUsuarios]);
+const handleCriarUsuario = useCallback(async () => {
+  if (!newUser.name || !newUser.email || !newUser.password) {
+    setUserMsg({ tipo: 'erro', texto: 'Preencha todos os campos.' });
+    return;
+  }
+
+  setSavingUser(true);
+  setUserMsg(null);
+
+  try {
+    await criarUsuario({
+      nome: newUser.name,
+      email: newUser.email,
+      senha: newUser.password,
+      cargo: newUser.role,
+    });
+
+    // 🔥 login do usuário recém criado
+    const { error } = await supabase.auth.signInWithPassword({
+      email: newUser.email,
+      password: newUser.password,
+    });
+
+    if (error) throw error;
+
+    setNewUser({ name: '', email: '', password: '', role: 'CONSULTOR' });
+    setUserMsg({ tipo: 'ok', texto: 'Usuário criado e logado com sucesso!' });
+
+    await carregarUsuarios();
+  } catch (e) {
+    setUserMsg({ tipo: 'erro', texto: e.message ?? 'Erro ao criar usuário.' });
+  } finally {
+    setSavingUser(false);
+    setTimeout(() => setUserMsg(null), 4000);
+  }
+}, [newUser, carregarUsuarios]);
 
   const alterarCargo = useCallback(async (id, cargo) => {
     try {

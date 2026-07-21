@@ -15,25 +15,25 @@ export function AuthProvider({ children }) {
     async function carregarUsuario() {
       setLoading(true)
 
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        setUsuario(null)
+        setLoading(false)
+        return
+      }
 
-      console.log('user:', user)
-      console.log('authError:', authError)
-
-      if (!user) {
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (authError || !user) {
         setUsuario(null)
         setLoading(false)
         return
       }
 
       const { data, error: dbError } = await supabase
-        .from('usuarios').select('nome, cargo, status').eq('id', user.id).single()
-
-      console.log('data:', data)
-      console.log('dbError:', dbError)
+        .from('usuarios')
+        .select('nome, cargo, status')
+        .eq('id', user.id)
+        .single()
 
       if (dbError) {
         setUsuario(null)
@@ -42,7 +42,12 @@ export function AuthProvider({ children }) {
           id: user.id,
           email: user.email,
           ...data,
-          start : data.nome.split('').slice(0 , 2 ).map(n => n[0]).join('').toUpperCase()
+          start: data.nome
+            .split(' ')
+            .slice(0, 2)
+            .map(n => n[0])
+            .join('')
+            .toUpperCase(),
         })
       }
 
@@ -51,15 +56,11 @@ export function AuthProvider({ children }) {
 
     carregarUsuario()
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
       carregarUsuario()
     })
 
-    return () => {
-      subscription.unsubscribe()
-    }
+    return () => subscription.unsubscribe()
   }, [])
 
   return (

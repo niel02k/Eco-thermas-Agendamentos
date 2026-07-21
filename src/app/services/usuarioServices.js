@@ -99,11 +99,14 @@ export async function buscarUsuario(id) {
 =========================================================== */
 
 export async function criarUsuario(usuario) {
-  const { data, error } = await supabase
-    .from('usuarios')
-    .insert(usuario)
-    .select()
-    .single();
+  const { data, error } = await supabase.functions.invoke('create-user-admin', {
+    body: {
+      nome: usuario.nome,
+      email: usuario.email,
+      senha: usuario.senha,
+      cargo: usuario.cargo,
+    },
+  });
 
   if (error) throw error;
   return data;
