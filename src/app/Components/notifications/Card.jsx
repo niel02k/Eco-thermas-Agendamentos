@@ -6,6 +6,9 @@ import { CalendarCheck, UserCheck, CreditCard, AlertCircle, Bell, CheckCheck, Fi
 import Notification from './Notification';
 import styles from './Card.module.css';
 import { useRouter } from 'next/navigation';
+import { useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+
 
 /**
  * Componente principal do Card de Notificações com Gerenciamento de Estado
@@ -15,14 +18,23 @@ import { useRouter } from 'next/navigation';
 const CardNotification = () => {
   const router = useRouter();
   // Dados iniciais mockados
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: "Novo Agendamento", description: "Carlos Mendes confirmou para amanhã às 14h.", time: "2 min atrás", icon: CalendarCheck, iconColor: "#1E6EBE", isUnread: true, category: "agendamento" },
-    { id: 2, title: "Contrato Assinado", description: "Ana Paula assinou o contrato de fidelidade.", time: "15 min atrás", icon: UserCheck, iconColor: "#3CC83C", isUnread: true, category: "contrato" },
-    { id: 3, title: "Pagamento Pendente", description: "O boleto de Bruno Leite vence hoje.", time: "1h atrás", icon: CreditCard, iconColor: "#FA643C", isUnread: false, category: "financeiro" },
-    { id: 4, title: "Alerta de Capacidade", description: "O parque atingiu 85% da capacidade permitida.", time: "3h atrás", icon: AlertCircle, iconColor: "#FAD228", isUnread: false, category: "alerta" },
-    { id: 5, title: "Novo Cliente", description: "Juliana Silva se cadastrou via site.", time: "5h atrás", icon: UserCheck, iconColor: "#1E6EBE", isUnread: false, category: "cadastro" },
-    { id: 6, title: "Revisão de Contrato", description: "O contrato #442 precisa de revisão manual.", time: "1 dia atrás", icon: FileCheck2, iconColor: "#991094", isUnread: false, category: "contrato" },
-  ]);
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    async function loadNotifications() {
+      try {
+        const data = await getNotifications();
+
+        console.log("Notificações:", data);
+
+        setNotifications(data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadNotifications();
+  }, []);
 
   // Função para marcar todas como lidas
   const markAllAsRead = () => {
