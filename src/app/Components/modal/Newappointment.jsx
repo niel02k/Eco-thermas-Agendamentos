@@ -55,7 +55,7 @@ export default function NewAppointment({
       const mes = String(hoje.getMonth() + 1).padStart(2, '0');
       const dia = String(hoje.getDate()).padStart(2, '0');
       const prefixo = `${ano}${mes}${dia}`;
-      setForm(prev => ({ ...prev, codigo: `${prefixo}XXX` }));
+      setForm(prev => ({ ...prev, codigo: `${prefixo}` }));
     }
   }, [dadosEdicao]);
 
