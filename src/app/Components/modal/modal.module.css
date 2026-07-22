@@ -515,6 +515,7 @@
     .field input,
     .field textarea,
     .field select {
+        max-height: 40px;
         width:90%;
         padding: 10px;
         margin: 0 auto;
