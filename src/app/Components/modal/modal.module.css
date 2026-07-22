@@ -488,9 +488,15 @@
 }
 
 @media (max-width: 480px) {
+
+    .overlay {
+        padding: 0;
+        align-items: flex-end; /* Modal sobe de baixo no mobile */
+    }
     .modal {
-        max-height: 100vh;
-        border-radius: 0;
+        width: 90vw;
+        max-height: 90vh;
+        
     }
 
     .header h2 {
@@ -508,6 +514,8 @@
     .field input,
     .field textarea,
     .field select {
+        width:90%;
         padding: 10px;
+        margin: 0 auto;
     }
 }
