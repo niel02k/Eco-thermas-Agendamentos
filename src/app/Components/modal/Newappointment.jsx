@@ -262,7 +262,7 @@ export default function NewAppointment({
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>Data de Nascimento</label>
-                  <input type="date" name="nascimento" value={form.nascimento} onChange={handleChange} max={new Date().toISOString().split("T")[0]} required />
+                  <input type="" name="nascimento" value={form.nascimento} onChange={handleChange} max={new Date().toISOString().split("T")[0]} required />
                 </div>
                 <div className={styles.field}>
                   <label>CPF</label>
