@@ -1,27 +1,31 @@
-// src/app/actions/usuarios.js
 "use server";
 
-import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
-export async function criarUsuario({ nome, email, senha, cargo }) {
-  const supabase = await createClient();
+export async function criarUsuario({
+  nome,
+  email,
+  senha,
+  cargo,
+}) {
+  const { data, error } =
+    await supabaseAdmin.auth.admin.createUser({
+      email,
+      password: senha,
+      email_confirm: true,
 
-  // Chamar a função SQL diretamente
-  const { data, error } = await supabase.rpc('criar_usuario_sql', {
-    p_nome: nome,
-    p_email: email,
-    p_senha: senha,
-    p_cargo: cargo,
-  });
+      user_metadata: {
+        nome,
+        cargo,
+      },
+    });
 
   if (error) {
-    console.error('Erro RPC:', error);
-    throw new Error(error.message || 'Erro ao criar usuário');
+    throw new Error(error.message);
   }
 
-  if (!data.sucesso) {
-    throw new Error(data.erro || 'Erro ao criar usuário');
-  }
-
-  return { sucesso: true };
+  return {
+    sucesso: true,
+    data,
+  };
 }
