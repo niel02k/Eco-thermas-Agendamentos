@@ -46,31 +46,12 @@ const Header = ({
         </button>
 
         {/* Barra de Busca */}
-        <div className={styles.searchBar}>
-          <Search size={20} className={styles.searchIcon} />
-          <input 
-            type="text" 
-            placeholder="Pesquisar..." 
-            className={styles.searchInput} 
-          />
-        </div>
+        
       </div>
       
       {/* Ações do Usuário */}
       <div className={styles.userActions}>
-        <div className={styles.notificationWrapper} ref={notificationRef}>
-          <button 
-            className={`${styles.notificationBtn} ${showNotifications ? styles.active : ''}`} 
-            onClick={() => setShowNotifications(!showNotifications)}
-            aria-label="Notificações"
-          >
-            <Bell size={22} />
-            <span className={styles.notificationBadge}></span>
-          </button>
-
-          {/* Renderização condicional do Card */}
-          {showNotifications && <CardNotification />}
-        </div>
+        
         
         <div className={styles.userProfile}>
           <div className={styles.avatar}>{initials}</div>
