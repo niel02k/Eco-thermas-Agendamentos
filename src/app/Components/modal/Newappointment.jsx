@@ -255,14 +255,14 @@ export default function NewAppointment({
                 </div>
                 <div className={styles.field}>
                   <label>Cliente</label>
-                  <input type="text" name="cliente" value={form.cliente} onChange={handleLettersOnly} placeholder="Pesquisar cliente..." maxLength={100} required />
+                  <input type="text" name="cliente" value={form.cliente} onChange={handleLettersOnly} placeholder="Nome do cliente..." maxLength={100} required />
                 </div>
               </div>
 
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>Data de Nascimento</label>
-                  <input type="date" name="nascimento" value={form.nascimento} onChange={handleChange} max={new Date().toISOString().split("T")[0]} required />
+                  <input type="" name="nascimento" value={form.nascimento} onChange={handleChange} max={new Date().toISOString().split("T")[0]} required />
                 </div>
                 <div className={styles.field}>
                   <label>CPF</label>
