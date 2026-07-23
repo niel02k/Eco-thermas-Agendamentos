@@ -1,0 +1,14 @@
+.container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: auto;
+    height:100vh;
+}
+.iconContainer{
+    color:black ;
+    transform: rotate(360deg);
+}
+.text{
+    color:black
+}

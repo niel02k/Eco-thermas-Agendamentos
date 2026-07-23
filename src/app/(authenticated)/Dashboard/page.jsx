@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { Plus, Users, CalendarCheck, TrendingUp, TrendingDown, Activity } from 'lucide-react';
+import { Plus, Users, CalendarCheck, TrendingUp, TrendingDown, Activity,LayoutDashboard } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import PageHeader from '@/app/Components/PageHeader/PageHeader.jsx';
 import StatCard from '@/app/Components/StatCard/StatCard.jsx';
@@ -9,7 +9,9 @@ import styles from './Dashboard.module.css';
 import { useAgendamentos } from '@/app/hooks/useAgendamentos';
 import { useContratos } from '@/app/hooks/useContratos';
 import { taxaDeConversao } from '@/app/services/agendamentosServices.js'
-import NewAppointment from "@/app/Components/modal/Newappointment";;
+import NewAppointment from "@/app/Components/modal/Newappointment";
+import Loading from '@/app/Components/loading/page.jsx';
+
 
 /* ── Dashboard ── */
 const Dashboard = () => {
@@ -80,6 +82,15 @@ const Dashboard = () => {
     dia,
     total: dadosSemana[i]?.total ?? 0
   }));
+
+if(loading){
+  return(
+    <Loading 
+      icon={LayoutDashboard}  // ← SEM colchetes angulares
+      text="Carregando Dashboard....." 
+    />
+  )
+}
 
   return (
     <div className={styles.container}>
