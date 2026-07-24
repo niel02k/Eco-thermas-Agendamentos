@@ -258,63 +258,115 @@ function agruparTicketMedio(data, tipo, inicio, fim) {
 }
 
 // TICKET MÉDIO (totalmente reutilizável)
+// src/app/services/contratosServices.js
+
 export async function ticketMedio({ 
   inicio, 
   fim, 
-  status = ['ATIVO'],
+  status = ['ATIVO', 'PENDENTE'],
   vendedor_id = null,
   forma_pagamento = null,
-  agrupado_por = null // 'vendedor', 'forma_pagamento', 'mes'
+  agrupado_por = null
 } = {}) {
   
-  const hoje = new Date();
-  const dataInicio = inicio || new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().split('T')[0];
-  const dataFim = fim || hoje.toISOString().split('T')[0];
+  try {
 
-  // Query base
-  let query = supabase
-    .from('contratos')
-    .select('valor_total, data_inicio, forma_pagamento, vendedor_id, vendedor:vendedor_id(nome)', { count: 'exact' })
-    .gte('data_inicio', dataInicio)
-    .lte('data_inicio', dataFim)
-    .in('status', status);
+    // Função auxiliar para buscar contratos
+    const buscarContratos = async (comFiltroData = true) => {
+      let query = supabase
+        .from('contratos')
+        .select('valor_total, data_inicio, data_criacao, forma_pagamento, status, vendedor_id, vendedor:vendedor_id(nome)', { count: 'exact' });
 
-  // Filtros opcionais
-  if (vendedor_id) {
-    query = query.eq('vendedor_id', vendedor_id);
-  }
+      // Aplicar filtro de data apenas se solicitado
+      if (comFiltroData && (inicio || fim)) {
+        const hoje = new Date();
+        const dataInicio = inicio || new Date(hoje.getFullYear(), 0, 1).toISOString().split('T')[0];
+        const dataFim = fim || hoje.toISOString().split('T')[0];
+        query = query.gte('data_inicio', dataInicio).lte('data_inicio', dataFim);
+      }
 
-  if (forma_pagamento) {
-    query = query.eq('forma_pagamento', forma_pagamento);
-  }
+      if (status && status.length > 0) {
+        query = query.in('status', status);
+      }
 
-  const { data, error, count } = await query;
+      if (vendedor_id) {
+        query = query.eq('vendedor_id', vendedor_id);
+      }
 
-  if (error) throw error;
+      if (forma_pagamento) {
+        query = query.eq('forma_pagamento', forma_pagamento);
+      }
 
-  if (!data || data.length === 0) {
+      const { data, error, count } = await query;
+      return { data, error, count };
+    };
+
+    // Primeira tentativa: COM filtro de data (se datas foram fornecidas)
+    if (inicio || fim) {
+      const { data, error, count } = await buscarContratos(true);
+      
+      if (error) {
+        console.error('❌ Erro na query com filtro:', error);
+      } else if (data && data.length > 0) {
+        
+        const valorTotal = data.reduce((acc, c) => acc + (Number(c.valor_total) || 0), 0);
+        const resultado = {
+          ticket_medio: valorTotal / data.length,
+          total_contratos: data.length,
+          valor_total: valorTotal,
+          periodo: { 
+            inicio: inicio || 'início', 
+            fim: fim || 'hoje' 
+          }
+        };
+        
+        return resultado;
+      }
+      
+    }
+    
+    // Segunda tentativa: SEM filtro de data (todos os contratos)
+    console.log('🔍 Buscando sem filtro de data...');
+    const { data, error, count } = await buscarContratos(false);
+    
+    if (error) {
+      console.error('❌ Erro na query sem filtro:', error);
+      throw error;
+    }
+    
+    console.log('📊 Dados encontrados sem filtro:', { count, length: data?.length });
+    
+    if (!data || data.length === 0) {
+      console.warn('⚠️ Nenhum contrato encontrado');
+      return {
+        ticket_medio: 0,
+        total_contratos: 0,
+        valor_total: 0,
+        periodo: { inicio: 'N/A', fim: 'N/A' }
+      };
+    }
+    
+    // Calcular ticket médio
+    const valorTotal = data.reduce((acc, c) => acc + (Number(c.valor_total) || 0), 0);
+    
+    const resultado = {
+      ticket_medio: Number((valorTotal / data.length).toFixed(2)),
+      total_contratos: data.length,
+      valor_total: valorTotal,
+      periodo: { inicio: 'todos', fim: 'todos' }
+    };
+    
+
+    return resultado;
+    
+  } catch (error) {
+    console.error('❌ Erro geral no ticketMedio:', error);
     return {
       ticket_medio: 0,
       total_contratos: 0,
       valor_total: 0,
-      periodo: { inicio: dataInicio, fim: dataFim },
-      filtros: { vendedor_id, forma_pagamento }
+      periodo: {},
+      erro: error.message
     };
   }
-
-  // Se quiser agrupado
-  if (agrupado_por) {
-    return agruparTicketMedio(data, agrupado_por, dataInicio, dataFim);
-  }
-
-  // Ticket médio geral
-  const valorTotal = data.reduce((acc, c) => acc + Number(c.valor_total), 0);
-
-  return {
-    ticket_medio: valorTotal / data.length,
-    total_contratos: data.length,
-    valor_total: valorTotal,
-    periodo: { inicio: dataInicio, fim: dataFim },
-    filtros: { vendedor_id, forma_pagamento }
-  };
 }

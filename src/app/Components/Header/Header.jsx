@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Bell, Menu } from 'lucide-react';
-import CardNotification from '@/app/Components/notifications/Card.jsx';
+
 import styles from './Header.module.css';
 
 /**
@@ -19,19 +19,11 @@ const Header = ({
   initials = "U",
   onMenuOpen 
 }) => {
-  const [showNotifications, setShowNotifications] = useState(false);
-  const notificationRef = useRef(null);
+
+
 
   // Fechar o card ao clicar fora dele
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
-        setShowNotifications(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  
 
   return (
     <header className={styles.header}>

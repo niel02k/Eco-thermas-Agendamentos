@@ -96,24 +96,99 @@ export async function proximosDiasComAgendamentos(quantidade = 2) {
     label: new Date(data_visita + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' })
   }));
 }
+// src/app/services/agendamentosServices.js
+
+// src/app/services/agendamentosServices.js
 
 export async function taxaDeConversao({ inicio, fim } = {}) {
-  const hoje = new Date();
-  const dataInicio = inicio || new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().split('T')[0];
+  try {
+    
+    // Se tiver datas específicas, tentar primeiro com filtro
+    if (inicio || fim) {
+      const hoje = new Date();
+      const dataInicio = inicio || new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().split('T')[0];
+      
+      // CORREÇÃO: Pegar o último dia do mês atual corretamente
+      const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
+      const dataFim = fim || `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(ultimoDiaMes).padStart(2, '0')}`;
+      
+      
+      // Buscar vendas realizadas COM filtro de data
+      const { count: vendasFiltrado, error: error1 } = await supabase
+        .from('agendamentos')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'REALIZADO')
+        .eq('resultado_venda', 'VENDA_REALIZADA')
+        .gte('data_visita', dataInicio)
+        .lte('data_visita', dataFim);
+      
+      if (error1) {
+        console.error('❌ Erro query vendas (filtrado):', error1);
+      }
+      
+      // Buscar atendidos COM filtro de data
+      const { count: atendidosFiltrado, error: error2 } = await supabase
+        .from('agendamentos')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'REALIZADO')
+        .gte('data_visita', dataInicio)
+        .lte('data_visita', dataFim);
+      
+      if (error2) {
+        console.error('❌ Erro query atendidos (filtrado):', error2);
+      }
+      
+      
+      // Se encontrou dados no período, usar eles
+      if (atendidosFiltrado > 0) {
+        const taxa = Number(((vendasFiltrado / atendidosFiltrado) * 100).toFixed(2));
+        return taxa;
+      }
+      
+      console.log('⚠️ Nenhum dado no período, buscando sem filtro...');
+    }
+    
+    // FALLBACK: Buscar sem filtro de data (todos os registros)
+    console.log('🔍 Buscando sem filtro de data...');
+    
+    // Contar vendas realizadas (geral)
+    const { count: vendasrealizada, error: error3 } = await supabase
+      .from('agendamentos')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'REALIZADO')
+      .eq('resultado_venda', 'VENDA_REALIZADA');
+    
+    if (error3) {
+      console.error('❌ Erro query vendas (geral):', error3);
+      throw error3;
+    }
+    
+    // Contar atendidos (geral)
+    const { count: atendidos, error: error4 } = await supabase
+      .from('agendamentos')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'REALIZADO');
+    
+    if (error4) {
+      console.error('❌ Erro query atendidos (geral):', error4);
+      throw error4;
+    }
+    
   
-  const dataFim = fim || hoje.toISOString().split('T')[0];
-  const { count: vendasrealizada, error } = await supabase
-    .from('agendamentos').select('*', { count: 'exact', head: true })
-    .eq('status', 'REALIZADO').eq('resultado_venda', 'VENDA_REALIZADA')
-    .gte('data_visita', dataInicio).lte('data_visita', dataFim);
-  if (error) throw error;
-  const { count: atendidos, error: totalError } = await supabase
-    .from('agendamentos').select('*', { count: 'exact', head: true })
-    .eq('status', 'REALIZADO').gte('data_visita', dataInicio).lte('data_visita', dataFim);
-  if (totalError) throw totalError;
-  return atendidos > 0 ? Number(((vendasrealizada / atendidos) * 100).toFixed(2)) : 0;
+    
+    // Calcular
+    const resultado = atendidos > 0 
+      ? Number(((vendasrealizada / atendidos) * 100).toFixed(2)) 
+      : 0;
+    
+   
+    return resultado;
+    
+  } catch (error) {
+    console.error('❌ Erro geral na taxaDeConversao:', error);
+    return 0;
+  }
 }
-
 // ============ CRUD ============
 
 export async function listarAgendamentos({ pagina = 1, limite = 10, busca = '' } = {}) {

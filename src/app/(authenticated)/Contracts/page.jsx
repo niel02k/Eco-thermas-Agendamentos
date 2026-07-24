@@ -3,11 +3,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {Plus, TrendingUp, Award, Activity, DollarSign, BarChart3,Filter, Search, RefreshCw, ChevronLeft, ChevronRight,Eye, Edit, Trash2, X , Pencil} from "lucide-react";
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
-import StatCard from "@/app/Components/StatCard/StatCard.jsx";
+import StatCard from "@/app/Components/Cards/StatCard/StatCard.jsx";
 import styles from "./Contracts.module.css";
 import ReceitaMensalChart from "@/app/Components/ReceitaMensal/ReceitaMensalChart.jsx";
-import CriarContrato from "@/app/Components/CriarContrato/CriarContrato.jsx";
-import EditarContrato from "@/app/Components/EditarContrato/EditarContrato.jsx";
+import CriarContrato from "@/app/Components/Comp_Contrato/CriarContrato/CriarContrato.jsx";
+import EditarContrato from "@/app/Components/Comp_Contrato/EditarContrato/EditarContrato.jsx";
 import { useContratosPage } from "@/app/hooks/useContratosPage";
 import { STATUS_CONTRATO, STATUS_CONTRATO_LABELS, PAGAMENTO, PAGAMENTO_LABELS } from "@/lib/constats";
 

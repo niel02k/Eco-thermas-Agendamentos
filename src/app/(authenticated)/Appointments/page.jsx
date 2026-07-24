@@ -8,11 +8,11 @@ import {
 } from "lucide-react";
 
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
-import StatCard from "@/app/Components/StatCard/StatCard.jsx";
+import StatCard from "@/app/Components/Cards/StatCard/StatCard.jsx";
 import { useAgendamentos } from "@/app/hooks/useAgendamentos.js";
 import styles from "./Appointments.module.css";
 import NewAppointment from "@/app/Components/modal/Newappointment";
-import ResultCard from "@/app/Components/ResultCard/ResultCard.jsx";
+import ResultCard from "@/app/Components/Cards/ResultCard/ResultCard.jsx";
 /* -------------------------------------------------------------------------- */
 /* HELPERS                                                                     */
 /* -------------------------------------------------------------------------- */
@@ -54,7 +54,7 @@ const STATUS_MAP = {
   CONFIRMADO: { label: "Confirmado", cls: "statusConfirmed", color: "#3CC83C" },
   PENDENTE: { label: "Pendente", cls: "statusPending", color: "#FAD228" },
   CANCELADO: { label: "Cancelado", cls: "statusCanceled", color: "#FA643C" },
-  REALIZADO: { label: "Concluído", cls: "statusFinished", color: "#1E6EBE" },
+  REALIZADO: { label: "Realizado", cls: "statusFinished", color: "#1E6EBE" },
 };
 
 /* -------------------------------------------------------------------------- */
@@ -497,7 +497,7 @@ const handleCriarAgendamento = async (dados) => {
                               </button>
 
                               {/* 👇 Botão CONFIRMAR REALIZADO (só para CONFIRMADO ou PENDENTE) */}
-                              {(ag.status === 'CONFIRMADO' || ag.status === 'PENDENTE') && (
+                              {(ag.status === 'REALIZADO' || ag.status === 'PENDENTE') && (
                                 <button
                                   className={`${styles.actionButton} ${styles.confirmButton}`}
                                   title="Confirmar Realização"
