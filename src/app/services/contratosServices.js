@@ -310,14 +310,14 @@ export async function ticketMedio({
       } else if (data && data.length > 0) {
         
         const valorTotal = data.reduce((acc, c) => acc + (Number(c.valor_total) || 0), 0);
-        const resultado = {
-          ticket_medio: valorTotal / data.length,
-          total_contratos: data.length,
-          valor_total: valorTotal,
-          periodo: { 
-            inicio: inicio || 'início', 
-            fim: fim || 'hoje' 
-          }
+        const ticketMedio =
+             data.length > 0 ? Number((valorTotal / data.length).toFixed(2)) : 0;
+
+          const resultado = {
+             ticket_medio: ticketMedio,
+             total_contratos: data.length,
+             valor_total: Number(valorTotal.toFixed(2)),
+            periodo: { inicio: "todos", fim: "todos" }
         };
         
         return resultado;
