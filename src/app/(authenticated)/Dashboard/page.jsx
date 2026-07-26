@@ -6,7 +6,7 @@ import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 import PageHeader from '@/app/Components/PageHeader/PageHeader.jsx';
 import StatCard from '@/app/Components/Cards/StatCard/StatCard.jsx';
 import styles from './Dashboard.module.css';
-import { useDashboardStats } from '@/app/hooks/useDashboardStats';
+import { useDashboardStats } from '@/app/hooks/dashboard/useDashboardStats';
 import NewAppointment from "@/app/Components/modal/Newappointment";
 
 
@@ -29,16 +29,16 @@ const Dashboard = () => {
 
   // Animação de entrada
   useEffect(() => {
-    const t = setTimeout(() => setVisible(true), 80);
+    const t = setTimeout(() => setVisible(true), 20);
     return () => clearTimeout(t);
   }, []);
 
   // Formatações
-  const formatarNumero = (valor) => new Intl.NumberFormat('pt-BR').format(valor || 0);
-  const formatarMoeda = (valor) => {
+     const formatarNumero = (valor) => new Intl.NumberFormat('pt-BR').format(valor || 0);
+      const formatarMoeda = (valor) => {
     const num = Number(valor) || 0;
-    return `R$ ${num.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-  };
+      return `R$ ${num.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    };
 
   // Dados para gráfico de semana
   const dadosSemanaFormatado = Array.isArray(semanaData) 

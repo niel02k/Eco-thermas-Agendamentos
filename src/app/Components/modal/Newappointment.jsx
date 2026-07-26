@@ -1,21 +1,32 @@
+// src/app/Components/modal/Newappointment.jsx
 "use client";
 
 import styles from "./modal.module.css";
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useConsultores } from "@/app/hooks/useConsultores";
 import { useDisponibilidadeParque } from "@/app/hooks/useDisponibilidadeParque";
+import { useAgendamentosForm } from "@/app/hooks/agendamentos/useAgendamentosForm";
 
 export default function NewAppointment({ 
   onClose, 
-  onSubmit, 
-  loading = false, 
-  erro = null,
-  sucesso = false,
-  agendamentoCriado = null,
+  onSubmit,
   dadosEdicao = null
 }) {
   const { consultores, loading: loadingConsultores } = useConsultores();
   const { diasAbertos, loading: loadingDias, formatarDataDisponivel } = useDisponibilidadeParque();
+  
+  const { 
+    loading, 
+    erro, 
+    sucesso, 
+    agendamentoSalvo,
+    salvar, 
+    resetar 
+  } = useAgendamentosForm(async (agendamento) => {
+    if (onSubmit) {
+      await onSubmit(agendamento);
+    }
+  });
   
   const [errorTime, setErrorTime] = useState('');
   const [step, setStep] = useState(1);
@@ -28,7 +39,7 @@ export default function NewAppointment({
     codigo: "",
     cliente_id: "",
     cliente: "",
-    nascimento: "",
+    idade: "",
     cpf: "",
     dataVisita: "",
     horario: "",
@@ -39,8 +50,16 @@ export default function NewAppointment({
     status: "PENDENTE",
   });
 
+  const isEdicao = !!dadosEdicao;
+
+  // ── Verifica idade do titular ──────────────────────────────────
+  const idadeTitular = Number(form.idade);
+  const titularMaiorIdade = idadeTitular >= 18;
+  const titularMenor6Anos = idadeTitular > 0 && idadeTitular < 6;
+
   // ── Datas disponíveis formatadas ──────────────────────────────
   const datasDisponiveis = useMemo(() => {
+    if (!diasAbertos || diasAbertos.length === 0) return [];
     return diasAbertos.map(data => ({
       value: data,
       label: formatarDataDisponivel(data),
@@ -49,22 +68,21 @@ export default function NewAppointment({
 
   // ── Gerar código temporário para preview ──────────────────────
   useEffect(() => {
-    if (!dadosEdicao) {
+    if (!isEdicao) {
       const hoje = new Date();
       const ano = String(hoje.getFullYear()).slice(-2);
       const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-      const dia = String(hoje.getDate()).padStart(2, '0');
-      const prefixo = `${ano}${mes}${dia}`;
-      setForm(prev => ({ ...prev, codigo: `${prefixo}` }));
+      const prefixo = `${ano}${mes}`;
+      setForm(prev => ({ ...prev, codigo: `${prefixo}XXX` }));
     }
-  }, [dadosEdicao]);
+  }, [isEdicao]);
 
   // ── Mostrar código real após criação ──────────────────────────
   useEffect(() => {
-    if (sucesso && agendamentoCriado) {
-      setForm(prev => ({ ...prev, codigo: agendamentoCriado.codigo }));
+    if (sucesso && agendamentoSalvo) {
+      setForm(prev => ({ ...prev, codigo: agendamentoSalvo.codigo }));
     }
-  }, [sucesso, agendamentoCriado]);
+  }, [sucesso, agendamentoSalvo]);
 
   // ── Preencher formulário se estiver editando ──────────────────
   useEffect(() => {
@@ -73,7 +91,7 @@ export default function NewAppointment({
         codigo: dadosEdicao.codigo || "",
         cliente_id: dadosEdicao.cliente_id || "",
         cliente: dadosEdicao.cliente?.nome || "",
-        nascimento: dadosEdicao.cliente?.data_nascimento || "",
+        idade: dadosEdicao.cliente?.idade || "",
         cpf: dadosEdicao.cliente?.cpf || "",
         dataVisita: dadosEdicao.data_visita || "",
         horario: dadosEdicao.horario_visita?.slice(0, 5) || "",
@@ -84,11 +102,10 @@ export default function NewAppointment({
         status: dadosEdicao.status || "PENDENTE",
       });
 
-      // Preencher dependentes
       if (dadosEdicao.dependentes && dadosEdicao.dependentes.length > 0) {
         const deps = dadosEdicao.dependentes.map(dep => ({
           nome: dep.nome || "",
-          nascimento: dep.data_nascimento || "",
+          idade: dep.idade || "",
           cpf: dep.cpf || "",
         }));
         setAmount(deps.length);
@@ -103,73 +120,87 @@ export default function NewAppointment({
   }, [dadosEdicao]);
 
   // ── Validações ─────────────────────────────────────────────────
+  
+  // Titular: maior de idade (>= 18)
+  const idadeValida = idadeTitular >= 18 && idadeTitular < 120;
+  
+  // CPF do titular: obrigatório pois é maior de idade
+  const cpfValido = form.cpf.replace(/\D/g, "").length === 11;
+
   const formValid =
     form.cliente.trim() !== "" &&
-    form.nascimento !== "" &&
-    form.cpf.replace(/\D/g, "").length === 11 &&
+    form.idade !== "" &&
+    idadeValida &&                                     // 👈 Maior de idade
+    cpfValido &&                                       // 👈 CPF obrigatório
     form.dataVisita !== "" &&
     form.horario !== "" &&
     form.cidade.trim() !== "" &&
     errorTime === "";
 
+  // Validação de dependentes: CPF obrigatório apenas se idade >= 6
   const companionsValid =
     companions.length === 0 ||
-    companions.every((person) =>
-      person.nome.trim().length >= 3 &&
-      person.cpf.replace(/\D/g, "").length === 11
-    );
+    companions.every((person) => {
+      const idadeDep = Number(person.idade);
+      const depMenor6Anos = idadeDep > 0 && idadeDep < 6;
+      const nomeValido = person.nome.trim().length >= 3;
+      const idadeDepValida = idadeDep > 0 && idadeDep < 120;
+      const cpfValido = depMenor6Anos 
+        ? true 
+        : person.cpf.replace(/\D/g, "").length === 11;
+      return nomeValido && idadeDepValida && cpfValido;
+    });
 
   // ── Handlers ───────────────────────────────────────────────────
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
-  const handleAmount = (e) => {
-    const qtd = Number(e.target.value);
-    setAmount(qtd);
-    setCompanions(
-      Array.from({ length: qtd }, () => ({
-        nome: "", nascimento: "", cpf: "",
-      }))
-    );
-    setCurrentCompanion(0);
-  };
+  const handleIdadeChange = useCallback((e) => {
+    const value = e.target.value.replace(/\D/g, "").slice(0, 3);
+    setForm((prev) => ({ ...prev, idade: value }));
+  }, []);
 
-  const handleCompanionChange = (field, value) => {
-    const list = [...companions];
-    if (field === "nome") value = value.replace(/[^A-Za-zÀ-ÿ\s]/g, "");
-    if (field === "cpf") {
-      value = value.replace(/\D/g, "").slice(0, 11);
-      value = value.replace(/^(\d{3})(\d)/, "$1.$2").replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1-$2");
-    }
-    list[currentCompanion][field] = value;
-    setCompanions(list);
-  };
+  const handleAmount = useCallback((e) => {
+  const novaQuantidade = Number(e.target.value);
+  const quantidadeAnterior = companions.length;
 
-  const handleLettersOnly = (e) => {
+  if (novaQuantidade === quantidadeAnterior) return;
+
+  if (novaQuantidade > quantidadeAnterior) {
+    // Aumentou: adicionar novos acompanhantes vazios
+    const novos = Array.from({ length: novaQuantidade - quantidadeAnterior }, () => ({
+      nome: "", idade: "", cpf: "",
+    }));
+    setCompanions(prev => [...prev, ...novos]);
+  } else {
+    // Diminuiu: manter os primeiros
+    setCompanions(prev => prev.slice(0, novaQuantidade));
+  }
+  
+  setAmount(novaQuantidade);
+  // Ajustar currentCompanion se necessário
+  if (currentCompanion >= novaQuantidade) {
+    setCurrentCompanion(Math.max(0, novaQuantidade - 1));
+  }
+}, [companions, currentCompanion]);
+
+  const handleLettersOnly = useCallback((e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value.replace(/[^A-Za-zÀ-ÿ\s]/g, "") }));
-  };
+  }, []);
 
-  const handleCpf = (e) => {
+  const handleCpf = useCallback((e) => {
     let cpf = e.target.value.replace(/\D/g, "").slice(0, 11);
-    cpf = cpf.replace(/^(\d{3})(\d)/, "$1.$2").replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1-$2");
+    cpf = cpf.replace(/^(\d{3})(\d)/, "$1.$2")
+      .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/\.(\d{3})(\d)/, ".$1-$2");
     setForm((prev) => ({ ...prev, cpf }));
-  };
-
-  const calcularIdade = (dataNasc) => {
-    if (!dataNasc) return 0;
-    const hoje = new Date();
-    const nasc = new Date(dataNasc + "T00:00:00");
-    let idade = hoje.getFullYear() - nasc.getFullYear();
-    const mes = hoje.getMonth() - nasc.getMonth();
-    if (mes < 0 || (mes === 0 && hoje.getDate() < nasc.getDate())) idade--;
-    return idade;
-  };
+  }, []);
 
   // ── Finalizar ─────────────────────────────────────────────────
-  const handleFinalizar = async () => {
+  const handleFinalizar = useCallback(async () => {
     const dados = {
       vendedor_id: form.vendedor_id || null,
       data_visita: form.dataVisita,
@@ -181,40 +212,48 @@ export default function NewAppointment({
       status: form.status || "PENDENTE",
       dependentes: companions.map(c => ({
         nome: c.nome,
-        idade: calcularIdade(c.nascimento),
-        cpf: c.cpf || null,
+        idade: Number(c.idade) || 0,
+        cpf: Number(c.idade) < 6 ? null : (c.cpf || null), // Dependente < 6: CPF null
       })),
     };
 
-    if (dadosEdicao) {
+    if (isEdicao) {
       dados.codigo = dadosEdicao.codigo;
       dados.cliente_id = dadosEdicao.cliente_id;
     } else {
       dados.cliente = {
         nome: form.cliente,
-        cpf: form.cpf,
-        data_nascimento: form.nascimento,
+        cpf: form.cpf,                               // Titular sempre tem CPF
+        idade: Number(form.idade) || null,
       };
     }
 
-    await onSubmit(dados);
-  };
+    await salvar(dados, isEdicao);
+  }, [form, companions, isEdicao, dadosEdicao, salvar]);
+
+  // ── Fechar e resetar ──────────────────────────────────────────
+  const handleClose = useCallback(() => {
+    resetar();
+    onClose();
+  }, [resetar, onClose]);
 
   // ── Tela de Sucesso ────────────────────────────────────────────
-  if (sucesso && agendamentoCriado) {
+  if (sucesso && agendamentoSalvo) {
     return (
-      <div className={styles.overlay} onClick={onClose}>
+      <div className={styles.overlay} onClick={handleClose}>
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <div className={styles.header}>
             <div>
-              <h2>✅ {dadosEdicao ? "Agendamento Atualizado!" : "Agendamento Criado!"}</h2>
-              <p>O agendamento foi {dadosEdicao ? "atualizado" : "registrado"} com sucesso.</p>
+              <h2>✅ {isEdicao ? "Agendamento Atualizado!" : "Agendamento Criado!"}</h2>
+              <p>O agendamento foi {isEdicao ? "atualizado" : "registrado"} com sucesso.</p>
             </div>
           </div>
           <div className={styles.body}>
             <div className={styles.successBox}>
-              <h3>Código: <strong>{agendamentoCriado.codigo || form.codigo}</strong></h3>
+              <h3>Código: <strong>{agendamentoSalvo.codigo || form.codigo}</strong></h3>
               <p><strong>Cliente:</strong> {form.cliente}</p>
+              <p><strong>Idade:</strong> {form.idade} anos</p>
+              <p><strong>CPF:</strong> {form.cpf}</p>
               <p><strong>Data:</strong> {new Date(form.dataVisita + "T00:00:00").toLocaleDateString("pt-BR")}</p>
               <p><strong>Horário:</strong> {form.horario}</p>
               <p><strong>Pessoas:</strong> {1 + companions.length}</p>
@@ -222,7 +261,7 @@ export default function NewAppointment({
             </div>
           </div>
           <div className={styles.footer}>
-            <button className={styles.saveButton} onClick={onClose}>Fechar</button>
+            <button className={styles.saveButton} onClick={handleClose}>Fechar</button>
           </div>
         </div>
       </div>
@@ -231,7 +270,7 @@ export default function NewAppointment({
 
   // ── Render Principal ───────────────────────────────────────────
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.overlay} onClick={handleClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         {erro && <div className={styles.errorBanner}>⚠️ {erro}</div>}
 
@@ -239,44 +278,101 @@ export default function NewAppointment({
           <>
             <div className={styles.header}>
               <div>
-                <h2>{dadosEdicao ? "Editar Agendamento" : "Novo Agendamento"}</h2>
-                <p>{dadosEdicao ? "Atualize os dados do agendamento." : "Cadastre um novo agendamento para um visitante."}</p>
+                <h2>{isEdicao ? "Editar Agendamento" : "Novo Agendamento"}</h2>
+                <p>{isEdicao ? "Atualize os dados do agendamento." : "Cadastre um novo agendamento para um visitante."}</p>
               </div>
             </div>
 
             <div className={styles.body}>
+              {/* Código + Cliente */}
               <div className={styles.rowCode}>
                 <div className={`${styles.field} ${styles.codeField}`}>
                   <label>Código</label>
-                  <input type="text" name="codigo" value={form.codigo} readOnly className={styles.readOnlyInput} placeholder="Gerado automaticamente" />
+                  <input 
+                    type="text" 
+                    name="codigo" 
+                    value={form.codigo} 
+                    readOnly 
+                    className={styles.readOnlyInput} 
+                    placeholder="Gerado automaticamente" 
+                  />
                   <small style={{ color: '#94a3b8', fontSize: '0.75rem' }}>
-                    {dadosEdicao ? "Código do agendamento" : "Gerado automaticamente ao salvar"}
+                    {isEdicao ? "Código do agendamento" : "Gerado automaticamente ao salvar"}
                   </small>
                 </div>
                 <div className={styles.field}>
-                  <label>Cliente</label>
-                  <input type="text" name="cliente" value={form.cliente} onChange={handleLettersOnly} placeholder="Nome do cliente..." maxLength={100} required />
+                  <label>Cliente (Titular) *</label>
+                  <input 
+                    type="text" 
+                    name="cliente" 
+                    value={form.cliente} 
+                    onChange={handleLettersOnly} 
+                    placeholder="Nome do titular..." 
+                    maxLength={100} 
+                    required 
+                    disabled={isEdicao}
+                  />
                 </div>
               </div>
 
+              {/* Idade + CPF */}
               <div className={styles.row}>
                 <div className={styles.field}>
-                  <label>Data de Nascimento</label>
-                  <input type="" name="nascimento" value={form.nascimento} onChange={handleChange} max={new Date().toISOString().split("T")[0]} required />
+                  <label>Idade * (mínimo 18 anos)</label>
+                  <input 
+                    type="text" 
+                    name="idade" 
+                    value={form.idade} 
+                    onChange={handleIdadeChange} 
+                    placeholder="Ex: 35" 
+                    maxLength={3}
+                    required 
+                    disabled={isEdicao}
+                    className={!idadeValida && form.idade !== "" ? styles.inputError : ""}
+                  />
+                  {form.idade !== "" && !idadeValida && (
+                    <small style={{ color: '#FA643C', fontSize: '0.75rem' }}>
+                      O titular deve ser maior de idade (18 anos ou mais)
+                    </small>
+                  )}
                 </div>
                 <div className={styles.field}>
-                  <label>CPF</label>
-                  <input type="text" name="cpf" value={form.cpf} onChange={handleCpf} placeholder="000.000.000-00" maxLength={14} required />
+                  <label>CPF *</label>
+                  <input 
+                    type="text" 
+                    name="cpf" 
+                    value={form.cpf} 
+                    onChange={handleCpf} 
+                    placeholder="000.000.000-00" 
+                    maxLength={14} 
+                    required
+                    disabled={isEdicao}
+                    className={!cpfValido && form.cpf !== "" ? styles.inputError : ""}
+                  />
+                  {form.cpf !== "" && !cpfValido && (
+                    <small style={{ color: '#FA643C', fontSize: '0.75rem' }}>
+                      CPF deve ter 11 dígitos
+                    </small>
+                  )}
                 </div>
               </div>
 
+              {/* Data Visita + Horário */}
               <div className={styles.row}>
                 <div className={styles.field}>
-                  <label>Data da Visita</label>
+                  <label>Data da Visita *</label>
                   {loadingDias ? (
-                    <p style={{ color: '#94a3b8', fontSize: '0.875rem', padding: '0.5rem 0' }}>Carregando datas disponíveis...</p>
+                    <p style={{ color: '#94a3b8', fontSize: '0.875rem', padding: '0.5rem 0' }}>
+                      Carregando datas disponíveis...
+                    </p>
                   ) : (
-                    <select name="dataVisita" value={form.dataVisita} onChange={handleChange} className={styles.select} required>
+                    <select 
+                      name="dataVisita" 
+                      value={form.dataVisita} 
+                      onChange={handleChange} 
+                      className={styles.select} 
+                      required
+                    >
                       <option value="">Selecione uma data...</option>
                       {datasDisponiveis.map(d => (
                         <option key={d.value} value={d.value}>{d.label}</option>
@@ -285,36 +381,67 @@ export default function NewAppointment({
                   )}
                 </div>
                 <div className={styles.field}>
-                  <label>Horário</label>
-                  <select name="horario" value={form.horario} onChange={(e) => { setErrorTime(""); setForm(prev => ({ ...prev, horario: e.target.value })); }} className={styles.select} required>
+                  <label>Horário *</label>
+                  <select 
+                    name="horario" 
+                    value={form.horario} 
+                    onChange={(e) => { 
+                      setErrorTime(""); 
+                      setForm(prev => ({ ...prev, horario: e.target.value })); 
+                    }} 
+                    className={styles.select} 
+                    required
+                  >
                     <option value="">Selecione...</option>
-                    {["09:30", "10:00", "10:30", "11:00", "11:30"].map(h => <option key={h} value={h}>{h}</option>)}
+                    {["09:30", "10:00", "10:30", "11:00", "11:30"].map(h => (
+                      <option key={h} value={h}>{h}</option>
+                    ))}
                   </select>
                   {errorTime && <span className={styles.error}>{errorTime}</span>}
                 </div>
               </div>
 
+              {/* Consultor + Cidade */}
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>Consultor</label>
-                  <select name="vendedor_id" value={form.vendedor_id} onChange={handleChange} className={styles.select}>
+                  <select 
+                    name="vendedor_id" 
+                    value={form.vendedor_id} 
+                    onChange={handleChange} 
+                    className={styles.select}
+                    disabled={loadingConsultores}
+                  >
                     <option value="">Nenhum (opcional)</option>
-                    {consultores.map(c => (
+                    {Array.isArray(consultores) && consultores.map(c => (
                       <option key={c.id} value={c.id}>{c.nome}</option>
                     ))}
                   </select>
                 </div>
                 <div className={styles.field}>
-                  <label>Cidade</label>
-                  <input type="text" name="cidade" value={form.cidade} onChange={handleLettersOnly} placeholder="Cidade" maxLength={40} required />
+                  <label>Cidade *</label>
+                  <input 
+                    type="text" 
+                    name="cidade" 
+                    value={form.cidade} 
+                    onChange={handleLettersOnly} 
+                    placeholder="Cidade" 
+                    maxLength={40} 
+                    required 
+                  />
                 </div>
               </div>
 
-              {/* 👇 CAMPO ORIGEM */}
+              {/* Origem + Status (edição) */}
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>Origem</label>
-                  <select name="origem" value={form.origem} onChange={handleChange} className={styles.select}>
+                  <select 
+                    name="origem" 
+                    value={form.origem} 
+                    onChange={handleChange} 
+                    className={styles.select}
+                  >
                     <option value="OUTRO">Selecione...</option>
                     <option value="Leads SDR">Leads SDR</option>
                     <option value="Direto">Direto</option>
@@ -324,39 +451,58 @@ export default function NewAppointment({
                   </select>
                 </div>
 
-                 {dadosEdicao && (
-                
+                {isEdicao && (
                   <div className={styles.field}>
                     <label>Status</label>
-                    <select name="status" value={form.status} onChange={handleChange} className={styles.select}>
+                    <select 
+                      name="status" 
+                      value={form.status} 
+                      onChange={handleChange} 
+                      className={styles.select}
+                    >
                       <option value="PENDENTE">Pendente</option>
                       <option value="CONFIRMADO">Confirmado</option>
                       <option value="REALIZADO">Realizado</option>
                       <option value="CANCELADO">Cancelado</option>
                     </select>
                   </div>
-               
-              )}
-
-
+                )}
               </div>
 
-             
-
+              {/* Observações */}
               <div className={styles.field}>
                 <label>Observações</label>
-                <textarea name="observacoes" value={form.observacoes} onChange={handleChange} rows="4" placeholder="Digite alguma observação..." maxLength={500} />
+                <textarea 
+                  name="observacoes" 
+                  value={form.observacoes} 
+                  onChange={handleChange} 
+                  rows="4" 
+                  placeholder="Digite alguma observação..." 
+                  maxLength={500} 
+                />
               </div>
 
+              {/* Confirmação */}
               <div className={styles.confirmArea}>
-                <input type="checkbox" id="confirm" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} />
-                <label htmlFor="confirm">Declaro que revisei todas as informações acima e confirmo que estão corretas.</label>
+                <input 
+                  type="checkbox" 
+                  id="confirm" 
+                  checked={confirmed} 
+                  onChange={(e) => setConfirmed(e.target.checked)} 
+                />
+                <label htmlFor="confirm">
+                  Declaro que revisei todas as informações acima e confirmo que estão corretas.
+                </label>
               </div>
             </div>
 
             <div className={styles.footer}>
-              <button className={styles.cancelButton} onClick={onClose}>Cancelar</button>
-              <button className={styles.saveButton} disabled={!formValid || !confirmed} onClick={() => setStep(2)}>
+              <button className={styles.cancelButton} onClick={handleClose}>Cancelar</button>
+              <button 
+                className={styles.saveButton} 
+                disabled={!formValid || !confirmed} 
+                onClick={() => setStep(2)}
+              >
                 Continuar
               </button>
             </div>
@@ -367,16 +513,22 @@ export default function NewAppointment({
           <>
             <div className={styles.header}>
               <div>
-                <h2>Acompanhantes</h2>
-                <p>Informe os acompanhantes do cliente.</p>
+                <h2>Acompanhantes (Dependentes)</h2>
+                <p>Informe os acompanhantes. Menores de 6 anos não precisam de CPF.</p>
               </div>
             </div>
             <div className={styles.body}>
               <div className={styles.peopleSelect}>
                 <label>Acompanhantes</label>
-                <select value={amount} onChange={handleAmount} className={styles.peopleSelectInput}>
+                <select 
+                  value={amount} 
+                  onChange={handleAmount} 
+                  className={styles.peopleSelectInput}
+                >
                   {[0, 1, 2, 3, 4, 5, 6, 7].map((num) => (
-                    <option key={num} value={num}>{num} Acompanhante{num !== 1 ? "s" : ""}</option>
+                    <option key={num} value={num}>
+                      {num} Acompanhante{num !== 1 ? "s" : ""}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -384,26 +536,101 @@ export default function NewAppointment({
               {companions.length > 0 && (
                 <div className={styles.cardPerson}>
                   <h3>Acompanhante {currentCompanion + 1} de {companions.length}</h3>
-                  <div className={styles.field}><label>Nome</label><input type="text" value={companions[currentCompanion].nome} onChange={(e) => handleCompanionChange("nome", e.target.value)} placeholder="Nome completo" /></div>
-                  <div className={styles.field}><label>Data de Nascimento</label><input type="date" value={companions[currentCompanion].nascimento} onChange={(e) => handleCompanionChange("nascimento", e.target.value)} max={new Date().toISOString().split("T")[0]} /></div>
-                  <div className={styles.field}><label>CPF</label><input type="text" value={companions[currentCompanion].cpf} onChange={(e) => handleCompanionChange("cpf", e.target.value)} placeholder="000.000.000-00" maxLength={14} /></div>
+                  
+                  <div className={styles.field}>
+                    <label>Nome *</label>
+                    <input 
+                      type="text" 
+                      value={companions[currentCompanion]?.nome || ""} 
+                      onChange={(e) => handleCompanionChange("nome", e.target.value)} 
+                      placeholder="Nome completo" 
+                    />
+                  </div>
+                  
+                  <div className={styles.field}>
+                    <label>Idade *</label>
+                    <input 
+                      type="text" 
+                      value={companions[currentCompanion]?.idade || ""} 
+                      onChange={(e) => handleCompanionChange("idade", e.target.value)} 
+                      placeholder="Ex: 10" 
+                      maxLength={3}
+                    />
+                    {Number(companions[currentCompanion]?.idade) > 0 && 
+                     Number(companions[currentCompanion]?.idade) < 6 && (
+                      <small style={{ color: '#3CC83C', fontSize: '0.75rem' }}>
+                        Menor de 6 anos: CPF não obrigatório
+                      </small>
+                    )}
+                  </div>
+                  
+                  <div className={styles.field}>
+                    <label>
+                      CPF {Number(companions[currentCompanion]?.idade) >= 6 ? "*" : "(opcional)"}
+                    </label>
+                    <input 
+                      type="text" 
+                      value={companions[currentCompanion]?.cpf || ""} 
+                      onChange={(e) => handleCompanionChange("cpf", e.target.value)} 
+                      placeholder={
+                        Number(companions[currentCompanion]?.idade) < 6 
+                          ? "Opcional para menores de 6 anos" 
+                          : "000.000.000-00"
+                      } 
+                      maxLength={14}
+                      required={Number(companions[currentCompanion]?.idade) >= 6}
+                    />
+                  </div>
+                  
                   <div className={styles.navigationButtons}>
-                    <button type="button" className={styles.navButton} disabled={currentCompanion === 0} onClick={() => setCurrentCompanion((prev) => prev - 1)}>Anterior</button>
-                    <span className={styles.pageIndicator}>{currentCompanion + 1} / {companions.length}</span>
-                    <button type="button" className={styles.navButton} disabled={currentCompanion === companions.length - 1} onClick={() => setCurrentCompanion((prev) => prev + 1)}>Próximo</button>
+                    <button 
+                      type="button" 
+                      className={styles.navButton} 
+                      disabled={currentCompanion === 0} 
+                      onClick={() => setCurrentCompanion((prev) => prev - 1)}
+                    >
+                      Anterior
+                    </button>
+                    <span className={styles.pageIndicator}>
+                      {currentCompanion + 1} / {companions.length}
+                    </span>
+                    <button 
+                      type="button" 
+                      className={styles.navButton} 
+                      disabled={currentCompanion === companions.length - 1} 
+                      onClick={() => setCurrentCompanion((prev) => prev + 1)}
+                    >
+                      Próximo
+                    </button>
                   </div>
                 </div>
               )}
 
               <div className={styles.confirmArea}>
-                <input type="checkbox" id="confirmCompanions" checked={confirmedCompanions} onChange={(e) => setConfirmedCompanions(e.target.checked)} />
-                <label htmlFor="confirmCompanions">Declaro que revisei os dados dos acompanhantes e confirmo que estão corretos.</label>
+                <input 
+                  type="checkbox" 
+                  id="confirmCompanions" 
+                  checked={confirmedCompanions} 
+                  onChange={(e) => setConfirmedCompanions(e.target.checked)} 
+                />
+                <label htmlFor="confirmCompanions">
+                  Declaro que revisei os dados dos acompanhantes e confirmo que estão corretos.
+                </label>
               </div>
             </div>
             <div className={styles.footer}>
-              <button className={styles.cancelButton} onClick={() => { setStep(1); setConfirmed(false); }}>Voltar</button>
-              <button className={styles.saveButton} disabled={!companionsValid || !confirmedCompanions || loading} onClick={handleFinalizar}>
-                {loading ? "Salvando..." : dadosEdicao ? "Atualizar" : "Finalizar"}
+              <button 
+                className={styles.cancelButton} 
+                onClick={() => { setStep(1); setConfirmed(false); }}
+              >
+                Voltar
+              </button>
+              <button 
+                className={styles.saveButton} 
+                disabled={!companionsValid || !confirmedCompanions || loading} 
+                onClick={handleFinalizar}
+              >
+                {loading ? "Salvando..." : isEdicao ? "Atualizar" : "Finalizar"}
               </button>
             </div>
           </>

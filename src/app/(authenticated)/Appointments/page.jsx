@@ -9,10 +9,11 @@ import {
 
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
 import StatCard from "@/app/Components/Cards/StatCard/StatCard.jsx";
-import { useAgendamentos } from "@/app/hooks/useAgendamentos.js";
+import { useAgendamentos } from "@/app/hooks/agendamentos/index";
 import styles from "./Appointments.module.css";
 import NewAppointment from "@/app/Components/modal/Newappointment";
 import ResultCard from "@/app/Components/Cards/ResultCard/ResultCard.jsx";
+
 /* -------------------------------------------------------------------------- */
 /* HELPERS                                                                     */
 /* -------------------------------------------------------------------------- */
@@ -47,8 +48,6 @@ function formatarDataExtensa(dataISO) {
     year: "numeric",
   });
 }
-
-
 
 const STATUS_MAP = {
   CONFIRMADO: { label: "Confirmado", cls: "statusConfirmed", color: "#3CC83C" },
@@ -90,14 +89,12 @@ function ConfirmModal({ mensagem, onConfirm, onCancel }) {
   );
 }
 
-/** Modal de Visualização do Agendamento */
 function VisualizarModal({ agendamento, onClose, onEditar }) {
   if (!agendamento) return null;
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalDetalhe} onClick={e => e.stopPropagation()}>
-        {/* Header */}
         <div className={styles.modalDetalheHeader}>
           <div>
             <h2>Agendamento {agendamento.codigo}</h2>
@@ -115,9 +112,7 @@ function VisualizarModal({ agendamento, onClose, onEditar }) {
           </div>
         </div>
 
-        {/* Body */}
         <div className={styles.modalDetalheBody}>
-          {/* Cliente */}
           <div className={styles.detalheSection}>
             <h3><User size={16} /> Cliente</h3>
             <div className={styles.detalheGrid}>
@@ -140,7 +135,6 @@ function VisualizarModal({ agendamento, onClose, onEditar }) {
             </div>
           </div>
 
-          {/* Agendamento */}
           <div className={styles.detalheSection}>
             <h3><CalendarDays size={16} /> Agendamento</h3>
             <div className={styles.detalheGrid}>
@@ -163,7 +157,6 @@ function VisualizarModal({ agendamento, onClose, onEditar }) {
             </div>
           </div>
 
-          {/* Dependentes */}
           {agendamento.dependentes && agendamento.dependentes.length > 0 && (
             <div className={styles.detalheSection}>
               <h3><Users size={16} /> Dependentes ({agendamento.dependentes.length})</h3>
@@ -182,7 +175,6 @@ function VisualizarModal({ agendamento, onClose, onEditar }) {
             </div>
           )}
 
-          {/* Observações */}
           {agendamento.observacoes && (
             <div className={styles.detalheSection}>
               <h3>Observações</h3>
@@ -191,11 +183,8 @@ function VisualizarModal({ agendamento, onClose, onEditar }) {
           )}
         </div>
 
-        {/* Footer */}
         <div className={styles.modalDetalheFooter}>
-          <button className={styles.btnFechar} onClick={onClose}>
-            Fechar
-          </button>
+          <button className={styles.btnFechar} onClick={onClose}>Fechar</button>
           <button className={styles.btnEditar} onClick={() => onEditar(agendamento.codigo)}>
             <Pencil size={16} /> Editar
           </button>
@@ -217,22 +206,11 @@ export default function AppointmentsPage() {
   const debounceRef = useRef(null);
 
   const {
-    // Tabela
     agendamentos, total, pagina, totalPaginas,
     loadingTabela, handleBusca, setPagina,
-
-    // Stats
     totalHoje, semanaData, statusCount, loadingStats,
-
-    // Criar
-    criarAgendamento, loadingCriar, erroCriar,
-    sucessoCriar, agendamentoCriado, resetarCriacao,
-
-    // Visualizar/Editar
     agendamentoSelecionado, loadingDetalhe, modoModal,
     abrirVisualizar, abrirEditar, fecharModal,
-
-    // Resultado de Venda 👈
     showResultadoVenda,
     agendamentoParaResultado,
     loadingResultado,
@@ -240,32 +218,23 @@ export default function AppointmentsPage() {
     fecharResultadoVenda,
     confirmarResultadoVenda,
     confirmarRealizado,
-
-    // Ações
     cancelarAgendamento, excluir,
     erro,
+    recarregar,
   } = useAgendamentos();
-
 
   const handleConfirmarResultado = async (codigo, resultado) => {
     await confirmarResultadoVenda(codigo, resultado);
   };
 
-
   const handleConfirmarRealizado = async (codigo) => {
     await confirmarRealizado(codigo);
   };
+
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 100);
     return () => clearTimeout(t);
   }, []);
-
-  useEffect(() => {
-    if (sucessoCriar) {
-      setAbrirModal(false);
-      resetarCriacao();
-    }
-  }, [sucessoCriar, resetarCriacao]);
 
   const onChangeBusca = useCallback(
     (e) => {
@@ -287,23 +256,22 @@ export default function AppointmentsPage() {
     setConfirm(null);
   };
 
-const handleCriarAgendamento = async (dados) => {
-  await criarAgendamento(dados);
-};
-  // ── Handler para editar (abre modal de criação em modo edição) ──
-
-
   const getStatusClass = (status) => styles[STATUS_MAP[status]?.cls ?? ""] ?? "";
 
-
-   const handleEditar = async (codigo) => {
-    fecharModal(); // Fecha visualização se estiver aberta
-    await abrirEditar(codigo); // 👈 Carrega os dados do agendamento no hook
-    setAbrirModal(true); // Abre o modal
+  const handleEditar = async (codigo) => {
+    fecharModal();
+    await abrirEditar(codigo);
+    setAbrirModal(true);
   };
+
+  const handleCloseModal = async () => {
+    setAbrirModal(false);
+    fecharModal();
+    await recarregar();
+  };
+
   return (
     <>
-      {/* Modal de confirmação (Cancelar/Excluir) */}
       {confirm && (
         <ConfirmModal
           mensagem={
@@ -316,7 +284,6 @@ const handleCriarAgendamento = async (dados) => {
         />
       )}
 
-      {/* Modal de Visualização */}
       {modoModal === 'visualizar' && agendamentoSelecionado && (
         <VisualizarModal
           agendamento={agendamentoSelecionado}
@@ -325,7 +292,6 @@ const handleCriarAgendamento = async (dados) => {
         />
       )}
 
-      {/* 👇 Modal de Resultado de Venda */}
       {showResultadoVenda && agendamentoParaResultado && (
         <ResultCard
           agendamento={agendamentoParaResultado}
@@ -335,18 +301,9 @@ const handleCriarAgendamento = async (dados) => {
         />
       )}
 
-      {/* Modal de Novo/Editar Agendamento */}
       {abrirModal && (
         <NewAppointment
-          onClose={() => {
-            setAbrirModal(false);
-            resetarCriacao();
-          }}
-          onSubmit={handleCriarAgendamento}
-          loading={loadingCriar}
-          erro={erroCriar}
-          sucesso={sucessoCriar}
-          agendamentoCriado={agendamentoCriado}
+          onClose={handleCloseModal}
           dadosEdicao={modoModal === 'editar' ? agendamentoSelecionado : null}
         />
       )}
@@ -362,28 +319,18 @@ const handleCriarAgendamento = async (dados) => {
               actionLabel="Novo Agendamento"
               actionIcon={Plus}
               onAction={() => {
+                fecharModal();
                 setAbrirModal(true);
-                fecharModal(); // Garante que não abre em modo edição
               }}
             />
 
-            {/* Erro */}
-            {(erro || erroCriar) && (
+            {erro && (
               <div className={styles.erroBar}>
                 <AlertTriangle size={16} />
-                {erro || erroCriar}
+                {erro}
               </div>
             )}
 
-            {/* Sucesso */}
-            {sucessoCriar && agendamentoCriado && (
-              <div className={styles.sucessoBar}>
-                <CheckCircle2 size={16} />
-                Agendamento {agendamentoCriado.codigo} criado com sucesso!
-              </div>
-            )}
-
-            {/* STATS */}
             <div className={styles.statsGrid}>
               {loadingStats ? (
                 <><SkeletonStat /><SkeletonStat /><SkeletonStat /><SkeletonStat /></>
@@ -405,7 +352,6 @@ const handleCriarAgendamento = async (dados) => {
               )}
             </div>
 
-            {/* SEMANA + STATUS */}
             <div className={styles.scheduleRow}>
               <div className={styles.card}>
                 <div className={styles.cardHeader}><div><h2>Agenda da Semana</h2><p>Agendamentos por dia</p></div></div>
@@ -435,7 +381,6 @@ const handleCriarAgendamento = async (dados) => {
               </div>
             </div>
 
-            {/* TABELA */}
             <div className={styles.tableCard}>
               <div className={styles.tableHeader}>
                 <div>
@@ -496,8 +441,8 @@ const handleCriarAgendamento = async (dados) => {
                                 <Pencil size={15} />
                               </button>
 
-                              {/* 👇 Botão CONFIRMAR REALIZADO (só para CONFIRMADO ou PENDENTE) */}
-                              {(ag.status === 'REALIZADO' || ag.status === 'PENDENTE') && (
+                              {/* 👇 CORRIGIDO: Confirmar Realizado - apenas para PENDENTE ou CONFIRMADO */}
+                              {(ag.status === 'PENDENTE' || ag.status === 'CONFIRMADO') && (
                                 <button
                                   className={`${styles.actionButton} ${styles.confirmButton}`}
                                   title="Confirmar Realização"
@@ -507,7 +452,7 @@ const handleCriarAgendamento = async (dados) => {
                                 </button>
                               )}
 
-                              {/* 👇 Botão RESULTADO DE VENDA (só para REALIZADOS com PENDENTE) */}
+                              {/* Resultado de Venda - apenas para REALIZADOS com resultado PENDENTE */}
                               {ag.status === 'REALIZADO' && ag.resultado_venda === 'PENDENTE' && (
                                 <button
                                   className={`${styles.actionButton} ${styles.resultadoButton}`}
@@ -518,14 +463,15 @@ const handleCriarAgendamento = async (dados) => {
                                 </button>
                               )}
 
-                              {/* 👇 Badge de resultado já definido */}
+                              {/* Badge de resultado já definido */}
                               {ag.resultado_venda && ag.resultado_venda !== 'PENDENTE' && (
-                                <span className={`${styles.resultadoBadge} ${ag.resultado_venda === 'VENDA_REALIZADA' ? styles.resultadoVendido :
-                                    ag.resultado_venda === 'VENDA_PERDIDA' ? styles.resultadoPerdido :
-                                      styles.resultadoNA
-                                  }`}>
+                                <span className={`${styles.resultadoBadge} ${
+                                  ag.resultado_venda === 'VENDA_REALIZADA' ? styles.resultadoVendido :
+                                  ag.resultado_venda === 'VENDA_PERDIDA' ? styles.resultadoPerdido :
+                                  styles.resultadoNA
+                                }`}>
                                   {ag.resultado_venda === 'VENDA_REALIZADA' ? '✓ Vendido' :
-                                    ag.resultado_venda === 'VENDA_PERDIDA' ? '✗ Perdido' : 'N/A'}
+                                   ag.resultado_venda === 'VENDA_PERDIDA' ? '✗ Perdido' : 'N/A'}
                                 </span>
                               )}
 
@@ -569,7 +515,6 @@ const handleCriarAgendamento = async (dados) => {
               )}
             </div>
 
-            {/* ATIVIDADE RECENTE */}
             <div className={styles.card}>
               <div className={styles.cardHeader}><div><h2>Últimas Entradas</h2><p>Registros mais recentes</p></div></div>
               <div className={styles.activityList}>

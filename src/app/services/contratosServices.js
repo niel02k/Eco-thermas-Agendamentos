@@ -1,13 +1,14 @@
-// contratosServices.js
-
+// src/app/services/contratosServices.js
 import { createClient } from '@/lib/supabase/client';
 
 const supabase = createClient();
 
 // ============ CRUD BÁSICO ============
 
-// LISTAR com busca por nome do titular
-export async function listarContratos({ pagina = 1, limite = 10, busca = '' } = {}) {
+/**
+ * Listar contratos com paginação e busca
+ */
+export async function listarContratos({ pagina = 1, limite = 10, busca = '', status = null } = {}) {
   const inicio = (pagina - 1) * limite;
   const fim = inicio + limite - 1;
 
@@ -16,12 +17,17 @@ export async function listarContratos({ pagina = 1, limite = 10, busca = '' } = 
     .select(`*,
       vendedor:vendedor_id (nome),
       agendamento:agendamento_id (codigo, data_visita, horario_visita),
-      dependentes:contrato_dependentes (nome, cpf)
+      dependentes:contrato_dependentes (nome, cpf, idade)
     `, { count: 'exact' });
 
   // Busca por nome do titular
   if (busca) {
     query = query.ilike('titular_nome', `%${busca}%`);
+  }
+
+  // Filtro de status
+  if (status && status !== 'todos') {
+    query = query.eq('status', status);
   }
 
   const { data, count, error } = await query
@@ -31,14 +37,16 @@ export async function listarContratos({ pagina = 1, limite = 10, busca = '' } = 
   if (error) throw error;
 
   return {
-    contratos: data,
-    total: count,
+    contratos: data || [],
+    total: count || 0,
     pagina,
-    totalPaginas: Math.ceil(count / limite)
+    totalPaginas: Math.ceil((count || 0) / limite)
   };
 }
 
-// BUSCAR por ID
+/**
+ * Buscar contrato por ID
+ */
 export async function buscarContratoPorId(id) {
   const { data, error } = await supabase
     .from('contratos')
@@ -55,14 +63,16 @@ export async function buscarContratoPorId(id) {
   return data;
 }
 
-// BUSCAR por nome do titular ou dependente
+/**
+ * Buscar contratos por nome do titular ou dependente
+ */
 export async function buscarContratosPorNome(busca) {
   const { data, error } = await supabase
     .from('contratos')
     .select(`
       *,
       vendedor:vendedor_id (nome),
-      dependentes:contrato_dependentes (nome, cpf)
+      dependentes:contrato_dependentes (nome, cpf, idade)
     `)
     .or(
       `titular_nome.ilike.%${busca}%,` +
@@ -72,18 +82,19 @@ export async function buscarContratosPorNome(busca) {
     .limit(20);
 
   if (error) throw error;
-  return data;
+  return data || [];
 }
 
-// CRIAR
+/**
+ * Criar novo contrato
+ */
 export async function criarContrato(dados) {
   console.log("=== DADOS RECEBIDOS NO SERVIÇO ===");
   console.log("dados:", dados);
-  console.log("dados.cidade:", dados.cidade);
-  
+
   // Garantir que cidade não seja undefined ou null
   const cidade = dados.cidade?.trim() || "";
-  
+
   if (!cidade) {
     console.error("ERRO: cidade está vazia!");
     throw new Error("Cidade é obrigatória e não pode estar vazia");
@@ -92,20 +103,21 @@ export async function criarContrato(dados) {
   const dadosInsert = {
     agendamento_id: dados.agendamento_id || null,
     vendedor_id: dados.vendedor_id,
+    tipo_contrato: dados.tipo_contrato || 'PADRAO',
     titular_nome: dados.titular_nome,
-    titular_cpf: dados.titular_cpf,
+    titular_cpf: dados.titular_cpf?.replace(/\D/g, ''),
     titular_email: dados.titular_email || null,
     titular_telefone: dados.titular_telefone || null,
-    titular_data_nascimento: dados.titular_data_nascimento,
-    valor_total: dados.valor_total,
+    titular_idade: Number(dados.titular_idade) || 0,  // 👈 IDADE
+    valor_total: Number(dados.valor_total) || 0,
     forma_pagamento: dados.forma_pagamento,
     tipo_cobranca: dados.tipo_cobranca || null,
-    parcelas: dados.parcelas || 1,
+    parcelas: Number(dados.parcelas) || 1,
     status: dados.status || 'PENDENTE',
     data_inicio: dados.data_inicio,
     data_fim: dados.data_fim || null,
     observacoes: dados.observacoes || null,
-    cidade: cidade  // VARCHAR(30) NOT NULL
+    cidade: cidade
   };
 
   console.log("=== DADOS PARA INSERT ===");
@@ -132,8 +144,8 @@ export async function criarContrato(dados) {
     const deps = dados.dependentes.map(d => ({
       contrato_id: data.id,
       nome: d.nome,
-      cpf: d.cpf || null,
-      data_nascimento: d.data_nascimento || null
+      cpf: d.cpf?.replace(/\D/g, '') || null,
+      idade: Number(d.idade) || 0  // 👈 IDADE
     }));
 
     const { error: depError } = await supabase
@@ -144,42 +156,82 @@ export async function criarContrato(dados) {
       console.error("Erro ao inserir dependentes:", depError);
       throw depError;
     }
-    
+
     console.log("Dependentes inseridos com sucesso:", deps);
   }
 
   return data;
 }
-// ATUALIZAR
+
+/**
+ * Atualizar contrato existente
+ */
 export async function atualizarContrato(id, dados) {
+  const updateData = {
+    agendamento_id: dados.agendamento_id || null,
+    vendedor_id: dados.vendedor_id,
+    tipo_contrato: dados.tipo_contrato,
+    titular_nome: dados.titular_nome,
+    titular_cpf: dados.titular_cpf?.replace(/\D/g, ''),
+    titular_email: dados.titular_email || null,
+    titular_telefone: dados.titular_telefone || null,
+    titular_idade: Number(dados.titular_idade) || 0,  // 👈 IDADE
+    valor_total: Number(dados.valor_total) || 0,
+    forma_pagamento: dados.forma_pagamento,
+    tipo_cobranca: dados.tipo_cobranca || null,
+    parcelas: Number(dados.parcelas) || 1,
+    status: dados.status,
+    data_inicio: dados.data_inicio,
+    data_fim: dados.data_fim || null,
+    observacoes: dados.observacoes || null,
+    cidade: dados.cidade
+  };
+
+  // Remover undefined
+  Object.keys(updateData).forEach(key => {
+    if (updateData[key] === undefined) delete updateData[key];
+  });
+
   const { data, error } = await supabase
     .from('contratos')
-    .update({
-      agendamento_id: dados.agendamento_id,
-      vendedor_id: dados.vendedor_id,
-      titular_nome: dados.titular_nome,
-      titular_cpf: dados.titular_cpf,
-      titular_email: dados.titular_email,
-      titular_telefone: dados.titular_telefone,
-      titular_data_nascimento: dados.titular_data_nascimento,
-      valor_total: dados.valor_total,
-      forma_pagamento: dados.forma_pagamento,
-      tipo_cobranca: dados.tipo_cobranca,
-      parcelas: dados.parcelas,
-      status: dados.status,
-      data_inicio: dados.data_inicio,
-      data_fim: dados.data_fim,
-      observacoes: dados.observacoes
-    })
+    .update(updateData)
     .eq('id', id)
     .select()
     .single();
 
   if (error) throw error;
+
+  // Atualizar dependentes (remove antigos e insere novos)
+  if (dados.dependentes !== undefined) {
+    // Remover dependentes antigos
+    await supabase
+      .from('contrato_dependentes')
+      .delete()
+      .eq('contrato_id', id);
+
+    // Inserir novos dependentes
+    if (dados.dependentes && dados.dependentes.length > 0) {
+      const deps = dados.dependentes.map(d => ({
+        contrato_id: id,
+        nome: d.nome,
+        cpf: d.cpf?.replace(/\D/g, '') || null,
+        idade: Number(d.idade) || 0  // 👈 IDADE
+      }));
+
+      const { error: depError } = await supabase
+        .from('contrato_dependentes')
+        .insert(deps);
+
+      if (depError) throw depError;
+    }
+  }
+
   return data;
 }
 
-// EXCLUIR
+/**
+ * Excluir contrato (dependentes são excluídos por CASCADE)
+ */
 export async function excluirContrato(id) {
   const { error } = await supabase
     .from('contratos')
@@ -190,7 +242,9 @@ export async function excluirContrato(id) {
   return true;
 }
 
-// RECEITA REAL POR MÊS (últimos 8 meses)
+/**
+ * Receita mensal dos últimos 8 meses
+ */
 export async function receitaPorMes() {
   const hoje = new Date();
   const inicio = new Date(hoje.getFullYear(), hoje.getMonth() - 7, 1);
@@ -199,7 +253,7 @@ export async function receitaPorMes() {
     .from('contratos')
     .select('valor_total, data_inicio')
     .gte('data_inicio', inicio.toISOString().split('T')[0])
-    .eq('status', 'ATIVO');
+    .in('status', ['ATIVO', 'PENDENTE']);
 
   if (error) throw error;
 
@@ -213,7 +267,7 @@ export async function receitaPorMes() {
     agrupado[chave] = 0;
   }
 
-  data.forEach(c => {
+  (data || []).forEach(c => {
     const d = new Date(c.data_inicio);
     const chave = meses[d.getMonth()];
     if (agrupado[chave] !== undefined) {
@@ -224,42 +278,9 @@ export async function receitaPorMes() {
   return Object.entries(agrupado).map(([mes, receita]) => ({ mes, receita }));
 }
 
-// Função auxiliar para agrupar ticket médio (NÃO exportada diretamente)
-function agruparTicketMedio(data, tipo, inicio, fim) {
-  const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-  
-  const agrupado = data.reduce((acc, contrato) => {
-    let chave;
-
-    if (tipo === 'vendedor') {
-      chave = contrato.vendedor?.nome || 'Sem vendedor';
-    } else if (tipo === 'forma_pagamento') {
-      chave = contrato.forma_pagamento;
-    } else if (tipo === 'mes') {
-      const d = new Date(contrato.data_inicio);
-      chave = meses[d.getMonth()];
-    }
-
-    if (!acc[chave]) {
-      acc[chave] = { total: 0, quantidade: 0 };
-    }
-    acc[chave].total += Number(contrato.valor_total);
-    acc[chave].quantidade += 1;
-    return acc;
-  }, {});
-
-  return Object.entries(agrupado).map(([chave, valor]) => ({
-    grupo: chave,
-    ticket_medio: valor.total / valor.quantidade,
-    total_contratos: valor.quantidade,
-    valor_total: valor.total,
-    periodo: { inicio, fim }
-  }));
-}
-
-// TICKET MÉDIO (totalmente reutilizável)
-// src/app/services/contratosServices.js
-
+/**
+ * Ticket médio dos contratos
+ */
 export async function ticketMedio({ 
   inicio, 
   fim, 
@@ -270,14 +291,11 @@ export async function ticketMedio({
 } = {}) {
   
   try {
-
-    // Função auxiliar para buscar contratos
     const buscarContratos = async (comFiltroData = true) => {
       let query = supabase
         .from('contratos')
         .select('valor_total, data_inicio, data_criacao, forma_pagamento, status, vendedor_id, vendedor:vendedor_id(nome)', { count: 'exact' });
 
-      // Aplicar filtro de data apenas se solicitado
       if (comFiltroData && (inicio || fim)) {
         const hoje = new Date();
         const dataInicio = inicio || new Date(hoje.getFullYear(), 0, 1).toISOString().split('T')[0];
@@ -301,43 +319,29 @@ export async function ticketMedio({
       return { data, error, count };
     };
 
-    // Primeira tentativa: COM filtro de data (se datas foram fornecidas)
+    // Primeira tentativa: COM filtro de data
     if (inicio || fim) {
-      const { data, error, count } = await buscarContratos(true);
+      const { data, error } = await buscarContratos(true);
       
       if (error) {
-        console.error('❌ Erro na query com filtro:', error);
+        console.error('Erro na query com filtro:', error);
       } else if (data && data.length > 0) {
-        
         const valorTotal = data.reduce((acc, c) => acc + (Number(c.valor_total) || 0), 0);
-        const ticketMedio =
-             data.length > 0 ? Number((valorTotal / data.length).toFixed(2)) : 0;
-
-          const resultado = {
-             ticket_medio: ticketMedio,
-             total_contratos: data.length,
-             valor_total: Number(valorTotal.toFixed(2)),
-            periodo: { inicio: "todos", fim: "todos" }
+        return {
+          ticket_medio: Number((valorTotal / data.length).toFixed(2)),
+          total_contratos: data.length,
+          valor_total: Number(valorTotal.toFixed(2)),
+          periodo: { inicio: inicio || 'início', fim: fim || 'hoje' }
         };
-        
-        return resultado;
       }
-      
     }
     
-    // Segunda tentativa: SEM filtro de data (todos os contratos)
-    console.log('🔍 Buscando sem filtro de data...');
-    const { data, error, count } = await buscarContratos(false);
+    // Segunda tentativa: SEM filtro de data
+    const { data, error } = await buscarContratos(false);
     
-    if (error) {
-      console.error('❌ Erro na query sem filtro:', error);
-      throw error;
-    }
-    
-    console.log('📊 Dados encontrados sem filtro:', { count, length: data?.length });
+    if (error) throw error;
     
     if (!data || data.length === 0) {
-      console.warn('⚠️ Nenhum contrato encontrado');
       return {
         ticket_medio: 0,
         total_contratos: 0,
@@ -346,21 +350,17 @@ export async function ticketMedio({
       };
     }
     
-    // Calcular ticket médio
     const valorTotal = data.reduce((acc, c) => acc + (Number(c.valor_total) || 0), 0);
     
-    const resultado = {
+    return {
       ticket_medio: Number((valorTotal / data.length).toFixed(2)),
       total_contratos: data.length,
-      valor_total: valorTotal,
+      valor_total: Number(valorTotal.toFixed(2)),
       periodo: { inicio: 'todos', fim: 'todos' }
     };
     
-
-    return resultado;
-    
   } catch (error) {
-    console.error('❌ Erro geral no ticketMedio:', error);
+    console.error('Erro geral no ticketMedio:', error);
     return {
       ticket_medio: 0,
       total_contratos: 0,
