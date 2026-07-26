@@ -8,7 +8,7 @@ import StatCard from '@/app/Components/Cards/StatCard/StatCard.jsx';
 import styles from './Dashboard.module.css';
 import { useDashboardStats } from '@/app/hooks/useDashboardStats';
 import NewAppointment from "@/app/Components/modal/Newappointment";
-import Loading from '@/app/Components/loading/page.jsx';
+
 
 const Dashboard = () => {
   const [visible, setVisible] = useState(false);
@@ -16,7 +16,6 @@ const Dashboard = () => {
   
   // Usar o hook de estatísticas
   const {
-    loading,
     error,
     totalHoje,
     semanaData,
@@ -49,14 +48,7 @@ const Dashboard = () => {
       }))
     : [];
 
-  if (loading) {
-    return (
-      <Loading 
-        icon={LayoutDashboard}
-        text="Carregando Dashboard....." 
-      />
-    );
-  }
+ 
 
   return (
     <div className={styles.container}>
@@ -242,7 +234,7 @@ const Dashboard = () => {
               <span className={styles.stripLabel}>Ticket Médio</span>
               <span className={styles.stripValue}>
                 {ticketMedioData?.ticket_medio > 0 
-                  ? formatarMoeda(ticketMedioData.ticket_medio) 
+                  ? formatarMoeda(ticketMedioData.ticket_medio)
                   : 'R$ 0,00'}
               </span>
             </div>
