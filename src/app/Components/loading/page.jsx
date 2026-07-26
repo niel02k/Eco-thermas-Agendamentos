@@ -1,4 +1,4 @@
-import styles from "@/app/Components/loading/loanding.module.css"
+import styles from "@/app/Components/loading/loading.module.css"
 
 export default function Loading({
     icon: Icon,
