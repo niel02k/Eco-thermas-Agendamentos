@@ -1,11 +1,11 @@
 :root {
   /* Identidade Visual Eco Manager - Cores Oficiais */
-  --color-blue-main: #1E6EBE;    /* Azul Principal (Texto "eco") */
-  --color-orange-sun: #FA643C;   /* Laranja (Sol) - Cor de Destaque/CTA */
-  --color-blue-sky: #6EC8F0;     /* Azul Claro (Respingos) - Apoio */
-  --color-yellow-sun: #FAD228;   /* Amarelo (Raios do Sol) */
-  --color-green-nature: #3CC83C; /* Verde (Folhas) - Sucesso */
-  --color-purple-deep: #991094;  /* Roxo (Texto Inferior) */
+  --color-blue-main: #1E6EBE;
+  --color-orange-sun: #FA643C;
+  --color-blue-sky: #6EC8F0;
+  --color-yellow-sun: #FAD228;
+  --color-green-nature: #3CC83C;
+  --color-purple-deep: #991094;
 
   /* Cores de Interface */
   --bg-light: #F8FAFC;
@@ -24,6 +24,7 @@
 .loginContainer {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh; /* Melhor para mobile */
   background-color: var(--bg-light);
   font-family: 'Inter', sans-serif;
 }
@@ -47,11 +48,7 @@
   }
 }
 
-.checkboxLabel{
-    color: #1E6EBE;
-}
-
-/* Elementos decorativos inspirados no Sol e Respingos */
+/* Elementos decorativos */
 .brandingSection::before {
   content: '';
   position: absolute;
@@ -133,23 +130,45 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 1rem; /* Reduzido para mobile */
+}
+
+@media (min-width: 640px) {
+  .formSection {
+    padding: 2rem;
+  }
 }
 
 .formWrapper {
   width: 100%;
   max-width: 460px;
   background-color: var(--surface);
-  padding: 3.5rem 3rem;
+  padding: 2rem 1.5rem; /* Mais compacto para mobile */
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--border);
 }
 
+@media (min-width: 640px) {
+  .formWrapper {
+    padding: 3rem 2.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .formWrapper {
+    padding: 3.5rem 3rem;
+  }
+}
+
 .mobileLogo {
   display: flex;
   justify-content: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.mobileLogo .logoImg {
+  height: 48px; /* Ligeiramente menor para mobile */
 }
 
 @media (min-width: 1024px) {
@@ -159,39 +178,77 @@
 }
 
 .formHeader {
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
   text-align: center;
+}
+
+@media (min-width: 640px) {
+  .formHeader {
+    margin-bottom: 3rem;
+  }
 }
 
 .formTitle {
   font-family: 'Montserrat', sans-serif;
-  font-size: 2rem;
+  font-size: 1.75rem; /* Reduzido para mobile */
   font-weight: 800;
   color: var(--color-blue-main);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .formTitle {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+  }
 }
 
 .formSubtitle {
-  font-size: 1rem;
+  font-size: 0.9rem; /* Reduzido para mobile */
   color: var(--text-muted);
+  line-height: 1.4;
+}
+
+@media (min-width: 640px) {
+  .formSubtitle {
+    font-size: 1rem;
+  }
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1.75rem;
+  gap: 1.25rem; /* Reduzido para mobile */
+}
+
+@media (min-width: 640px) {
+  .form {
+    gap: 1.75rem;
+  }
 }
 
 .inputGroup {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.4rem;
+}
+
+@media (min-width: 640px) {
+  .inputGroup {
+    gap: 0.6rem;
+  }
 }
 
 .label {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-main);
+}
+
+@media (min-width: 640px) {
+  .label {
+    font-size: 0.9rem;
+  }
 }
 
 .inputWrapper {
@@ -202,20 +259,43 @@
 
 .inputIcon {
   position: absolute;
-  left: 1.25rem;
+  left: 1rem;
   color: var(--color-blue-main);
   opacity: 0.7;
 }
 
+@media (min-width: 640px) {
+  .inputIcon {
+    left: 1.25rem;
+  }
+}
+
 .input {
   width: 100%;
-  padding: 1rem 1.25rem 1rem 3.25rem;
+  padding: 0.85rem 1rem 0.85rem 2.75rem; /* Ajustado para mobile */
   font-size: 1rem;
   color: var(--text-main);
   background-color: var(--input-bg);
   border: 2px solid transparent;
   border-radius: var(--radius-lg);
   transition: all 0.3s ease;
+  -webkit-appearance: none; /* Remove estilos padrão do iOS */
+  appearance: none;
+}
+
+@media (min-width: 640px) {
+  .input {
+    padding: 1rem 1.25rem 1rem 3.25rem;
+  }
+}
+
+/* Ajuste específico para iOS */
+.input::-webkit-contacts-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
 }
 
 .input:focus {
@@ -227,15 +307,27 @@
 
 .passwordToggle {
   position: absolute;
-  right: 1.25rem;
+  right: 1rem;
   background: none;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0.5rem; /* Área de toque maior para mobile */
   display: flex;
   align-items: center;
   transition: color 0.2s;
+  min-width: 44px; /* Tamanho mínimo para toque */
+  min-height: 44px;
+  justify-content: center;
+}
+
+@media (min-width: 640px) {
+  .passwordToggle {
+    right: 1.25rem;
+    padding: 0.25rem;
+    min-width: auto;
+    min-height: auto;
+  }
 }
 
 .passwordToggle:hover {
@@ -246,40 +338,70 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  flex-wrap: wrap; /* Permite quebra em telas muito pequenas */
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .formOptions {
+    font-size: 0.9rem;
+  }
 }
 
 .checkboxGroup {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
+}
+
+.checkboxLabel {
+  color: #1E6EBE;
+  user-select: none; /* Evita seleção de texto ao tocar */
 }
 
 .checkbox {
   appearance: none;
-  width: 1.1rem;
-  height: 1.1rem;
+  -webkit-appearance: none;
+  min-width: 1.25rem; /* Tamanho mínimo para toque */
+  min-height: 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
   border: 2px solid #ccc;
   border-radius: 4px;
   background: white;
   cursor: pointer;
   display: grid;
   place-content: center;
+  margin: 0;
+}
+
+@media (min-width: 640px) {
+  .checkbox {
+    min-width: 1.1rem;
+    min-height: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+  }
 }
 
 .checkbox:checked {
   background: var(--color-blue-main);
   border-color: var(--color-blue-main);
 }
+
 .checkbox:checked::after {
   content: "✓";
   color: white;
   font-size: 0.8rem;
+  line-height: 1;
 }
+
 .forgotPassword {
   color: var(--color-purple-deep);
   font-weight: 600;
   text-decoration: none;
+  padding: 0.25rem 0; /* Área de toque */
 }
 
 .forgotPassword:hover {
@@ -288,10 +410,10 @@
 
 .submitButton {
   width: 100%;
-  padding: 1.1rem;
+  padding: 1rem; /* Reduzido para mobile */
   background-color: var(--color-orange-sun);
   color: white;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   border: none;
   border-radius: var(--radius-lg);
@@ -302,6 +424,15 @@
   justify-content: center;
   gap: 0.75rem;
   box-shadow: 0 4px 12px rgba(250, 100, 60, 0.3);
+  -webkit-tap-highlight-color: transparent; /* Remove highlight no iOS */
+  touch-action: manipulation; /* Melhora resposta ao toque */
+}
+
+@media (min-width: 640px) {
+  .submitButton {
+    padding: 1.1rem;
+    font-size: 1.1rem;
+  }
 }
 
 .submitButton:hover {
@@ -312,13 +443,21 @@
 
 .submitButton:active {
   transform: translateY(0);
+  background-color: #cc4726; /* Feedback visual ao toque */
 }
 
 .formFooter {
-  margin-top: 2.5rem;
+  margin-top: 2rem;
   text-align: center;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--text-muted);
+}
+
+@media (min-width: 640px) {
+  .formFooter {
+    margin-top: 2.5rem;
+    font-size: 0.95rem;
+  }
 }
 
 .formFooterLink {
@@ -326,8 +465,36 @@
   font-weight: 700;
   text-decoration: none;
   margin-left: 0.4rem;
+  padding: 0.25rem 0; /* Área de toque */
 }
 
 .formFooterLink:hover {
   text-decoration: underline;
+}
+
+/* Ajustes para telas muito pequenas (iPhone SE, etc) */
+@media (max-width: 374px) {
+  .formWrapper {
+    padding: 1.5rem 1rem;
+  }
+  
+  .formTitle {
+    font-size: 1.5rem;
+  }
+  
+  .formOptions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .input {
+    font-size: 0.95rem;
+  }
+}
+
+/* Previne zoom em inputs no iOS */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .input {
+    font-size: 16px; /* Tamanho mínimo para evitar zoom no iOS */
+  }
 }

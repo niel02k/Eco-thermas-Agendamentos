@@ -1,0 +1,333 @@
+/* src/app/Components/Comp_Contrato/VisualizarContrato/VisualizarContrato.module.css */
+
+/* ───────────────────────────────────────────── */
+/* OVERLAY + MODAL                               */
+/* ───────────────────────────────────────────── */
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modalDetalhe {
+  background: #ffffff;
+  border-radius: 1.5rem;
+  max-width: 650px;
+  width: 90%;
+  max-height: 85vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.2);
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+/* ───────────────────────────────────────────── */
+/* HEADER                                        */
+/* ───────────────────────────────────────────── */
+
+.modalDetalheHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.75rem 1.75rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  flex-shrink: 0;
+}
+
+.modalDetalheHeader h2 {
+  margin: 0 0 0.5rem;
+  color: #1e293b;
+  font-size: 1.2rem;
+  font-weight: 800;
+  font-family: "Montserrat", sans-serif;
+}
+
+.closeBtn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 0.75rem;
+  background: #f1f5f9;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.closeBtn:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.actionButton {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 0.75rem;
+  background: #eff6ff;
+  color: #1e6ebe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionButton:hover {
+  background: #dbeafe;
+  transform: translateY(-1px);
+}
+
+/* ───────────────────────────────────────────── */
+/* BODY                                          */
+/* ───────────────────────────────────────────── */
+
+.modalDetalheBody {
+  padding: 1.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* ───────────────────────────────────────────── */
+/* SEÇÕES                                        */
+/* ───────────────────────────────────────────── */
+
+.detalheSection {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 1.25rem;
+}
+
+.detalheSection h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+  color: #1e6ebe;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Grid de detalhes */
+.detalheGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.875rem;
+}
+
+.detalheGrid div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.detalheGrid label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detalheGrid p {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Valor em destaque */
+.valorDestaque {
+  color: #16a34a !important;
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+}
+
+/* ───────────────────────────────────────────── */
+/* DEPENDENTES                                   */
+/* ───────────────────────────────────────────── */
+
+.dependentesList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.dependenteItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.625rem 0.875rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  transition: all 0.15s ease;
+}
+
+.dependenteItem:hover {
+  border-color: #1e6ebe;
+  background: #eff6ff;
+}
+
+.dependenteNome {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.dependenteInfo {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ───────────────────────────────────────────── */
+/* OBSERVAÇÕES                                   */
+/* ───────────────────────────────────────────── */
+
+.observacoes {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #475569;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+/* ───────────────────────────────────────────── */
+/* STATUS BADGE                                  */
+/* ───────────────────────────────────────────── */
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.statusAtivo     { background: #dcfce7; color: #166534; }
+.statusPendente  { background: #fef9c3; color: #854d0e; }
+.statusBloqueado { background: #fee2e2; color: #b91c1c; }
+.statusEncerrado { background: #f1f5f9; color: #64748b; }
+.statusCancelado { background: #fee2e2; color: #b91c1c; }
+
+/* ───────────────────────────────────────────── */
+/* FOOTER                                        */
+/* ───────────────────────────────────────────── */
+
+.modalDetalheFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1.25rem 1.75rem;
+  border-top: 1px solid #f1f5f9;
+  flex-shrink: 0;
+}
+
+.btnFechar {
+  padding: 0.7rem 1.5rem;
+  background: #f1f5f9;
+  color: #64748b;
+  border: none;
+  border-radius: 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnFechar:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.btnEditar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.5rem;
+  background: #1e6ebe;
+  color: #ffffff;
+  border: none;
+  border-radius: 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnEditar:hover {
+  background: #1557a0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30, 110, 190, 0.3);
+}
+
+/* ───────────────────────────────────────────── */
+/* RESPONSIVO                                    */
+/* ───────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .modalDetalhe {
+    max-width: 95%;
+    max-height: 90vh;
+    border-radius: 1.25rem;
+  }
+
+  .modalDetalheHeader {
+    padding: 1.25rem 1.25rem 0.875rem;
+  }
+
+  .modalDetalheHeader h2 {
+    font-size: 1rem;
+  }
+
+  .modalDetalheBody {
+    padding: 1rem 1.25rem;
+    gap: 1rem;
+  }
+
+  .detalheGrid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .modalDetalheFooter {
+    padding: 1rem 1.25rem;
+    flex-direction: column;
+  }
+
+  .btnFechar,
+  .btnEditar {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem;
+  }
+}

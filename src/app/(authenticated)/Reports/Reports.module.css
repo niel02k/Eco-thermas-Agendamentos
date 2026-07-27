@@ -432,7 +432,7 @@
 @media (max-width:4043px){
   .tableRowHeader,
   .tableRow {
-    grid-template-columns: 90px 90px 0.4fr 110px 110px 110px 120px;
+    grid-template-columns: 90px 90px 0.4fr 110px 110px 110px 110px;
     font-size: 0.88rem;
     gap: 60px;
   }
@@ -450,7 +450,7 @@
 
   .tableRowHeader,
   .tableRow {
-    grid-template-columns: 50px 50px 0.5fr 110px 110px 110px 120px;
+    grid-template-columns: 50px 50px 0.5fr 110px 110px 110px 110px;
     font-size: 0.88rem;
     gap: 60px;
   }
@@ -653,6 +653,10 @@
   .moduleBadge {
     margin-left: auto;
   }
+  .clientName{
+    color: #1e293b;
+  
+  }
 }
 
 /* ==========================
@@ -674,6 +678,10 @@
   .tableRow > span{
     font-size:.8rem;
     gap:.5rem;
+  }
+  .clientName{
+    color: #1e293b;
+  
   }
 }
 /* ==========================
