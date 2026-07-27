@@ -8,6 +8,7 @@ import styles from './Card.module.css';
 import { useRouter } from 'next/navigation';
 import { useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { getNotifications } from "@/app/services/notificacaoService";
 
 
 /**
@@ -16,6 +17,7 @@ import { createClient } from "@/lib/supabase/client";
 
 
 const CardNotification = () => {
+  console.log("CARD DE NOTIFICAÇÕES RENDERIZADO")
   const router = useRouter();
   // Dados iniciais mockados
   const [notifications, setNotifications] = useState([]);
@@ -29,7 +31,9 @@ const CardNotification = () => {
 
         setNotifications(data);
       } catch (err) {
-        console.error(err);
+        console.error("ERRO COMPLETO:", err);
+        console.error("Mensagem:", err.message);
+        console.error("Detalhes:", err);
       }
     }
 
