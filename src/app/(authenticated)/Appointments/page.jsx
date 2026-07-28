@@ -9,13 +9,13 @@ import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
 
 // Componentes
-import AppointmentsStats from "@/app/Components/ModalAgendamento/components/AppointmentsStats";
-import AppointmentsWeekStatus from "@/app/Components/ModalAgendamento/components/AppointmentsWeekStatus";
-import AppointmentsTable from "@/app/Components/ModalAgendamento/components/AppointmentsTable";
-import AppointmentsMobile from "@/app/Components/ModalAgendamento/components/AppointmentsMobile";
-import AppointmentsRecent from "@/app/Components/ModalAgendamento/components/AppointmentsRecent";
-import VisualizarModal from "@/app/Components/ModalAgendamento/components/VisualizarModal";
-import ConfirmModal from "@/app/Components/ModalAgendamento/components/ConfirmModal";
+import AppointmentsStats from "@/app/Components/ModalAgendamento/AppointmentsStats";
+import AppointmentsWeekStatus from "@/app/Components/ModalAgendamento/AppointmentsWeekStatus";
+import AppointmentsTable from "@/app/Components/ModalAgendamento/AppointmentsTable";
+import AppointmentsMobile from "@/app/Components/ModalAgendamento/AppointmentsMobile";
+import AppointmentsRecent from "@/app/Components/ModalAgendamento/AppointmentsRecent";
+import VisualizarModal from "@/app/Components/ModalAgendamento/VisualizarModal";
+import ConfirmModal from "@/app/Components/ModalAgendamento/ConfirmModal";
 import NewAppointment from "@/app/Components/modal/Newappointment.jsx";
 import ResultCard from "@/app/Components/Cards/ResultCard/ResultCard.jsx";
 
