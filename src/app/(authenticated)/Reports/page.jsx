@@ -11,7 +11,7 @@ import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
 import StatCard from "@/app/Components/Cards/StatCard/StatCard.jsx";
 import styles from "./Reports.module.css";
 import { useContratos } from "@/app/hooks/useContratos";
-import { useAgendamentos } from "@/app/hooks/agendamentos/useAgendamentos";
+import { useAgendamentos } from "@/app/hooks/useAgendamentos";
 import { useConsultores } from "@/app/hooks/useConsultores";
 import { exportToExcel, exportToPDF } from "@/app/services/exportServices.js";
 
