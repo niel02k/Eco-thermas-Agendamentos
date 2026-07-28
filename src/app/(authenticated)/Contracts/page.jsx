@@ -61,6 +61,34 @@ export default function Contracts() {
   });
 }, [rankingVendedores, statusContratos, resumoGeral, total, contratos]); 
   return (
+    <>
+
+      {/* Modal de Visualização */}
+      {modalAberto && contratoSelecionado && (
+        <VisualizarContrato
+          contrato={contratoSelecionado}
+          onClose={() => setModalAberto(false)}
+          onEditar={(id) => { setModalAberto(false); handleEditar(id); }}
+        />
+      )}
+
+      {/* Modal de Criar Contrato */}
+      {showCriarContrato && (
+        <FormContrato 
+          onClose={() => setShowCriarContrato(false)} 
+          onSuccess={handleContratoCriado} 
+        />
+      )}
+
+      {/* Modal de Editar Contrato */}
+      {showEditarContrato && contratoParaEditar && (
+        <FormContrato
+          contrato={contratoParaEditar}
+          onClose={() => { setShowEditarContrato(false); setContratoParaEditar(null); }}
+          onSuccess={handleContratoEditado}
+        />
+      )}
+      
     <div className={styles.container}>
       <main className={`${styles.main} ${visible ? styles.mainVisible : ""}`}>
         <PageHeader
@@ -150,10 +178,7 @@ export default function Contracts() {
           />
         )}
 
-        {showCriarContrato && (
-          <FormContrato onClose={() => setShowCriarContrato(false)} onSuccess={handleContratoCriado} />
-        )}
-
+     
         {showEditarContrato && contratoParaEditar && (
           <FormContrato
             contrato={contratoParaEditar}
@@ -163,5 +188,6 @@ export default function Contracts() {
         )}
       </main>
     </div>
+    </>
   );
 }

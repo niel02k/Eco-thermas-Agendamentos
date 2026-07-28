@@ -1,5 +1,5 @@
 import React from 'react';
-import Button from '@/app/Components/Button/Button.jsx';
+import Button from '@/app/Components/ui/Button/Button.jsx';
 import styles from './PageHeader.module.css';
 
 /**

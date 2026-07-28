@@ -1,277 +1,129 @@
+// src/app/Components/ModalAgendamento/Appointments.jsx
 "use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import {
-  Plus, CalendarCheck, CircleDollarSign, CheckCircle2, CalendarDays,
-  Eye, Pencil, XCircle, Trash2, Clock3, Search,
-  ChevronLeft, ChevronRight, AlertTriangle, X, User, Users, MapPin,
-} from "lucide-react";
-
+import { Plus, AlertTriangle } from "lucide-react";
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
-import StatCard from "@/app/Components/Cards/StatCard/StatCard.jsx";
-import { useAgendamentos } from "@/app/hooks/agendamentos/index";
-import styles from "./Appointments.module.css";
-import NewAppointment from "@/app/Components/modal/Newappointment";
+import { useAgendamentos } from "@/app/hooks/useAgendamentos";
+import { useMediaQuery } from "@/app/hooks/useMediaQuery";
+import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
+
+// Componentes
+import AppointmentsStats from "@/app/components/ModalAgendamento/AppointmentsStats.jsx";
+import AppointmentsWeekStatus from "@/app/components/ModalAgendamento/AppointmentsWeekStatus.jsx";
+import AppointmentsTable from "@/app/components/ModalAgendamento/AppointmentsTable.jsx";
+import AppointmentsMobile from "@/app/components/ModalAgendamento/AppointmentsMobile.jsx";
+import AppointmentsRecent from "@/app/components/ModalAgendamento/AppointmentsRecent.jsx";
+import VisualizarModal from "@/app/components/ModalAgendamento/VisualizarModal.jsx";
+import ConfirmModal from "@/app/components/ModalAgendamento/ConfirmModal.jsx";
+import NewAppointment from "@/app/Components/modal/Newappointment.jsx";
 import ResultCard from "@/app/Components/Cards/ResultCard/ResultCard.jsx";
 
-/* -------------------------------------------------------------------------- */
-/* HELPERS                                                                     */
-/* -------------------------------------------------------------------------- */
-
-function formatarData(dataISO) {
-  if (!dataISO) return "—";
-  const [ano, mes, dia] = dataISO.split("-");
-  return `${dia}/${mes}/${ano}`;
-}
-
-function formatarDataExtenso(dataISO) {
-  if (!dataISO) return "—";
-  return new Date(dataISO + "T12:00:00").toLocaleDateString("pt-BR", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-}
-
-function formatarHorario(horario) {
-  if (!horario) return "—";
-  return horario.slice(0, 5);
-}
-
-function formatarDataExtensa(dataISO) {
-  if (!dataISO) return "—";
-  return new Date(dataISO + "T12:00:00").toLocaleDateString("pt-BR", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-}
-
-const STATUS_MAP = {
-  CONFIRMADO: { label: "Confirmado", cls: "statusConfirmed", color: "#3CC83C" },
-  PENDENTE: { label: "Pendente", cls: "statusPending", color: "#FAD228" },
-  CANCELADO: { label: "Cancelado", cls: "statusCanceled", color: "#FA643C" },
-  REALIZADO: { label: "Realizado", cls: "statusFinished", color: "#1E6EBE" },
-};
-
-/* -------------------------------------------------------------------------- */
-/* SUBCOMPONENTES                                                              */
-/* -------------------------------------------------------------------------- */
-
-function SkeletonRow() {
-  return (
-    <tr>
-      {[...Array(7)].map((_, i) => (
-        <td key={i}><div className={styles.skeletonCell} /></td>
-      ))}
-    </tr>
-  );
-}
-
-function SkeletonStat() {
-  return <div className={styles.skeletonStat} />;
-}
-
-function ConfirmModal({ mensagem, onConfirm, onCancel }) {
-  return (
-    <div className={styles.modalOverlay}>
-      <div className={styles.modalBox}>
-        <AlertTriangle size={28} color="#FA643C" />
-        <p className={styles.modalMsg}>{mensagem}</p>
-        <div className={styles.modalActions}>
-          <button className={styles.modalCancel} onClick={onCancel}>Cancelar</button>
-          <button className={styles.modalConfirm} onClick={onConfirm}>Confirmar</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function VisualizarModal({ agendamento, onClose, onEditar }) {
-  if (!agendamento) return null;
-
-  return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalDetalhe} onClick={e => e.stopPropagation()}>
-        <div className={styles.modalDetalheHeader}>
-          <div>
-            <h2>Agendamento {agendamento.codigo}</h2>
-            <span className={`${styles.statusBadge} ${styles[STATUS_MAP[agendamento.status]?.cls]}`}>
-              {STATUS_MAP[agendamento.status]?.label}
-            </span>
-          </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button className={styles.actionButton} onClick={() => onEditar(agendamento.codigo)}>
-              <Pencil size={16} />
-            </button>
-            <button className={styles.closeBtn} onClick={onClose}>
-              <X size={20} />
-            </button>
-          </div>
-        </div>
-
-        <div className={styles.modalDetalheBody}>
-          <div className={styles.detalheSection}>
-            <h3><User size={16} /> Cliente</h3>
-            <div className={styles.detalheGrid}>
-              <div>
-                <label>Nome</label>
-                <p>{agendamento.cliente?.nome || "—"}</p>
-              </div>
-              <div>
-                <label>CPF</label>
-                <p>{agendamento.cliente?.cpf || "—"}</p>
-              </div>
-              <div>
-                <label>Telefone</label>
-                <p>{agendamento.cliente?.telefone || "—"}</p>
-              </div>
-              <div>
-                <label>E-mail</label>
-                <p>{agendamento.cliente?.email || "—"}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.detalheSection}>
-            <h3><CalendarDays size={16} /> Agendamento</h3>
-            <div className={styles.detalheGrid}>
-              <div>
-                <label>Data</label>
-                <p>{formatarDataExtensa(agendamento.data_visita)}</p>
-              </div>
-              <div>
-                <label>Horário</label>
-                <p>{formatarHorario(agendamento.horario_visita)}</p>
-              </div>
-              <div>
-                <label>Pessoas</label>
-                <p>{agendamento.quantidade_pessoas}</p>
-              </div>
-              <div>
-                <label>Cidade</label>
-                <p><MapPin size={14} style={{ display: 'inline' }} /> {agendamento.cidade || "—"}</p>
-              </div>
-            </div>
-          </div>
-
-          {agendamento.dependentes && agendamento.dependentes.length > 0 && (
-            <div className={styles.detalheSection}>
-              <h3><Users size={16} /> Dependentes ({agendamento.dependentes.length})</h3>
-              <div className={styles.dependentesList}>
-                {agendamento.dependentes.map((dep, i) => (
-                  <div key={i} className={styles.dependenteItem}>
-                    <span className={styles.dependenteNome}>
-                      {i + 1}. {dep.nome}
-                    </span>
-                    <span className={styles.dependenteInfo}>
-                      {dep.idade} anos {dep.cpf ? `· CPF: ${dep.cpf}` : ""}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {agendamento.observacoes && (
-            <div className={styles.detalheSection}>
-              <h3>Observações</h3>
-              <p className={styles.observacoes}>{agendamento.observacoes}</p>
-            </div>
-          )}
-        </div>
-
-        <div className={styles.modalDetalheFooter}>
-          <button className={styles.btnFechar} onClick={onClose}>Fechar</button>
-          <button className={styles.btnEditar} onClick={() => onEditar(agendamento.codigo)}>
-            <Pencil size={16} /> Editar
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/* COMPONENTE PRINCIPAL                                                        */
-/* -------------------------------------------------------------------------- */
-
-export default function AppointmentsPage() {
+export default function Appointments() {
   const [visible, setVisible] = useState(false);
   const [abrirModal, setAbrirModal] = useState(false);
   const [confirm, setConfirm] = useState(null);
   const [inputBusca, setInputBusca] = useState("");
   const debounceRef = useRef(null);
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const {
     agendamentos, total, pagina, totalPaginas,
     loadingTabela, handleBusca, setPagina,
     totalHoje, semanaData, statusCount, loadingStats,
-    agendamentoSelecionado, loadingDetalhe, modoModal,
+    criarAgendamento, loadingCriar, erroCriar, sucessoCriar, agendamentoCriado, resetarCriacao,
+    agendamentoSelecionado, modoModal,
     abrirVisualizar, abrirEditar, fecharModal,
-    showResultadoVenda,
-    agendamentoParaResultado,
-    loadingResultado,
-    abrirResultadoVenda,
-    fecharResultadoVenda,
-    confirmarResultadoVenda,
-    confirmarRealizado,
+    showResultadoVenda, agendamentoParaResultado, loadingResultado,
+    abrirResultadoVenda, fecharResultadoVenda,
+    confirmarResultadoVenda, confirmarRealizado,
     cancelarAgendamento, excluir,
-    erro,
-    recarregar,
+    erro, recarregar,
   } = useAgendamentos();
 
-  const handleConfirmarResultado = async (codigo, resultado) => {
-    await confirmarResultadoVenda(codigo, resultado);
-  };
-
-  const handleConfirmarRealizado = async (codigo) => {
-    await confirmarRealizado(codigo);
-  };
-
+  // ─── Animação ──────────────────────────────────────
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 100);
     return () => clearTimeout(t);
   }, []);
 
-  const onChangeBusca = useCallback(
-    (e) => {
-      const val = e.target.value;
-      setInputBusca(val);
-      clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => handleBusca(val), 350);
-    },
-    [handleBusca]
-  );
+  // ─── Sucesso ao criar ──────────────────────────────
+  useEffect(() => {
+    if (sucessoCriar) {
+      setAbrirModal(false);
+      resetarCriacao();
+    }
+  }, [sucessoCriar, resetarCriacao]);
 
-  const pedirCancelamento = (codigo) => setConfirm({ tipo: "cancelar", codigo });
-  const pedirExclusao = (codigo) => setConfirm({ tipo: "excluir", codigo });
+  // ─── Busca com debounce ────────────────────────────
+  const onChangeBusca = useCallback((e) => {
+    const val = e.target.value;
+    setInputBusca(val);
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => handleBusca(val), 350);
+  }, [handleBusca]);
 
-  const confirmarAcao = async () => {
+  // ─── Handlers ──────────────────────────────────────
+  const handleConfirmarResultado = useCallback(async (codigo, resultado) => {
+    await confirmarResultadoVenda(codigo, resultado);
+  }, [confirmarResultadoVenda]);
+
+  // src/app/(authenticated)/Appointments/Appointments.jsx
+
+const handleConfirmarRealizado = useCallback(async (codigo) => {
+  // 1. Pega o agendamento atual da lista
+  const ag = agendamentos.find(a => a.codigo === codigo);
+  
+  // 2. Abre o modal IMEDIATAMENTE com os dados atuais
+  if (ag) {
+    abrirResultadoVenda({ 
+      ...ag, 
+      status: 'REALIZADO', 
+      resultado_venda: 'PENDENTE' 
+    });
+  }
+
+  // 3. Marca como realizado em background
+  try {
+    await confirmarRealizado(codigo);
+  } catch (e) {
+    console.error('Erro ao confirmar:', e);
+  }
+}, [agendamentos, abrirResultadoVenda, confirmarRealizado]);
+
+  const handleEditar = useCallback(async (codigo) => {
+    fecharModal();
+    await abrirEditar(codigo);
+    setAbrirModal(true);
+  }, [fecharModal, abrirEditar]);
+
+  const handleCloseModal = useCallback(async () => {
+    setAbrirModal(false);
+    fecharModal();
+    await recarregar();
+  }, [fecharModal, recarregar]);
+
+  const pedirCancelamento = useCallback((codigo) => {
+    setConfirm({ tipo: "cancelar", codigo });
+  }, []);
+
+  const pedirExclusao = useCallback((codigo) => {
+    setConfirm({ tipo: "excluir", codigo });
+  }, []);
+
+  const confirmarAcao = useCallback(async () => {
     if (!confirm) return;
     if (confirm.tipo === "cancelar") await cancelarAgendamento(confirm.codigo);
     if (confirm.tipo === "excluir") await excluir(confirm.codigo);
     setConfirm(null);
-  };
+  }, [confirm, cancelarAgendamento, excluir]);
 
-  const getStatusClass = (status) => styles[STATUS_MAP[status]?.cls ?? ""] ?? "";
 
-  const handleEditar = async (codigo) => {
-    fecharModal();
-    await abrirEditar(codigo);
-    setAbrirModal(true);
-  };
-
-  const handleCloseModal = async () => {
-    setAbrirModal(false);
-    fecharModal();
-    await recarregar();
-  };
+  
 
   return (
     <>
+      {/* Modal de Confirmação */}
       {confirm && (
         <ConfirmModal
           mensagem={
@@ -284,6 +136,7 @@ export default function AppointmentsPage() {
         />
       )}
 
+      {/* Modal de Visualização */}
       {modoModal === 'visualizar' && agendamentoSelecionado && (
         <VisualizarModal
           agendamento={agendamentoSelecionado}
@@ -292,6 +145,7 @@ export default function AppointmentsPage() {
         />
       )}
 
+      {/* Modal de Resultado de Venda */}
       {showResultadoVenda && agendamentoParaResultado && (
         <ResultCard
           agendamento={agendamentoParaResultado}
@@ -301,6 +155,7 @@ export default function AppointmentsPage() {
         />
       )}
 
+      {/* Modal de Criar/Editar */}
       {abrirModal && (
         <NewAppointment
           onClose={handleCloseModal}
@@ -309,233 +164,96 @@ export default function AppointmentsPage() {
       )}
 
       <div className={styles.container}>
-        <main className={`${styles.mainContent} ${visible ? styles.mainVisible : ""}`}>
-          <div className={styles.content}>
+        <main className={`${styles.main} ${visible ? styles.mainVisible : ""}`}>
+          
+          {/* Header */}
+          <PageHeader
+            title="Agendamentos"
+            subtitle="Gestão operacional dos visitantes e reservas"
+            badge={{ text: "Sistema Ativo", type: "success" }}
+            actionLabel="Novo Agendamento"
+            actionIcon={Plus}
+            onAction={() => {
+              fecharModal();
+              setAbrirModal(true);
+            }}
+          />
 
-            <PageHeader
-              title="Agendamentos"
-              subtitle="Gestão operacional dos visitantes e reservas"
-              badge={{ text: "Sistema Ativo", type: "success" }}
-              actionLabel="Novo Agendamento"
-              actionIcon={Plus}
-              onAction={() => {
-                fecharModal();
-                setAbrirModal(true);
-              }}
+          {/* Erro */}
+          {(erro || erroCriar) && (
+            <div className={styles.errorBanner}>
+              <AlertTriangle size={16} />
+              <span>{erro || erroCriar}</span>
+            </div>
+          )}
+
+          {/* Sucesso */}
+          {sucessoCriar && agendamentoCriado && (
+            <div className={styles.successBanner}>
+              ✅ Agendamento {agendamentoCriado.codigo} criado com sucesso!
+            </div>
+          )}
+
+          {/* Estatísticas */}
+          <AppointmentsStats
+            totalHoje={totalHoje}
+            semanaData={semanaData}
+            statusCount={statusCount}
+            loading={loadingStats}
+          />
+
+          {/* Agenda + Status */}
+          <AppointmentsWeekStatus
+            semanaData={semanaData}
+            statusCount={statusCount}
+            loading={loadingStats}
+          />
+
+          {/* Busca */}
+          <div className={styles.searchBar}>
+            <input
+              type="text"
+              placeholder="Buscar por nome, código ou CPF..."
+              value={inputBusca}
+              onChange={onChangeBusca}
+              className={styles.searchInput}
             />
-
-            {erro && (
-              <div className={styles.erroBar}>
-                <AlertTriangle size={16} />
-                {erro}
-              </div>
-            )}
-
-            <div className={styles.statsGrid}>
-              {loadingStats ? (
-                <><SkeletonStat /><SkeletonStat /><SkeletonStat /><SkeletonStat /></>
-              ) : (
-                <>
-                  <div className={styles.cardEntry}>
-                    <StatCard title="Hoje" value={String(totalHoje)} label="Agendamentos hoje" trend={0} icon={CalendarCheck} color="blue" />
-                  </div>
-                  <div className={styles.cardEntry}>
-                    <StatCard title="Semana" value={String(semanaData.reduce((acc, d) => acc + d.total, 0))} label="Total na semana" trend={0} icon={CalendarDays} color="green" />
-                  </div>
-                  <div className={styles.cardEntry}>
-                    <StatCard title="Confirmados" value={String(statusCount.CONFIRMADO)} label="Aguardando visita" trend={0} icon={CheckCircle2} color="green" />
-                  </div>
-                  <div className={styles.cardEntry}>
-                    <StatCard title="Pendentes" value={String(statusCount.PENDENTE)} label="Aguardando confirmação" trend={0} icon={CircleDollarSign} color="yellow" />
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div className={styles.scheduleRow}>
-              <div className={styles.card}>
-                <div className={styles.cardHeader}><div><h2>Agenda da Semana</h2><p>Agendamentos por dia</p></div></div>
-                <div className={styles.weekGrid}>
-                  {loadingStats
-                    ? [...Array(7)].map((_, i) => <div key={i} className={`${styles.dayCard} ${styles.skeletonDay}`} />)
-                    : semanaData.map((item) => (
-                      <div key={item.day} className={styles.dayCard}>
-                        <span className={styles.dayName}>{item.day}</span>
-                        <strong>{item.total}</strong>
-                        <small>agend.</small>
-                      </div>
-                    ))}
-                </div>
-              </div>
-              <div className={styles.card}>
-                <div className={styles.cardHeader}><div><h2>Status</h2><p>Resumo operacional</p></div></div>
-                <div className={styles.statusList}>
-                  {["CONFIRMADO", "PENDENTE", "CANCELADO", "REALIZADO"].map((key) => (
-                    <div key={key} className={styles.statusItem}>
-                      <div className={styles.statusDot} style={{ background: STATUS_MAP[key]?.color }} />
-                      <span>{STATUS_MAP[key]?.label}</span>
-                      <strong>{loadingStats ? "—" : statusCount[key]}</strong>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.tableCard}>
-              <div className={styles.tableHeader}>
-                <div>
-                  <h2>Agendamentos</h2>
-                  <p>{loadingTabela ? "Carregando..." : `${total} registro${total !== 1 ? "s" : ""}`}</p>
-                </div>
-                <div className={styles.searchBox}>
-                  <Search size={16} color="#94a3b8" />
-                  <input type="text" placeholder="Buscar..." value={inputBusca} onChange={onChangeBusca} className={styles.searchInput} />
-                </div>
-              </div>
-
-              <div className={styles.tableWrapper}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th>Código</th><th>Cliente</th><th>Data / Horário</th>
-                      <th>Pessoas</th><th>Cidade</th><th>Status</th><th>Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {loadingTabela ? (
-                      [...Array(5)].map((_, i) => <SkeletonRow key={i} />)
-                    ) : agendamentos.length === 0 ? (
-                      <tr><td colSpan={7} className={styles.emptyRow}>Nenhum agendamento encontrado.</td></tr>
-                    ) : (
-                      agendamentos.map((ag) => (
-                        <tr key={ag.codigo}>
-                          <td><span className={styles.codBadge}>{ag.codigo}</span></td>
-                          <td>
-                            <div className={styles.clienteCell}>
-                              <span className={styles.clienteNome}>{ag.cliente?.nome ?? "—"}</span>
-                              <span className={styles.clienteTel}>{ag.cliente?.telefone ?? ""}</span>
-                            </div>
-                          </td>
-                          <td>
-                            <div className={styles.dataCell}>
-                              <span>{formatarData(ag.data_visita)}</span>
-                              <span className={styles.horario}>{formatarHorario(ag.horario_visita)}</span>
-                            </div>
-                          </td>
-                          <td>{ag.quantidade_pessoas}</td>
-                          <td>{ag.cidade ?? "—"}</td>
-                          <td>
-                            <span className={`${styles.statusBadge} ${getStatusClass(ag.status)}`}>
-                              {STATUS_MAP[ag.status]?.label ?? ag.status}
-                            </span>
-                          </td>
-                          <td>
-                            <div className={styles.actions}>
-                              {/* Visualizar */}
-                              <button className={styles.actionButton} title="Visualizar" onClick={() => abrirVisualizar(ag.codigo)}>
-                                <Eye size={15} />
-                              </button>
-
-                              {/* Editar */}
-                              <button className={styles.actionButton} title="Editar" onClick={() => handleEditar(ag.codigo)}>
-                                <Pencil size={15} />
-                              </button>
-
-                              {/* 👇 CORRIGIDO: Confirmar Realizado - apenas para PENDENTE ou CONFIRMADO */}
-                              {(ag.status === 'PENDENTE' || ag.status === 'CONFIRMADO') && (
-                                <button
-                                  className={`${styles.actionButton} ${styles.confirmButton}`}
-                                  title="Confirmar Realização"
-                                  onClick={() => handleConfirmarRealizado(ag.codigo)}
-                                >
-                                  <CheckCircle2 size={15} />
-                                </button>
-                              )}
-
-                              {/* Resultado de Venda - apenas para REALIZADOS com resultado PENDENTE */}
-                              {ag.status === 'REALIZADO' && ag.resultado_venda === 'PENDENTE' && (
-                                <button
-                                  className={`${styles.actionButton} ${styles.resultadoButton}`}
-                                  title="Resultado da Venda"
-                                  onClick={() => abrirResultadoVenda(ag)}
-                                >
-                                  <CircleDollarSign size={15} />
-                                </button>
-                              )}
-
-                              {/* Badge de resultado já definido */}
-                              {ag.resultado_venda && ag.resultado_venda !== 'PENDENTE' && (
-                                <span className={`${styles.resultadoBadge} ${
-                                  ag.resultado_venda === 'VENDA_REALIZADA' ? styles.resultadoVendido :
-                                  ag.resultado_venda === 'VENDA_PERDIDA' ? styles.resultadoPerdido :
-                                  styles.resultadoNA
-                                }`}>
-                                  {ag.resultado_venda === 'VENDA_REALIZADA' ? '✓ Vendido' :
-                                   ag.resultado_venda === 'VENDA_PERDIDA' ? '✗ Perdido' : 'N/A'}
-                                </span>
-                              )}
-
-                              {/* Cancelar */}
-                              <button
-                                className={`${styles.actionButton} ${styles.cancelButton}`}
-                                title="Cancelar"
-                                disabled={ag.status === "CANCELADO" || ag.status === "REALIZADO"}
-                                onClick={() => pedirCancelamento(ag.codigo)}
-                              >
-                                <XCircle size={15} />
-                              </button>
-
-                              {/* Excluir */}
-                              <button
-                                className={`${styles.actionButton} ${styles.deleteButton}`}
-                                title="Excluir"
-                                onClick={() => pedirExclusao(ag.codigo)}
-                              >
-                                <Trash2 size={15} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              {totalPaginas > 1 && (
-                <div className={styles.pagination}>
-                  <button className={styles.pageBtn} onClick={() => setPagina(p => Math.max(1, p - 1))} disabled={pagina === 1}>
-                    <ChevronLeft size={16} /> Anterior
-                  </button>
-                  <span className={styles.pageInfo}>Página {pagina} de {totalPaginas} · {total} registros</span>
-                  <button className={styles.pageBtn} onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))} disabled={pagina === totalPaginas}>
-                    Próximo <ChevronRight size={16} />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className={styles.card}>
-              <div className={styles.cardHeader}><div><h2>Últimas Entradas</h2><p>Registros mais recentes</p></div></div>
-              <div className={styles.activityList}>
-                {loadingTabela
-                  ? [...Array(4)].map((_, i) => <div key={i} className={styles.skeletonActivity} />)
-                  : agendamentos.slice(0, 5).map((ag) => {
-                    const color = STATUS_MAP[ag.status]?.color ?? "#94a3b8";
-                    return (
-                      <div key={ag.codigo} className={styles.activityItem}>
-                        <div className={styles.activityAvatar} style={{ backgroundColor: color }}><Clock3 size={16} /></div>
-                        <div className={styles.activityInfo}>
-                          <span className={styles.activityName}>{ag.cliente?.nome ?? ag.codigo}</span>
-                          <span className={styles.activityAction}>{ag.cidade} · {ag.quantidade_pessoas} pessoa{ag.quantidade_pessoas !== 1 ? "s" : ""}</span>
-                        </div>
-                        <span className={styles.activityTime}>{formatarData(ag.data_visita)} {formatarHorario(ag.horario_visita)}</span>
-                      </div>
-                    );
-                  })}
-              </div>
-            </div>
           </div>
+
+          {/* Tabela ou Cards */}
+          {isMobile ? (
+            <AppointmentsMobile
+              agendamentos={agendamentos}
+              loading={loadingTabela}
+              onVisualizar={abrirVisualizar}
+              onEditar={handleEditar}
+              onConfirmarRealizado={handleConfirmarRealizado}
+              onResultadoVenda={abrirResultadoVenda}
+              onCancelar={pedirCancelamento}
+              onExcluir={pedirExclusao}
+            />
+          ) : (
+            <AppointmentsTable
+              agendamentos={agendamentos}
+              loading={loadingTabela}
+              total={total}
+              pagina={pagina}
+              totalPaginas={totalPaginas}
+              onPageChange={setPagina}
+              onVisualizar={abrirVisualizar}
+              onEditar={handleEditar}
+              onConfirmarRealizado={handleConfirmarRealizado}
+              onResultadoVenda={abrirResultadoVenda}
+              onCancelar={pedirCancelamento}
+              onExcluir={pedirExclusao}
+            />
+          )}
+
+          {/* Últimas Entradas */}
+          <AppointmentsRecent
+            agendamentos={agendamentos}
+            loading={loadingTabela}
+          />
         </main>
       </div>
     </>

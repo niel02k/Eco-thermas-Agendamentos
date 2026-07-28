@@ -48,6 +48,7 @@ export default function NewAppointment({
     origem: "OUTRO",
     observacoes: "",
     status: "PENDENTE",
+    resultado_venda: "PENDENTE", // 👈 Novo campo
   });
 
   const isEdicao = !!dadosEdicao;
@@ -55,7 +56,6 @@ export default function NewAppointment({
   // ── Verifica idade do titular ──────────────────────────────────
   const idadeTitular = Number(form.idade);
   const titularMaiorIdade = idadeTitular >= 18;
-  const titularMenor6Anos = idadeTitular > 0 && idadeTitular < 6;
 
   // ── Datas disponíveis formatadas ──────────────────────────────
   const datasDisponiveis = useMemo(() => {
@@ -100,6 +100,7 @@ export default function NewAppointment({
         origem: dadosEdicao.origem || "OUTRO",
         observacoes: dadosEdicao.observacoes || "",
         status: dadosEdicao.status || "PENDENTE",
+        resultado_venda: dadosEdicao.resultado_venda || "PENDENTE", // 👈 Novo campo
       });
 
       if (dadosEdicao.dependentes && dadosEdicao.dependentes.length > 0) {
@@ -120,24 +121,19 @@ export default function NewAppointment({
   }, [dadosEdicao]);
 
   // ── Validações ─────────────────────────────────────────────────
-  
-  // Titular: maior de idade (>= 18)
   const idadeValida = idadeTitular >= 18 && idadeTitular < 120;
-  
-  // CPF do titular: obrigatório pois é maior de idade
   const cpfValido = form.cpf.replace(/\D/g, "").length === 11;
 
   const formValid =
     form.cliente.trim() !== "" &&
     form.idade !== "" &&
-    idadeValida &&                                     // 👈 Maior de idade
-    cpfValido &&                                       // 👈 CPF obrigatório
+    idadeValida &&
+    cpfValido &&
     form.dataVisita !== "" &&
     form.horario !== "" &&
     form.cidade.trim() !== "" &&
     errorTime === "";
 
-  // Validação de dependentes: CPF obrigatório apenas se idade >= 6
   const companionsValid =
     companions.length === 0 ||
     companions.every((person) => {
@@ -163,28 +159,39 @@ export default function NewAppointment({
   }, []);
 
   const handleAmount = useCallback((e) => {
-  const novaQuantidade = Number(e.target.value);
-  const quantidadeAnterior = companions.length;
+    const novaQuantidade = Number(e.target.value);
+    const quantidadeAnterior = companions.length;
 
-  if (novaQuantidade === quantidadeAnterior) return;
+    if (novaQuantidade === quantidadeAnterior) return;
 
-  if (novaQuantidade > quantidadeAnterior) {
-    // Aumentou: adicionar novos acompanhantes vazios
-    const novos = Array.from({ length: novaQuantidade - quantidadeAnterior }, () => ({
-      nome: "", idade: "", cpf: "",
-    }));
-    setCompanions(prev => [...prev, ...novos]);
-  } else {
-    // Diminuiu: manter os primeiros
-    setCompanions(prev => prev.slice(0, novaQuantidade));
-  }
-  
-  setAmount(novaQuantidade);
-  // Ajustar currentCompanion se necessário
-  if (currentCompanion >= novaQuantidade) {
-    setCurrentCompanion(Math.max(0, novaQuantidade - 1));
-  }
-}, [companions, currentCompanion]);
+    if (novaQuantidade > quantidadeAnterior) {
+      const novos = Array.from({ length: novaQuantidade - quantidadeAnterior }, () => ({
+        nome: "", idade: "", cpf: "",
+      }));
+      setCompanions(prev => [...prev, ...novos]);
+    } else {
+      setCompanions(prev => prev.slice(0, novaQuantidade));
+    }
+    
+    setAmount(novaQuantidade);
+    if (currentCompanion >= novaQuantidade) {
+      setCurrentCompanion(Math.max(0, novaQuantidade - 1));
+    }
+  }, [companions, currentCompanion]);
+
+  const handleCompanionChange = useCallback((field, value) => {
+    const list = [...companions];
+    if (field === "nome") value = value.replace(/[^A-Za-zÀ-ÿ\s]/g, "");
+    if (field === "idade") value = value.replace(/\D/g, "").slice(0, 3);
+    if (field === "cpf") {
+      value = value.replace(/\D/g, "").slice(0, 11);
+      value = value.replace(/^(\d{3})(\d)/, "$1.$2")
+        .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+        .replace(/\.(\d{3})(\d)/, ".$1-$2");
+    }
+    list[currentCompanion][field] = value;
+    setCompanions(list);
+  }, [companions, currentCompanion]);
 
   const handleLettersOnly = useCallback((e) => {
     const { name, value } = e.target;
@@ -210,10 +217,11 @@ export default function NewAppointment({
       cidade: form.cidade || "Não informada",
       origem: form.origem || "OUTRO",
       status: form.status || "PENDENTE",
+      resultado_venda: form.resultado_venda || "PENDENTE", // 👈 Enviar resultado_venda
       dependentes: companions.map(c => ({
         nome: c.nome,
         idade: Number(c.idade) || 0,
-        cpf: Number(c.idade) < 6 ? null : (c.cpf || null), // Dependente < 6: CPF null
+        cpf: Number(c.idade) < 6 ? null : (c.cpf || null),
       })),
     };
 
@@ -223,7 +231,7 @@ export default function NewAppointment({
     } else {
       dados.cliente = {
         nome: form.cliente,
-        cpf: form.cpf,                               // Titular sempre tem CPF
+        cpf: form.cpf,
         idade: Number(form.idade) || null,
       };
     }
@@ -288,30 +296,14 @@ export default function NewAppointment({
               <div className={styles.rowCode}>
                 <div className={`${styles.field} ${styles.codeField}`}>
                   <label>Código</label>
-                  <input 
-                    type="text" 
-                    name="codigo" 
-                    value={form.codigo} 
-                    readOnly 
-                    className={styles.readOnlyInput} 
-                    placeholder="Gerado automaticamente" 
-                  />
+                  <input type="text" name="codigo" value={form.codigo} readOnly className={styles.readOnlyInput} placeholder="Gerado automaticamente" />
                   <small style={{ color: '#94a3b8', fontSize: '0.75rem' }}>
                     {isEdicao ? "Código do agendamento" : "Gerado automaticamente ao salvar"}
                   </small>
                 </div>
                 <div className={styles.field}>
                   <label>Cliente (Titular) *</label>
-                  <input 
-                    type="text" 
-                    name="cliente" 
-                    value={form.cliente} 
-                    onChange={handleLettersOnly} 
-                    placeholder="Nome do titular..." 
-                    maxLength={100} 
-                    required 
-                    disabled={isEdicao}
-                  />
+                  <input type="text" name="cliente" value={form.cliente} onChange={handleLettersOnly} placeholder="Nome do titular..." maxLength={100} required disabled={isEdicao} />
                 </div>
               </div>
 
@@ -319,41 +311,14 @@ export default function NewAppointment({
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>Idade * (mínimo 18 anos)</label>
-                  <input 
-                    type="text" 
-                    name="idade" 
-                    value={form.idade} 
-                    onChange={handleIdadeChange} 
-                    placeholder="Ex: 35" 
-                    maxLength={3}
-                    required 
-                    disabled={isEdicao}
-                    className={!idadeValida && form.idade !== "" ? styles.inputError : ""}
-                  />
+                  <input type="text" name="idade" value={form.idade} onChange={handleIdadeChange} placeholder="Ex: 35" maxLength={3} required disabled={isEdicao} />
                   {form.idade !== "" && !idadeValida && (
-                    <small style={{ color: '#FA643C', fontSize: '0.75rem' }}>
-                      O titular deve ser maior de idade (18 anos ou mais)
-                    </small>
+                    <small style={{ color: '#FA643C', fontSize: '0.75rem' }}>O titular deve ser maior de idade (18 anos ou mais)</small>
                   )}
                 </div>
                 <div className={styles.field}>
                   <label>CPF *</label>
-                  <input 
-                    type="text" 
-                    name="cpf" 
-                    value={form.cpf} 
-                    onChange={handleCpf} 
-                    placeholder="000.000.000-00" 
-                    maxLength={14} 
-                    required
-                    disabled={isEdicao}
-                    className={!cpfValido && form.cpf !== "" ? styles.inputError : ""}
-                  />
-                  {form.cpf !== "" && !cpfValido && (
-                    <small style={{ color: '#FA643C', fontSize: '0.75rem' }}>
-                      CPF deve ter 11 dígitos
-                    </small>
-                  )}
+                  <input type="text" name="cpf" value={form.cpf} onChange={handleCpf} placeholder="000.000.000-00" maxLength={14} required disabled={isEdicao} />
                 </div>
               </div>
 
@@ -362,42 +327,20 @@ export default function NewAppointment({
                 <div className={styles.field}>
                   <label>Data da Visita *</label>
                   {loadingDias ? (
-                    <p style={{ color: '#94a3b8', fontSize: '0.875rem', padding: '0.5rem 0' }}>
-                      Carregando datas disponíveis...
-                    </p>
+                    <p style={{ color: '#94a3b8', fontSize: '0.875rem', padding: '0.5rem 0' }}>Carregando datas disponíveis...</p>
                   ) : (
-                    <select 
-                      name="dataVisita" 
-                      value={form.dataVisita} 
-                      onChange={handleChange} 
-                      className={styles.select} 
-                      required
-                    >
+                    <select name="dataVisita" value={form.dataVisita} onChange={handleChange} className={styles.select} required>
                       <option value="">Selecione uma data...</option>
-                      {datasDisponiveis.map(d => (
-                        <option key={d.value} value={d.value}>{d.label}</option>
-                      ))}
+                      {datasDisponiveis.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
                     </select>
                   )}
                 </div>
                 <div className={styles.field}>
                   <label>Horário *</label>
-                  <select 
-                    name="horario" 
-                    value={form.horario} 
-                    onChange={(e) => { 
-                      setErrorTime(""); 
-                      setForm(prev => ({ ...prev, horario: e.target.value })); 
-                    }} 
-                    className={styles.select} 
-                    required
-                  >
+                  <select name="horario" value={form.horario} onChange={(e) => { setErrorTime(""); setForm(prev => ({ ...prev, horario: e.target.value })); }} className={styles.select} required>
                     <option value="">Selecione...</option>
-                    {["09:30", "10:00", "10:30", "11:00", "11:30"].map(h => (
-                      <option key={h} value={h}>{h}</option>
-                    ))}
+                    {["09:30", "10:00", "10:30", "11:00", "11:30"].map(h => <option key={h} value={h}>{h}</option>)}
                   </select>
-                  {errorTime && <span className={styles.error}>{errorTime}</span>}
                 </div>
               </div>
 
@@ -405,30 +348,14 @@ export default function NewAppointment({
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>Consultor</label>
-                  <select 
-                    name="vendedor_id" 
-                    value={form.vendedor_id} 
-                    onChange={handleChange} 
-                    className={styles.select}
-                    disabled={loadingConsultores}
-                  >
+                  <select name="vendedor_id" value={form.vendedor_id} onChange={handleChange} className={styles.select} disabled={loadingConsultores}>
                     <option value="">Nenhum (opcional)</option>
-                    {Array.isArray(consultores) && consultores.map(c => (
-                      <option key={c.id} value={c.id}>{c.nome}</option>
-                    ))}
+                    {Array.isArray(consultores) && consultores.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
                   </select>
                 </div>
                 <div className={styles.field}>
                   <label>Cidade *</label>
-                  <input 
-                    type="text" 
-                    name="cidade" 
-                    value={form.cidade} 
-                    onChange={handleLettersOnly} 
-                    placeholder="Cidade" 
-                    maxLength={40} 
-                    required 
-                  />
+                  <input type="text" name="cidade" value={form.cidade} onChange={handleLettersOnly} placeholder="Cidade" maxLength={40} required />
                 </div>
               </div>
 
@@ -436,12 +363,7 @@ export default function NewAppointment({
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>Origem</label>
-                  <select 
-                    name="origem" 
-                    value={form.origem} 
-                    onChange={handleChange} 
-                    className={styles.select}
-                  >
+                  <select name="origem" value={form.origem} onChange={handleChange} className={styles.select}>
                     <option value="OUTRO">Selecione...</option>
                     <option value="Leads SDR">Leads SDR</option>
                     <option value="Direto">Direto</option>
@@ -454,12 +376,7 @@ export default function NewAppointment({
                 {isEdicao && (
                   <div className={styles.field}>
                     <label>Status</label>
-                    <select 
-                      name="status" 
-                      value={form.status} 
-                      onChange={handleChange} 
-                      className={styles.select}
-                    >
+                    <select name="status" value={form.status} onChange={handleChange} className={styles.select}>
                       <option value="PENDENTE">Pendente</option>
                       <option value="CONFIRMADO">Confirmado</option>
                       <option value="REALIZADO">Realizado</option>
@@ -469,42 +386,37 @@ export default function NewAppointment({
                 )}
               </div>
 
+              {/* 👉 RESULTADO DA VENDA - aparece quando status é REALIZADO */}
+              {form.status === 'REALIZADO' && (
+                <div className={styles.row}>
+                  <div className={styles.field}>
+                    <label>Resultado da Venda</label>
+                    <select name="resultado_venda" value={form.resultado_venda} onChange={handleChange} className={styles.select}>
+                      <option value="PENDENTE">Pendente</option>
+                      <option value="VENDA_REALIZADA">Venda Realizada</option>
+                      <option value="VENDA_PERDIDA">Venda Perdida</option>
+                      <option value="NAO_APLICAVEL">Não Aplicável</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+
               {/* Observações */}
               <div className={styles.field}>
                 <label>Observações</label>
-                <textarea 
-                  name="observacoes" 
-                  value={form.observacoes} 
-                  onChange={handleChange} 
-                  rows="4" 
-                  placeholder="Digite alguma observação..." 
-                  maxLength={500} 
-                />
+                <textarea name="observacoes" value={form.observacoes} onChange={handleChange} rows="4" placeholder="Digite alguma observação..." maxLength={500} />
               </div>
 
               {/* Confirmação */}
               <div className={styles.confirmArea}>
-                <input 
-                  type="checkbox" 
-                  id="confirm" 
-                  checked={confirmed} 
-                  onChange={(e) => setConfirmed(e.target.checked)} 
-                />
-                <label htmlFor="confirm">
-                  Declaro que revisei todas as informações acima e confirmo que estão corretas.
-                </label>
+                <input type="checkbox" id="confirm" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} />
+                <label htmlFor="confirm">Declaro que revisei todas as informações acima e confirmo que estão corretas.</label>
               </div>
             </div>
 
             <div className={styles.footer}>
               <button className={styles.cancelButton} onClick={handleClose}>Cancelar</button>
-              <button 
-                className={styles.saveButton} 
-                disabled={!formValid || !confirmed} 
-                onClick={() => setStep(2)}
-              >
-                Continuar
-              </button>
+              <button className={styles.saveButton} disabled={!formValid || !confirmed} onClick={() => setStep(2)}>Continuar</button>
             </div>
           </>
         )}
@@ -520,15 +432,9 @@ export default function NewAppointment({
             <div className={styles.body}>
               <div className={styles.peopleSelect}>
                 <label>Acompanhantes</label>
-                <select 
-                  value={amount} 
-                  onChange={handleAmount} 
-                  className={styles.peopleSelectInput}
-                >
+                <select value={amount} onChange={handleAmount} className={styles.peopleSelectInput}>
                   {[0, 1, 2, 3, 4, 5, 6, 7].map((num) => (
-                    <option key={num} value={num}>
-                      {num} Acompanhante{num !== 1 ? "s" : ""}
-                    </option>
+                    <option key={num} value={num}>{num} Acompanhante{num !== 1 ? "s" : ""}</option>
                   ))}
                 </select>
               </div>
@@ -536,100 +442,28 @@ export default function NewAppointment({
               {companions.length > 0 && (
                 <div className={styles.cardPerson}>
                   <h3>Acompanhante {currentCompanion + 1} de {companions.length}</h3>
-                  
+                  <div className={styles.field}><label>Nome *</label><input type="text" value={companions[currentCompanion]?.nome || ""} onChange={(e) => handleCompanionChange("nome", e.target.value)} placeholder="Nome completo" /></div>
+                  <div className={styles.field}><label>Idade *</label><input type="text" value={companions[currentCompanion]?.idade || ""} onChange={(e) => handleCompanionChange("idade", e.target.value)} placeholder="Ex: 10" maxLength={3} /></div>
                   <div className={styles.field}>
-                    <label>Nome *</label>
-                    <input 
-                      type="text" 
-                      value={companions[currentCompanion]?.nome || ""} 
-                      onChange={(e) => handleCompanionChange("nome", e.target.value)} 
-                      placeholder="Nome completo" 
-                    />
+                    <label>CPF {Number(companions[currentCompanion]?.idade) >= 6 ? "*" : "(opcional)"}</label>
+                    <input type="text" value={companions[currentCompanion]?.cpf || ""} onChange={(e) => handleCompanionChange("cpf", e.target.value)} placeholder={Number(companions[currentCompanion]?.idade) < 6 ? "Opcional para menores de 6 anos" : "000.000.000-00"} maxLength={14} required={Number(companions[currentCompanion]?.idade) >= 6} />
                   </div>
-                  
-                  <div className={styles.field}>
-                    <label>Idade *</label>
-                    <input 
-                      type="text" 
-                      value={companions[currentCompanion]?.idade || ""} 
-                      onChange={(e) => handleCompanionChange("idade", e.target.value)} 
-                      placeholder="Ex: 10" 
-                      maxLength={3}
-                    />
-                    {Number(companions[currentCompanion]?.idade) > 0 && 
-                     Number(companions[currentCompanion]?.idade) < 6 && (
-                      <small style={{ color: '#3CC83C', fontSize: '0.75rem' }}>
-                        Menor de 6 anos: CPF não obrigatório
-                      </small>
-                    )}
-                  </div>
-                  
-                  <div className={styles.field}>
-                    <label>
-                      CPF {Number(companions[currentCompanion]?.idade) >= 6 ? "*" : "(opcional)"}
-                    </label>
-                    <input 
-                      type="text" 
-                      value={companions[currentCompanion]?.cpf || ""} 
-                      onChange={(e) => handleCompanionChange("cpf", e.target.value)} 
-                      placeholder={
-                        Number(companions[currentCompanion]?.idade) < 6 
-                          ? "Opcional para menores de 6 anos" 
-                          : "000.000.000-00"
-                      } 
-                      maxLength={14}
-                      required={Number(companions[currentCompanion]?.idade) >= 6}
-                    />
-                  </div>
-                  
                   <div className={styles.navigationButtons}>
-                    <button 
-                      type="button" 
-                      className={styles.navButton} 
-                      disabled={currentCompanion === 0} 
-                      onClick={() => setCurrentCompanion((prev) => prev - 1)}
-                    >
-                      Anterior
-                    </button>
-                    <span className={styles.pageIndicator}>
-                      {currentCompanion + 1} / {companions.length}
-                    </span>
-                    <button 
-                      type="button" 
-                      className={styles.navButton} 
-                      disabled={currentCompanion === companions.length - 1} 
-                      onClick={() => setCurrentCompanion((prev) => prev + 1)}
-                    >
-                      Próximo
-                    </button>
+                    <button type="button" className={styles.navButton} disabled={currentCompanion === 0} onClick={() => setCurrentCompanion((prev) => prev - 1)}>Anterior</button>
+                    <span className={styles.pageIndicator}>{currentCompanion + 1} / {companions.length}</span>
+                    <button type="button" className={styles.navButton} disabled={currentCompanion === companions.length - 1} onClick={() => setCurrentCompanion((prev) => prev + 1)}>Próximo</button>
                   </div>
                 </div>
               )}
 
               <div className={styles.confirmArea}>
-                <input 
-                  type="checkbox" 
-                  id="confirmCompanions" 
-                  checked={confirmedCompanions} 
-                  onChange={(e) => setConfirmedCompanions(e.target.checked)} 
-                />
-                <label htmlFor="confirmCompanions">
-                  Declaro que revisei os dados dos acompanhantes e confirmo que estão corretos.
-                </label>
+                <input type="checkbox" id="confirmCompanions" checked={confirmedCompanions} onChange={(e) => setConfirmedCompanions(e.target.checked)} />
+                <label htmlFor="confirmCompanions">Declaro que revisei os dados dos acompanhantes e confirmo que estão corretos.</label>
               </div>
             </div>
             <div className={styles.footer}>
-              <button 
-                className={styles.cancelButton} 
-                onClick={() => { setStep(1); setConfirmed(false); }}
-              >
-                Voltar
-              </button>
-              <button 
-                className={styles.saveButton} 
-                disabled={!companionsValid || !confirmedCompanions || loading} 
-                onClick={handleFinalizar}
-              >
+              <button className={styles.cancelButton} onClick={() => { setStep(1); setConfirmed(false); }}>Voltar</button>
+              <button className={styles.saveButton} disabled={!companionsValid || !confirmedCompanions || loading} onClick={handleFinalizar}>
                 {loading ? "Salvando..." : isEdicao ? "Atualizar" : "Finalizar"}
               </button>
             </div>

@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, LogIn, ShieldCheck } from 'lucide-react';
-import Input from '@/app/Components/Input/Input.jsx';
-import Button from '@/app/Components/Button/Button.jsx';
+import Input from '@/app/Components/ui/Input/Input.jsx';
+import Button from '@/app/Components/ui/Button/Button.jsx';
 import styles from './Login.module.css';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
