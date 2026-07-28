@@ -491,7 +491,7 @@
 .emptyBox span { font-size: 0.85rem; }
 
 /* ─── Responsivo ────────────────────────────────── */
-@media (max-width: 1280px) {
+@media (max-width: 1480px) {
   .kpisGrid { grid-template-columns: repeat(3, 1fr); }
   .insightsGrid { grid-template-columns: repeat(2, 1fr); }
 }

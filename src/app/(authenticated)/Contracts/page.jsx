@@ -5,7 +5,7 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { Plus } from "lucide-react";
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
 import styles from "./Contracts.module.css";
-import { useContratosPage } from "@/app/hooks/useContratosPage";
+import { useContratosPage } from "@/app/hooks/contratos/useContratosPage";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 
 // Componentes
@@ -50,6 +50,16 @@ export default function Contracts() {
     }
   }, [handleExcluir]);
 
+
+  useEffect(() => {
+  console.log('📊 Dados recebidos do hook:', {
+    rankingVendedores,
+    statusContratos,
+    resumoGeral,
+    total,
+    contratosLength: contratos?.length,
+  });
+}, [rankingVendedores, statusContratos, resumoGeral, total, contratos]); 
   return (
     <div className={styles.container}>
       <main className={`${styles.main} ${visible ? styles.mainVisible : ""}`}>

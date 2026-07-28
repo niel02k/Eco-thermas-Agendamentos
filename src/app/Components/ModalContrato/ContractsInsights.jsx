@@ -1,7 +1,7 @@
 
 
 
-// src/app/(sua-rota)/contratos/components/ContractsInsights.jsx
+
 "use client";
 
 import React from "react";

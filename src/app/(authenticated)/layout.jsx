@@ -20,10 +20,7 @@ export default function AuthenticatedLayout({ children }) {
     const routeMap = {
       'dashboard': 'dashboard',
       'agendamentos': 'agendamentos',
-      'clientes': 'clientes',
       'contratos': 'contratos',
-      'financeiro': 'financeiro',
-      'visitantes': 'visitantes',
       'relatorios': 'relatorios',
       'configuracoes': 'configuracoes',
     };
