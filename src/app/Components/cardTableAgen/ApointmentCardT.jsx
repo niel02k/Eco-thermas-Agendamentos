@@ -1,5 +1,5 @@
-import styles from "./ApointmentCardT.module.css";
 "use client";
+import styles from "./ApointmentCardT.module.css";
 
 import {
   Eye,
@@ -8,10 +8,10 @@ import {
   X
 } from "lucide-react";
 
-import styles from "./AppointmentCard.module.css";
 
 
-export default function AppointmentCard({
+
+export default function ApointmentCardT({
   agendamento,
   onClose,
   onVisualizar,

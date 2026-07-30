@@ -25,6 +25,7 @@ import VisualizarModal from "@/app/Components/ModalAgendamento/VisualizarModal";
 import ConfirmModal from "@/app/Components/ModalAgendamento/ConfirmModal";
 import NewAppointment from "@/app/Components/modal/Newappointment.jsx";
 import ResultCard from "@/app/Components/Cards/ResultCard/ResultCard.jsx";
+import ApointmentCardT from "@/app/Components/CardTableAgen/ApointmentCardT";
 
 export default function Appointments() {
   const [visible, setVisible] = useState(false);
@@ -33,6 +34,7 @@ export default function Appointments() {
   const [inputBusca, setInputBusca] = useState("");
   const debounceRef = useRef(null);
   const isMobile = useMediaQuery("(max-width: 768px)");
+ const [cardSelecionado, setCardSelecionado] = useState(null);
 
   const {
     agendamentos, total, pagina, totalPaginas,
@@ -247,6 +249,7 @@ const handleConfirmarRealizado = useCallback(async (codigo) => {
               pagina={pagina}
               totalPaginas={totalPaginas}
               onPageChange={setPagina}
+              onSelecionar={setCardSelecionado}
               onVisualizar={abrirVisualizar}
               onEditar={handleEditar}
               onConfirmarRealizado={handleConfirmarRealizado}
@@ -261,6 +264,13 @@ const handleConfirmarRealizado = useCallback(async (codigo) => {
             agendamentos={agendamentos}
             loading={loadingTabela}
           />
+          {cardSelecionado && (
+            <ApointmentCardT
+              agendamento={cardSelecionado}
+              onClose={() => setCardSelecionado(null)}
+            />
+          )}
+
         </main>
       </div>
     </>

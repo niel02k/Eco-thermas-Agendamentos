@@ -8,9 +8,21 @@ import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
 
 
 export default function AppointmentsTable({
-  agendamentos, loading, total, pagina, totalPaginas,
-  onPageChange, onVisualizar, onEditar,
-  onConfirmarRealizado, onResultadoVenda, onCancelar, onExcluir
+  agendamentos,
+  loading,
+  total,
+  pagina,
+  totalPaginas,
+  onPageChange,
+
+  onSelecionar,
+
+  onVisualizar,
+  onEditar,
+  onConfirmarRealizado,
+  onResultadoVenda,
+  onCancelar,
+  onExcluir
 }) {
   return (
     <div className={styles.tableCard}>
@@ -49,6 +61,9 @@ export default function AppointmentsTable({
               <AppointmentRow
                 key={ag.codigo}
                 agendamento={ag}
+
+                onSelecionar={onSelecionar}
+
                 onVisualizar={onVisualizar}
                 onEditar={onEditar}
                 onConfirmarRealizado={onConfirmarRealizado}
