@@ -25,7 +25,7 @@ import VisualizarModal from "@/app/Components/ModalAgendamento/VisualizarModal";
 import ConfirmModal from "@/app/Components/ModalAgendamento/ConfirmModal";
 import NewAppointment from "@/app/Components/modal/Newappointment.jsx";
 import ResultCard from "@/app/Components/Cards/ResultCard/ResultCard.jsx";
-import ApointmentCardT from "@/app/Components/CardTableAgen/ApointmentCardT";
+import ApointmentCardT from "@/app/Components/CardTableAgen/ApointmentCardT.jsx";
 
 export default function Appointments() {
   const [visible, setVisible] = useState(false);
