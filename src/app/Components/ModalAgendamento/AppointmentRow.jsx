@@ -1,8 +1,16 @@
 // src/app/Components/ModalAgendamento/components/AppointmentRow.jsx
 "use client";
 
-import React, { memo } from "react";
-import { Eye, Pencil, CheckCircle2, CircleDollarSign, XCircle, Trash2 } from "lucide-react";
+import React, { memo, useState } from "react";
+import {
+  MoreVertical,
+  Eye,
+  Pencil,
+  CheckCircle2,
+  CircleDollarSign,
+  XCircle,
+  Trash2,
+} from "lucide-react";
 import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
 
 const STATUS_MAP = {
@@ -24,14 +32,22 @@ function formatarHorario(horario) {
 }
 
 function AppointmentRow({
-  agendamento, onVisualizar, onEditar,
-  onConfirmarRealizado, onResultadoVenda, onCancelar, onExcluir
+  agendamento,
+  onSelecionar,
+  onVisualizar,
+  onEditar,
+  onConfirmarRealizado,
+  onResultadoVenda,
+  onCancelar,
+  onExcluir
 }) {
   const ag = agendamento;
   const statusInfo = STATUS_MAP[ag.status] || { label: ag.status, color: "#94A3B8" };
+  const [menuAberto, setMenuAberto] = useState(false);
 
   return (
-    <div className={styles.tableRow}>
+    <div className={styles.tableRow}
+         onClick={() => onSelecionar(ag)}>
       {/* Código */}
       <span className={styles.colCodigo}>#{ag.codigo}</span>
       

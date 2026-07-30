@@ -2,7 +2,14 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { Plus, AlertTriangle } from "lucide-react";
+import {
+    Plus,
+    AlertTriangle,
+    MoreVertical,
+    Eye,
+    Pencil,
+    Trash2,
+} from "lucide-react";
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
 import { useAgendamentos } from "@/app/hooks/useAgendamentos";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";

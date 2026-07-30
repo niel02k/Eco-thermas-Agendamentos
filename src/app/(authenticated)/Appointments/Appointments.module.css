@@ -399,10 +399,8 @@
 }
 
 .colActions {
-  display: flex;
-  gap: 3px;
-  justify-content: flex-end;
-  align-items: center;
+  display: none;
+
 }
 
 .actionBtn {
