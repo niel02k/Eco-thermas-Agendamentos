@@ -33,14 +33,21 @@ export default function ApointmentCardT({
           className={styles.close}
           onClick={onClose}
         >
-          <X size={20}/>
+          <X size={20}   />
         </button>
 
 
-        <h2>
-          Agendamento #{agendamento.codigo}
-        </h2>
+        <div className={styles.header}>
+          <span className={styles.badge}>
+              #{agendamento.codigo}
+          </span>
 
+          <span className={styles.status}>
+              {agendamento.status}
+          </span>
+        </div>
+
+       <h2>{agendamento.cliente?.nome}</h2>
 
         <div className={styles.info}>
 
