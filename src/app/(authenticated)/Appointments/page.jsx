@@ -3,12 +3,8 @@
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
-    Plus,
-    AlertTriangle,
-    MoreVertical,
-    Eye,
-    Pencil,
-    Trash2,
+  Plus,
+  AlertTriangle,
 } from "lucide-react";
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
 import { useAgendamentos } from "@/app/hooks/useAgendamentos";
@@ -20,12 +16,12 @@ import AppointmentsStats from "@/app/Components/ModalAgendamento/AppointmentsSta
 import AppointmentsWeekStatus from "@/app/Components/ModalAgendamento/AppointmentsWeekStatus";
 import AppointmentsTable from "@/app/Components/ModalAgendamento/AppointmentsTable";
 import AppointmentsMobile from "@/app/Components/ModalAgendamento/AppointmentsMobile";
-import AppointmentsRecent from "@/app/Components/ModalAgendamento/AppointmentsRecent";
 import VisualizarModal from "@/app/Components/ModalAgendamento/VisualizarModal";
 import ConfirmModal from "@/app/Components/ModalAgendamento/ConfirmModal";
 import NewAppointment from "@/app/Components/modal/Newappointment.jsx";
 import ResultCard from "@/app/Components/Cards/ResultCard/ResultCard.jsx";
 import ApointmentCardT from "@/app/Components/cardTableAgen/ApointmentCardT.jsx";
+import ExportVouchersButton from "@/app/Components/ModalAgendamento/ExportVouchersButton.jsx";
 
 export default function Appointments() {
   const [visible, setVisible] = useState(false);
@@ -34,7 +30,7 @@ export default function Appointments() {
   const [inputBusca, setInputBusca] = useState("");
   const debounceRef = useRef(null);
   const isMobile = useMediaQuery("(max-width: 768px)");
- const [cardSelecionado, setCardSelecionado] = useState(null);
+  const [cardSelecionado, setCardSelecionado] = useState(null);
 
   const {
     agendamentos, total, pagina, totalPaginas,
@@ -77,28 +73,21 @@ export default function Appointments() {
     await confirmarResultadoVenda(codigo, resultado);
   }, [confirmarResultadoVenda]);
 
-  // src/app/(authenticated)/Appointments/Appointments.jsx
-
-const handleConfirmarRealizado = useCallback(async (codigo) => {
-  // 1. Pega o agendamento atual da lista
-  const ag = agendamentos.find(a => a.codigo === codigo);
-  
-  // 2. Abre o modal IMEDIATAMENTE com os dados atuais
-  if (ag) {
-    abrirResultadoVenda({ 
-      ...ag, 
-      status: 'REALIZADO', 
-      resultado_venda: 'PENDENTE' 
-    });
-  }
-
-  // 3. Marca como realizado em background
-  try {
-    await confirmarRealizado(codigo);
-  } catch (e) {
-    console.error('Erro ao confirmar:', e);
-  }
-}, [agendamentos, abrirResultadoVenda, confirmarRealizado]);
+  const handleConfirmarRealizado = useCallback(async (codigo) => {
+    const ag = agendamentos.find(a => a.codigo === codigo);
+    if (ag) {
+      abrirResultadoVenda({
+        ...ag,
+        status: 'REALIZADO',
+        resultado_venda: 'PENDENTE'
+      });
+    }
+    try {
+      await confirmarRealizado(codigo);
+    } catch (e) {
+      console.error('Erro ao confirmar:', e);
+    }
+  }, [agendamentos, abrirResultadoVenda, confirmarRealizado]);
 
   const handleEditar = useCallback(async (codigo) => {
     fecharModal();
@@ -127,12 +116,9 @@ const handleConfirmarRealizado = useCallback(async (codigo) => {
     setConfirm(null);
   }, [confirm, cancelarAgendamento, excluir]);
 
-
-  
-
   return (
     <>
-      {/* Modal de Confirmação */}
+      {/* ═══════════ MODAIS ═══════════ */}
       {confirm && (
         <ConfirmModal
           mensagem={
@@ -145,7 +131,6 @@ const handleConfirmarRealizado = useCallback(async (codigo) => {
         />
       )}
 
-      {/* Modal de Visualização */}
       {modoModal === 'visualizar' && agendamentoSelecionado && (
         <VisualizarModal
           agendamento={agendamentoSelecionado}
@@ -154,7 +139,6 @@ const handleConfirmarRealizado = useCallback(async (codigo) => {
         />
       )}
 
-      {/* Modal de Resultado de Venda */}
       {showResultadoVenda && agendamentoParaResultado && (
         <ResultCard
           agendamento={agendamentoParaResultado}
@@ -164,7 +148,6 @@ const handleConfirmarRealizado = useCallback(async (codigo) => {
         />
       )}
 
-      {/* Modal de Criar/Editar */}
       {abrirModal && (
         <NewAppointment
           onClose={handleCloseModal}
@@ -172,10 +155,17 @@ const handleConfirmarRealizado = useCallback(async (codigo) => {
         />
       )}
 
+      {cardSelecionado && (
+        <ApointmentCardT
+          agendamento={cardSelecionado}
+          onClose={() => setCardSelecionado(null)}
+        />
+      )}
+
+      {/* ═══════════ CONTEÚDO PRINCIPAL ═══════════ */}
       <div className={styles.container}>
         <main className={`${styles.main} ${visible ? styles.mainVisible : ""}`}>
-          
-          {/* Header */}
+
           <PageHeader
             title="Agendamentos"
             subtitle="Gestão operacional dos visitantes e reservas"
@@ -188,7 +178,6 @@ const handleConfirmarRealizado = useCallback(async (codigo) => {
             }}
           />
 
-          {/* Erro */}
           {(erro || erroCriar) && (
             <div className={styles.errorBanner}>
               <AlertTriangle size={16} />
@@ -196,14 +185,12 @@ const handleConfirmarRealizado = useCallback(async (codigo) => {
             </div>
           )}
 
-          {/* Sucesso */}
           {sucessoCriar && agendamentoCriado && (
             <div className={styles.successBanner}>
               ✅ Agendamento {agendamentoCriado.codigo} criado com sucesso!
             </div>
           )}
 
-          {/* Estatísticas */}
           <AppointmentsStats
             totalHoje={totalHoje}
             semanaData={semanaData}
@@ -211,21 +198,26 @@ const handleConfirmarRealizado = useCallback(async (codigo) => {
             loading={loadingStats}
           />
 
-          {/* Agenda + Status */}
           <AppointmentsWeekStatus
             semanaData={semanaData}
             statusCount={statusCount}
             loading={loadingStats}
           />
 
-          {/* Busca */}
-          <div className={styles.searchBar}>
-            <input
-              type="text"
-              placeholder="Buscar por nome, código ou CPF..."
-              value={inputBusca}
-              onChange={onChangeBusca}
-              className={styles.searchInput}
+          {/* Toolbar: Busca + Exportar */}
+          <div className={styles.toolbar}>
+            <div className={styles.searchBar}>
+              <input
+                type="text"
+                placeholder="Buscar por nome, código ou CPF..."
+                value={inputBusca}
+                onChange={onChangeBusca}
+                className={styles.searchInput}
+              />
+            </div>
+            <ExportVouchersButton
+              agendamentos={agendamentos}
+              disabled={loadingTabela}
             />
           </div>
 
@@ -258,19 +250,6 @@ const handleConfirmarRealizado = useCallback(async (codigo) => {
               onExcluir={pedirExclusao}
             />
           )}
-
-          {/* Últimas Entradas */}
-          <AppointmentsRecent
-            agendamentos={agendamentos}
-            loading={loadingTabela}
-          />
-          {cardSelecionado && (
-            <ApointmentCardT
-              agendamento={cardSelecionado}
-              onClose={() => setCardSelecionado(null)}
-            />
-          )}
-
         </main>
       </div>
     </>

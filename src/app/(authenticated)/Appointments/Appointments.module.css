@@ -133,13 +133,35 @@
 /* ═══════════════════════════════════════════════════════════════
    CARDS GENÉRICOS
    ═══════════════════════════════════════════════════════════════ */
+.cardChart {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 18px;
+  box-shadow: 0 4px 16px rgba(30, 110, 190, 0.06);
+  overflow: hidden; /* Garante que o gráfico não ultrapasse */
+  min-width: 0; /* Permite encolher */
+}
+
+/* Card de Status */
 .card {
-  background: var(--bg-white);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 18px;
   padding: 1.5rem;
-  box-shadow: var(--shadow);
-  transition: all var(--transition);
+  box-shadow: 0 4px 16px rgba(30, 110, 190, 0.06);
+  min-width: 0;
+}
+
+/* Ajustar o gráfico dentro do card */
+.cardChart > div {
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.cardChart :hover {
+  transform: translateY(-1px);
+  width: 100%;
 }
 
 .card:hover {
@@ -171,7 +193,7 @@
    ═══════════════════════════════════════════════════════════════ */
 .weekStatusRow {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr 1fr; /* 👈 Dividir igualmente */
   gap: 1rem;
 }
 
@@ -300,8 +322,8 @@
 
 .tableHead {
   display: grid;
-  grid-template-columns: 100px 1.5fr 1.2fr 80px 100px 110px 1fr;
-  gap: 0.75rem;
+  grid-template-columns:  1.5fr 1.2fr  1fr 1fr 1fr 1fr;
+  gap: 1rem;
   padding: 0.75rem 1.5rem;
   background: var(--bg-light);
   border-bottom: 2px solid var(--border);
@@ -313,12 +335,16 @@
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+/* E as linhas também */
 .tableRow {
   display: grid;
-  grid-template-columns: 100px 1.5fr 1.2fr 80px 100px 110px 1fr;
-  gap: 0.75rem;
+  grid-template-columns:  1.5fr 1.2fr  1fr 1fr 1fr 1fr;
+  gap: 1rem;
   padding: 0.9rem 1.5rem;
   align-items: center;
   border-bottom: 1px solid var(--border-light);
@@ -371,7 +397,7 @@
 }
 
 .colPessoas {
-  text-align: center;
+  margin-left: 20px;
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -1023,4 +1049,136 @@
   .recentTime { width: 100%; }
   
   .confirmActions { flex-direction: column; }
+}
+
+
+.exportBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #15803D;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.exportBtn:hover:not(:disabled) {
+  background: #166534;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
+}
+
+.exportBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.exportBtn .spinning {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Toolbar de ações */
+.toolbar {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Responsivo */
+@media (max-width: 640px) {
+  .exportBtn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+  
+  .toolbar {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+
+.exportWrapper {
+  position: relative;
+}
+
+.datePickerPopup {
+  background: white;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 250px;
+}
+
+.datePickerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1E293B;
+}
+
+.datePickerHeader button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #94A3B8;
+  font-size: 1rem;
+  padding: 2px 6px;
+}
+
+.dateInput {
+  padding: 10px 12px;
+  border: 1px solid #D1D5DB;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.exportConfirmBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: #15803D;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.exportConfirmBtn:hover:not(:disabled) {
+  background: #166534;
+}
+
+.exportConfirmBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

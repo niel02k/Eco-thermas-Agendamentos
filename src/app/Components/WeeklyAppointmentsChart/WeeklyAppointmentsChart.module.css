@@ -1,0 +1,111 @@
+/* WeeklyAppointmentsChart.module.css */
+
+.chartCard {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 16px rgba(30, 110, 190, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.chartTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1E293B;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.chartSub {
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  color: #94A3B8;
+  font-weight: 500;
+}
+
+.chartBadge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.chartBadgeBlue {
+  background: #EFF6FF;
+  color: #1E6EBE;
+}
+
+/* ─── Empty ─────────────────────────── */
+.emptyChart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #F8FAFC;
+  border-radius: 12px;
+  color: #94A3B8;
+  font-size: 0.85rem;
+}
+
+.emptyIcon {
+  font-size: 2rem;
+}
+
+.emptyChart p {
+  margin: 0;
+  font-weight: 500;
+}
+
+/* ─── Skeleton Loading ──────────────── */
+.skeletonChart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: #F8FAFC;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.skeletonBar {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #E5E7EB 25%, #D1D5DB 50%, #E5E7EB 75%);
+  background-size: 600px 100%;
+  border-radius: 8px;
+  animation: shimmer 1.4s infinite linear;
+}
+
+@keyframes shimmer {
+  0% { background-position: -600px 0; }
+  100% { background-position: 600px 0; }
+}
+
+/* ─── Responsivo ────────────────────── */
+@media (max-width: 768px) {
+  .chartCard {
+    padding: 1rem;
+    border-radius: 14px;
+  }
+  
+  .chartTitle {
+    font-size: 0.85rem;
+  }
+  
+  .chartSub {
+    font-size: 0.7rem;
+  }
+}

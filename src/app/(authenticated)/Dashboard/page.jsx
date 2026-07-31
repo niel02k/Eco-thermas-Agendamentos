@@ -8,12 +8,13 @@ import StatCard from '@/app/Components/Cards/StatCard/StatCard.jsx';
 import styles from './Dashboard.module.css';
 import { useDashboardStats } from '@/app/hooks/dashboard/useDashboardStats';
 import NewAppointment from "@/app/Components/modal/Newappointment";
+import WeeklyAppointmentsChart from "@/app/Components/WeeklyAppointmentsChart/WeeklyAppointmentsChart.jsx";
 
 
 const Dashboard = () => {
   const [visible, setVisible] = useState(false);
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
-  
+
   // Usar o hook de estatísticas
   const {
     error,
@@ -34,21 +35,21 @@ const Dashboard = () => {
   }, []);
 
   // Formatações
-     const formatarNumero = (valor) => new Intl.NumberFormat('pt-BR').format(valor || 0);
-      const formatarMoeda = (valor) => {
+  const formatarNumero = (valor) => new Intl.NumberFormat('pt-BR').format(valor || 0);
+  const formatarMoeda = (valor) => {
     const num = Number(valor) || 0;
-      return `R$ ${num.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-    };
+    return `R$ ${num.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+  };
 
   // Dados para gráfico de semana
-  const dadosSemanaFormatado = Array.isArray(semanaData) 
+  const dadosSemanaFormatado = Array.isArray(semanaData)
     ? semanaData.map(item => ({
-        dia: item.day,
-        total: item.total || 0
-      }))
+      dia: item.day,
+      total: item.total || 0
+    }))
     : [];
 
- 
+
 
   return (
     <div className={styles.container}>
@@ -82,10 +83,10 @@ const Dashboard = () => {
               <StatCard
                 title="Hoje"
                 value={totalHoje.toString()}
-                label={new Date().toLocaleDateString('pt-BR', { 
-                  weekday: 'long', 
-                  day: '2-digit', 
-                  month: '2-digit' 
+                label={new Date().toLocaleDateString('pt-BR', {
+                  weekday: 'long',
+                  day: '2-digit',
+                  month: '2-digit'
                 })}
                 trend={0}
                 icon={CalendarCheck}
@@ -159,21 +160,21 @@ const Dashboard = () => {
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
                     <XAxis dataKey="mes" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                    <YAxis 
-                      tick={{ fontSize: 11, fill: '#94a3b8' }} 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tickFormatter={v => `R$${(v / 1000).toFixed(0)}k`} 
+                    <YAxis
+                      tick={{ fontSize: 11, fill: '#94a3b8' }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={v => `R$${(v / 1000).toFixed(0)}k`}
                     />
                     <Tooltip formatter={(v) => [formatarMoeda(v), 'Receita']} />
-                    <Area 
-                      type="monotone" 
-                      dataKey="receita" 
-                      stroke="#1E6EBE" 
-                      strokeWidth={2.5} 
-                      fill="url(#gradReceita)" 
-                      dot={{ r: 4, fill: '#fff', stroke: '#1E6EBE', strokeWidth: 2.5 }} 
-                      activeDot={{ r: 6 }} 
+                    <Area
+                      type="monotone"
+                      dataKey="receita"
+                      stroke="#1E6EBE"
+                      strokeWidth={2.5}
+                      fill="url(#gradReceita)"
+                      dot={{ r: 4, fill: '#fff', stroke: '#1E6EBE', strokeWidth: 2.5 }}
+                      activeDot={{ r: 6 }}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -185,38 +186,21 @@ const Dashboard = () => {
             </div>
 
             {/* Gráfico de Agendamentos por Dia */}
-            <div className={styles.chartCard}>
-              <div className={styles.chartHeader}>
-                <div>
-                  <h2 className={styles.chartTitle}>Agendamentos</h2>
-                  <p className={styles.chartSub}>Semana atual</p>
-                </div>
-                <div className={`${styles.chartBadge} ${styles.chartBadgeBlue}`}>
-                  <Activity size={13} />
-                  Agendamentos/dia
-                </div>
-              </div>
+            
               {dadosSemanaFormatado.length > 0 ? (
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={dadosSemanaFormatado} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
-                    <XAxis dataKey="dia" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                    <YAxis 
-                      tick={{ fontSize: 11, fill: '#000000' }} 
-                      axisLine={false} 
-                      tickLine={false} 
-                      allowDecimals={false} 
-                    />
-                    <Tooltip formatter={(v) => [v, 'Agendamentos']} />
-                    <Bar dataKey="total" fill="#6EC8F0" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+                <WeeklyAppointmentsChart
+                  data={semanaData}
+                  title="Agendamentos"
+                  subtitle="Semana atual"
+                  height={200}
+                  barColor="#6EC8F0"
+                />
               ) : (
                 <div className={styles.emptyChart}>
                   <p>Nenhum agendamento nesta semana</p>
                 </div>
               )}
-            </div>
+       
           </div>
 
           {/* Quick Strip - Indicadores */}
@@ -233,7 +217,7 @@ const Dashboard = () => {
             <div className={styles.stripCard}>
               <span className={styles.stripLabel}>Ticket Médio</span>
               <span className={styles.stripValue}>
-                {ticketMedioData?.ticket_medio > 0 
+                {ticketMedioData?.ticket_medio > 0
                   ? formatarMoeda(ticketMedioData.ticket_medio)
                   : 'R$ 0,00'}
               </span>
@@ -248,7 +232,7 @@ const Dashboard = () => {
             </div>
 
             {/* Valor Total */}
-           
+
           </div>
 
           {error && (
@@ -259,7 +243,7 @@ const Dashboard = () => {
           )}
         </div>
       </main>
-      
+
       {showAppointmentModal && (
         <NewAppointment
           onClose={() => {

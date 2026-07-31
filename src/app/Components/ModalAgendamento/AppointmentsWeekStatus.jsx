@@ -3,6 +3,7 @@
 
 import React from "react";
 import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
+import WeeklyAppointmentsChart from "@/app/Components/WeeklyAppointmentsChart/WeeklyAppointmentsChart.jsx";
 
 
 const STATUS_MAP = {
@@ -16,21 +17,15 @@ export default function AppointmentsWeekStatus({ semanaData, statusCount, loadin
   return (
     <div className={styles.weekStatusRow}>
       {/* Agenda da Semana */}
-      <div className={styles.card}>
-        <div className={styles.cardHeader}>
-          <h2>Agenda da Semana</h2>
-          <p>Agendamentos por dia</p>
-        </div>
-        <div className={styles.weekGrid}>
-          {loading
-            ? [...Array(7)].map((_, i) => <div key={i} className={styles.skeletonDay} />)
-            : (semanaData || []).map((item) => (
-                <div key={item.day} className={styles.dayCard}>
-                  <span className={styles.dayName}>{item.day}</span>
-                  <strong>{item.total}</strong>
-                </div>
-              ))}
-        </div>
+      <div className={styles.cardChart}>
+        <WeeklyAppointmentsChart
+          data={semanaData}
+          title="Agendamentos"
+          subtitle="Semana atual"
+          height={200}
+          barColor="#6EC8F0"
+        />
+        
       </div>
 
       {/* Status */}
@@ -50,5 +45,8 @@ export default function AppointmentsWeekStatus({ semanaData, statusCount, loadin
         </div>
       </div>
     </div>
+
+
+
   );
 }

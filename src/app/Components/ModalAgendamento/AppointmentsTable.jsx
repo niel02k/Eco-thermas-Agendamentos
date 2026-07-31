@@ -53,7 +53,6 @@ export default function AppointmentsTable({
             <span>Pessoas</span>
             <span>Cidade</span>
             <span>Status</span>
-            <span>Ações</span>
           </div>
 
           <div className={styles.tableBody}>
