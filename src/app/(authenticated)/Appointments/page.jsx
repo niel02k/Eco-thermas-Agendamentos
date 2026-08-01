@@ -2,15 +2,11 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import {
-  Plus,
-  AlertTriangle,
-} from "lucide-react";
+import {Plus, AlertTriangle,} from "lucide-react";
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
 import { useAgendamentos } from "@/app/hooks/useAgendamentos";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
-
 // Componentes
 import AppointmentsStats from "@/app/Components/ModalAgendamento/AppointmentsStats";
 import AppointmentsWeekStatus from "@/app/Components/ModalAgendamento/AppointmentsWeekStatus";
@@ -21,7 +17,7 @@ import ConfirmModal from "@/app/Components/ModalAgendamento/ConfirmModal";
 import NewAppointment from "@/app/Components/modal/Newappointment.jsx";
 import ResultCard from "@/app/Components/Cards/ResultCard/ResultCard.jsx";
 import ApointmentCardT from "@/app/Components/cardTableAgen/ApointmentCardT.jsx";
-import ExportVouchersButton from "@/app/Components/ModalAgendamento/ExportVouchersButton.jsx";
+
 
 export default function Appointments() {
   const [visible, setVisible] = useState(false);
@@ -204,22 +200,7 @@ export default function Appointments() {
             loading={loadingStats}
           />
 
-          {/* Toolbar: Busca + Exportar */}
-          <div className={styles.toolbar}>
-            <div className={styles.searchBar}>
-              <input
-                type="text"
-                placeholder="Buscar por nome, código ou CPF..."
-                value={inputBusca}
-                onChange={onChangeBusca}
-                className={styles.searchInput}
-              />
-            </div>
-            <ExportVouchersButton
-              agendamentos={agendamentos}
-              disabled={loadingTabela}
-            />
-          </div>
+
 
           {/* Tabela ou Cards */}
           {isMobile ? (
@@ -240,6 +221,8 @@ export default function Appointments() {
               total={total}
               pagina={pagina}
               totalPaginas={totalPaginas}
+              busca={inputBusca}                    // 👈 Passar busca
+              onBuscaChange={onChangeBusca}         // 👈 Passar handler
               onPageChange={setPagina}
               onSelecionar={setCardSelecionado}
               onVisualizar={abrirVisualizar}

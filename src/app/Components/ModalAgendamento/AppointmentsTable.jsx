@@ -1,31 +1,20 @@
-// src/app/Components/ModalAgendamento/components/AppointmentsTable.jsx
+// src/app/Components/ModalAgendamento/AppointmentsTable.jsx
 "use client";
 
 import React from "react";
-import AppointmentRow from "./AppointmentRow";
-import AppointmentsPagination from "./AppointmentsPagination";
+import AppointmentRow from "@/app/Components/ModalAgendamento/AppointmentRow";
+import AppointmentsPagination from "@/app/Components/ModalAgendamento/AppointmentsPagination";
+import ExportVouchersButton from "@/app/Components/ModalAgendamento/ExportVouchersButton";
 import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
 
-
 export default function AppointmentsTable({
-  agendamentos,
-  loading,
-  total,
-  pagina,
-  totalPaginas,
-  onPageChange,
-
-  onSelecionar,
-
-  onVisualizar,
-  onEditar,
-  onConfirmarRealizado,
-  onResultadoVenda,
-  onCancelar,
-  onExcluir
+  agendamentos, loading, total, pagina, totalPaginas,
+  onPageChange, onSelecionar, onVisualizar, onEditar,
+  onConfirmarRealizado, onResultadoVenda, onCancelar, onExcluir
 }) {
   return (
     <div className={styles.tableCard}>
+      {/* Topo da tabela */}
       <div className={styles.tableTop}>
         <div>
           <h3>Agendamentos</h3>
@@ -33,6 +22,12 @@ export default function AppointmentsTable({
             {loading ? "Carregando..." : `${total} registro${total !== 1 ? "s" : ""}`}
           </span>
         </div>
+        
+        {/* Botão Exportar Vouchers */}
+        <ExportVouchersButton 
+          agendamentos={agendamentos} 
+          disabled={loading} 
+        />
       </div>
 
       {loading ? (
@@ -46,6 +41,7 @@ export default function AppointmentsTable({
         </div>
       ) : (
         <>
+          {/* Cabeçalho */}
           <div className={styles.tableHead}>
             <span>Código</span>
             <span>Cliente</span>
@@ -55,14 +51,13 @@ export default function AppointmentsTable({
             <span>Status</span>
           </div>
 
+          {/* Linhas */}
           <div className={styles.tableBody}>
             {agendamentos.map(ag => (
               <AppointmentRow
                 key={ag.codigo}
                 agendamento={ag}
-
                 onSelecionar={onSelecionar}
-
                 onVisualizar={onVisualizar}
                 onEditar={onEditar}
                 onConfirmarRealizado={onConfirmarRealizado}
@@ -73,6 +68,7 @@ export default function AppointmentsTable({
             ))}
           </div>
 
+          {/* Paginação */}
           {totalPaginas > 1 && (
             <AppointmentsPagination
               pagina={pagina}

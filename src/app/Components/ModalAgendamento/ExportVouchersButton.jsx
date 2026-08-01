@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { FileSpreadsheet, Loader2, Calendar } from "lucide-react";
+import { FileSpreadsheet, Loader2, X } from "lucide-react";
 import { exportarVouchersExcel } from "@/app/services/exportServices";
 import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
 
@@ -17,7 +17,6 @@ export default function ExportVouchersButton({ agendamentos, disabled = false })
       return;
     }
 
-    // Filtrar por data selecionada
     const filtrados = agendamentos.filter(ag => ag.data_visita === selectedDate);
 
     if (filtrados.length === 0) {
@@ -42,6 +41,11 @@ export default function ExportVouchersButton({ agendamentos, disabled = false })
     }
   };
 
+  const handleCancel = () => {
+    setShowDatePicker(false);
+    setSelectedDate(new Date().toISOString().split('T')[0]);
+  };
+
   const formatarData = (data) => {
     const [ano, mes, dia] = data.split('-');
     return `${dia}/${mes}/${ano}`;
@@ -51,10 +55,6 @@ export default function ExportVouchersButton({ agendamentos, disabled = false })
     <div className={styles.exportWrapper}>
       {showDatePicker ? (
         <div className={styles.datePickerPopup}>
-          <div className={styles.datePickerHeader}>
-            <span>Selecionar data dos vouchers</span>
-            <button onClick={() => setShowDatePicker(false)}>✕</button>
-          </div>
           <input
             type="date"
             value={selectedDate}
@@ -74,9 +74,17 @@ export default function ExportVouchersButton({ agendamentos, disabled = false })
             ) : (
               <>
                 <FileSpreadsheet size={16} />
-                Exportar {formatarData(selectedDate)}
+                Exportar
               </>
             )}
+          </button>
+          <button
+            onClick={handleCancel}
+            disabled={loading}
+            className={styles.exportCancelBtn}
+            title="Cancelar"
+          >
+            <X size={16} />
           </button>
         </div>
       ) : (
