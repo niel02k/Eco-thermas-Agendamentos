@@ -36,6 +36,10 @@ export function useAgendamentos() {
   const [statusCount, setStatusCount] = useState({
     CONFIRMADO: 0, PENDENTE: 0, CANCELADO: 0,
   });
+  const [statusCountVenda, setStatusCountVenda] = useState({
+    VENDA_REALIZADA: 0,
+    VENDA_PERDIDA: 0,
+  });
   const [loadingStats, setLoadingStats] = useState(true);
 
   // ── Criar Agendamento ─────────────────────────────────────────
@@ -60,7 +64,11 @@ export function useAgendamentos() {
     setErro(null);
     try {
       const resultado = await listarAgendamentos({
-        pagina: pag, limite: LIMITE, busca: buscar,
+        pagina: pag, 
+        limite: LIMITE, 
+        busca: buscar,
+        ordenarPor: 'data_criacao',
+        ordem: 'desc',
       });
       setAgendamentos(resultado.agendamentos ?? []);
       setTotal(resultado.total ?? 0);
@@ -75,28 +83,54 @@ export function useAgendamentos() {
   // ═══════════════════════════════════════════════════════════════
   // CARREGAR STATS
   // ═══════════════════════════════════════════════════════════════
-  const carregarStats = useCallback(async () => {
-    setLoadingStats(true);
-    try {
-      const [hoje, semana, todos] = await Promise.all([
-        agendamentosHoje(),
-        agendamentosPorDiaSemana(),
-        listarAgendamentos({ pagina: 1, limite: 200 }),
-      ]);
-      setTotalHoje(hoje);
-      setSemanaData(DIAS_SEMANA.map((dia, i) => ({ day: dia, total: semana[i] ?? 0 })));
-      const counts = { CONFIRMADO: 0, PENDENTE: 0, CANCELADO: 0 };
-      (todos.agendamentos ?? []).forEach((a) => {
-        if (counts[a.status] !== undefined) counts[a.status]++;
-      });
-      setStatusCount(counts);
-    } catch (e) {
-      console.error('Erro ao carregar stats:', e);
-    } finally {
-      setLoadingStats(false);
-    }
-  }, []);
-
+const carregarStats = useCallback(async () => {
+  setLoadingStats(true);
+  try {
+    const [hojeData, semana, todos] = await Promise.all([
+      agendamentosHoje(),
+      agendamentosPorDiaSemana(),
+      listarAgendamentos({ pagina: 1, limite: 200 }),
+    ]);
+    setTotalHoje(hojeData);
+    setSemanaData(DIAS_SEMANA.map((dia, i) => ({ day: dia, total: semana[i] ?? 0 })));
+    
+    const counts = { CONFIRMADO: 0, PENDENTE: 0, CANCELADO: 0 };
+    const countsVenda = { VENDA_REALIZADA: 0, VENDA_PERDIDA: 0 };
+    
+    const agora = new Date();
+    const diaSemana = agora.getDay();
+    const inicioSemana = new Date(agora);
+    inicioSemana.setDate(agora.getDate() - (diaSemana === 0 ? 6 : diaSemana - 1));
+    inicioSemana.setHours(0, 0, 0, 0);
+    const fimSemana = new Date(inicioSemana);
+    fimSemana.setDate(inicioSemana.getDate() + 6);
+    fimSemana.setHours(23, 59, 59, 999);
+    
+    console.log('📅 Semana:', inicioSemana.toISOString().split('T')[0], 'até', fimSemana.toISOString().split('T')[0]);
+    
+    (todos.agendamentos ?? []).forEach((a) => {
+      if (counts[a.status] !== undefined) counts[a.status]++;
+      
+      const dataAgendamento = new Date(a.data_visita + 'T00:00:00');
+      console.log('📊 Agendamento:', a.codigo, a.data_visita, a.resultado_venda, 
+        'Na semana?', dataAgendamento >= inicioSemana && dataAgendamento <= fimSemana);
+      
+      if (dataAgendamento >= inicioSemana && dataAgendamento <= fimSemana) {
+        if (countsVenda[a.resultado_venda] !== undefined) {
+          countsVenda[a.resultado_venda]++;
+        }
+      }
+    });
+    
+    
+    setStatusCount(counts);
+    setStatusCountVenda(countsVenda);
+  } catch (e) {
+    console.error('Erro ao carregar stats:', e);
+  } finally {
+    setLoadingStats(false);
+  }
+}, []);
   // ═══════════════════════════════════════════════════════════════
   // BUSCAR DETALHE
   // ═══════════════════════════════════════════════════════════════
@@ -303,7 +337,7 @@ export function useAgendamentos() {
   return {
     agendamentos, total, pagina, totalPaginas,
     busca, loadingTabela, handleBusca, setPagina,
-    totalHoje, semanaData, statusCount, loadingStats,
+    totalHoje, semanaData, statusCount, statusCountVenda, loadingStats,
     criarAgendamento: handleCriarAgendamento,
     loadingCriar, erroCriar, sucessoCriar, agendamentoCriado, resetarCriacao,
     agendamentoSelecionado, loadingDetalhe, modoModal,

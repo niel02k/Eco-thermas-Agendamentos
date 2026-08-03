@@ -8,7 +8,7 @@ const supabase = createClient();
 /**
  * Listar contratos com paginação e busca
  */
-export async function listarContratos({ pagina = 1, limite = 10, busca = '', status = null } = {}) {
+export async function listarContratos({ pagina = 1, limite = 10, busca = '', status = null, ordenarPor = 'data_criacao', ordem = 'desc' } = {}) {
   const inicio = (pagina - 1) * limite;
   const fim = inicio + limite - 1;
 
@@ -20,19 +20,19 @@ export async function listarContratos({ pagina = 1, limite = 10, busca = '', sta
       dependentes:contrato_dependentes (nome, cpf, idade)
     `, { count: 'exact' });
 
-  // Busca por nome do titular
   if (busca) {
     query = query.ilike('titular_nome', `%${busca}%`);
   }
 
-  // Filtro de status
   if (status && status !== 'todos') {
     query = query.eq('status', status);
   }
 
-  const { data, count, error } = await query
-    .order('data_criacao', { ascending: false })
-    .range(inicio, fim);
+  // 👇 Ordenação dinâmica
+  const ascending = ordem === 'asc';
+  query = query.order(ordenarPor, { ascending });
+
+  const { data, count, error } = await query.range(inicio, fim);
 
   if (error) throw error;
 
@@ -43,7 +43,6 @@ export async function listarContratos({ pagina = 1, limite = 10, busca = '', sta
     totalPaginas: Math.ceil((count || 0) / limite)
   };
 }
-
 /**
  * Buscar contrato por ID
  */

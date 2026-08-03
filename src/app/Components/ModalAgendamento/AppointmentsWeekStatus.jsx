@@ -1,24 +1,34 @@
-// src/app/Components/ModalAgendamento/components/AppointmentsWeekStatus.jsx
+// src/app/Components/ModalAgendamento/AppointmentsWeekStatus.jsx
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
+import { CheckCircle2, TrendingUp, TrendingDown, XCircle } from "lucide-react";
 import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
 import WeeklyAppointmentsChart from "@/app/Components/WeeklyAppointmentsChart/WeeklyAppointmentsChart.jsx";
-import { 
-  STATUS_AGENDAMENTO, 
-  STATUS_AGENDAMENTO_LABELS, 
-  STATUS_AGENDAMENTO_COLORS 
-} from "@/lib/constants";
+import StatCard from "@/app/Components/Cards/StatCard/StatCard.jsx";
 
-export default function AppointmentsWeekStatus({ semanaData, statusCount, loading }) {
+function getPeriodoSemana() {
+  const hoje = new Date();
+  const diaSemana = hoje.getDay();
+  const inicio = new Date(hoje);
+  inicio.setDate(hoje.getDate() - (diaSemana === 0 ? 6 : diaSemana - 1));
+  const fim = new Date(inicio);
+  fim.setDate(inicio.getDate() + 6);
+  
+  const formatar = (d) => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  return `${formatar(inicio)} - ${formatar(fim)}`;
+}
+
+export default function AppointmentsWeekStatus({ semanaData, statusCount, statusCountVenda, loading }) {
+  const totalSemana = (semanaData || []).reduce((acc, d) => acc + (d.total || 0), 0);
+  const vendasRealizadas = statusCountVenda?.VENDA_REALIZADA || 0;
+  const vendasPerdidas = statusCountVenda?.VENDA_PERDIDA || 0;
+  const faltas = statusCount?.FALTOU || 0;
+  const periodo = useMemo(() => getPeriodoSemana(), []);
+
   return (
     <div className={styles.weekStatusRow}>
-      {/* Agenda da Semana */}
-      <div className={styles.card}>
-        <div className={styles.cardHeader}>
-          <h2>Agenda da Semana</h2>
-          <p>Agendamentos por dia</p>
-        </div>
+      <div className={styles.cardChart}>
         <WeeklyAppointmentsChart
           data={semanaData}
           height={200}
@@ -26,20 +36,42 @@ export default function AppointmentsWeekStatus({ semanaData, statusCount, loadin
         />
       </div>
 
-      {/* Status */}
-      <div className={styles.card}>
-        <div className={styles.cardHeader}>
-          <h2>Status</h2>
-          <p>Resumo operacional</p>
+      <div className={styles.weekRightColumn}>
+        <div className={styles.statCard}>
+          <StatCard 
+            title="Semana" 
+            value={String(totalSemana)} 
+            label={periodo}  // 👈 Mostra o período
+            icon={TrendingUp} 
+            color="blue" 
+          />
         </div>
-        <div className={styles.statusList}>
-          {Object.entries(STATUS_AGENDAMENTO).map(([key, value]) => (
-            <div key={key} className={styles.statusItem}>
-              <div className={styles.statusDot} style={{ background: STATUS_AGENDAMENTO_COLORS[value] }} />
-              <span>{STATUS_AGENDAMENTO_LABELS[key]}</span>
-              <strong>{loading ? "—" : (statusCount?.[value] || 0)}</strong>
-            </div>
-          ))}
+        <div className={styles.statCard}>
+          <StatCard 
+            title="Vendido" 
+            value={String(vendasRealizadas)} 
+            label="Vendas realizadas" 
+            icon={CheckCircle2} 
+            color="green" 
+          />
+        </div>
+        <div className={styles.statCard}>
+          <StatCard 
+            title="Não Vendido" 
+            value={String(vendasPerdidas)} 
+            label="Vendas perdidas" 
+            icon={TrendingDown} 
+            color="red" 
+          />
+        </div>
+        <div className={styles.statCard}>
+          <StatCard 
+            title="Faltou" 
+            value={String(faltas)} 
+            label="Faltou" 
+            icon={XCircle} 
+            color="yellow" 
+          />
         </div>
       </div>
     </div>

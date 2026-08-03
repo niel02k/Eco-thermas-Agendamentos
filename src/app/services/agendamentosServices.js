@@ -180,7 +180,7 @@ export async function taxaDeConversao({ inicio, fim } = {}) {
 
 // ============ CRUD ============
 
-export async function listarAgendamentos({ pagina = 1, limite = 10, busca = '', status = null, ordenarPor = 'data_visita', ordem = 'desc' } = {}) {
+export async function listarAgendamentos({ pagina = 1, limite = 10, busca = '', status = null, ordenarPor = 'data_criacao', ordem = 'asc' } = {}) {
   const inicio = (pagina - 1) * limite;
   const fim = inicio + limite - 1;
   

@@ -4,6 +4,7 @@
 import React from "react";
 import { X, Pencil, CheckCircle2, CircleDollarSign, XCircle, Trash2, User, Users, MapPin, CalendarDays } from "lucide-react";
 import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
+import VoucherPDFButton from "@/app/Components/ModalAgendamento/VoucherPDFButton";
 import { 
   STATUS_AGENDAMENTO, 
   STATUS_AGENDAMENTO_LABELS, 
@@ -38,8 +39,6 @@ export default function VisualizarModal({
   const statusLabel = STATUS_AGENDAMENTO_LABELS[ag.status] || ag.status;
   const visitaLabel = RESULTADO_VISITA_LABELS[ag.resultado_visita] || '';
   const visitaColor = RESULTADO_VISITA_COLORS[ag.resultado_visita] || '';
-
-  // Verifica se já foi finalizado (realizado ou faltou)
   const isFinalizado = ag.resultado_visita === RESULTADO_VISITA.REALIZADO || ag.resultado_visita === RESULTADO_VISITA.FALTOU;
 
   return (
@@ -52,17 +51,13 @@ export default function VisualizarModal({
             <h2>Agendamento {ag.codigo}</h2>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               <span className={styles.modalStatusBadge} style={{
-                background: `${statusColor}18`,
-                color: statusColor,
-                border: `1px solid ${statusColor}30`
+                background: `${statusColor}18`, color: statusColor, border: `1px solid ${statusColor}30`
               }}>
                 {statusLabel}
               </span>
               {visitaLabel && (
                 <span className={styles.modalStatusBadge} style={{
-                  background: `${visitaColor}18`,
-                  color: visitaColor,
-                  border: `1px solid ${visitaColor}30`
+                  background: `${visitaColor}18`, color: visitaColor, border: `1px solid ${visitaColor}30`
                 }}>
                   {visitaLabel}
                 </span>
@@ -70,45 +65,39 @@ export default function VisualizarModal({
             </div>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            {/* PENDENTE → CONFIRMADO (some se já finalizado) */}
+            <VoucherPDFButton agendamento={ag} />
             {!isFinalizado && ag.status === STATUS_AGENDAMENTO.PENDENTE && (
               <button className={styles.actionButton} title="Confirmar Agendamento"
                 onClick={() => { onClose(); onConfirmarAgendamento(ag.codigo); }}>
                 <CheckCircle2 size={16} color="#15803D" />
               </button>
             )}
-            
-            {/* CONFIRMADO → Abre modal Realizado/Faltou (some se já finalizado) */}
             {!isFinalizado && ag.status === STATUS_AGENDAMENTO.CONFIRMADO && (
               <button className={styles.actionButton} title="Realizar Agendamento"
                 onClick={() => { onClose(); onConfirmarRealizado(ag); }}>
                 <CheckCircle2 size={16} color="#A16207" />
               </button>
             )}
-            
-            {/* resultado_visita = REALIZADO + resultado_venda = PENDENTE → Definir Venda */}
             {ag.resultado_visita === RESULTADO_VISITA.REALIZADO && ag.resultado_venda === RESULTADO_VENDA.PENDENTE && (
               <button className={styles.actionButton} title="Resultado Venda"
                 onClick={() => { onClose(); onResultadoVenda(ag); }}>
                 <CircleDollarSign size={16} color="#A16207" />
               </button>
             )}
-            
-            {/* Editar */}
             <button className={styles.actionButton} onClick={() => { onClose(); onEditar(ag.codigo); }}>
               <Pencil size={16} />
             </button>
             
-            {/* Fechar */}
             <button className={styles.closeBtn} onClick={onClose}>
               <X size={20} />
             </button>
+
+            
           </div>
         </div>
 
         {/* Body */}
         <div className={styles.modalDetalheBody}>
-          {/* Cliente */}
           <div className={styles.detalheSection}>
             <h3><User size={16} /> Cliente</h3>
             <div className={styles.detalheGrid}>
@@ -121,7 +110,6 @@ export default function VisualizarModal({
             </div>
           </div>
 
-          {/* Agendamento */}
           <div className={styles.detalheSection}>
             <h3><CalendarDays size={16} /> Agendamento</h3>
             <div className={styles.detalheGrid}>
@@ -130,14 +118,8 @@ export default function VisualizarModal({
               <div><label>Pessoas</label><p>{ag.quantidade_pessoas}</p></div>
               <div><label>Cidade</label><p><MapPin size={14} style={{ display: 'inline' }} /> {ag.cidade || "—"}</p></div>
               <div><label>Consultor</label><p>{ag.vendedor?.nome || "Não informado"}</p></div>
-              <div>
-                <label>Status Confirmação</label>
-                <p>{statusLabel}</p>
-              </div>
-              <div>
-                <label>Comparecimento</label>
-                <p>{RESULTADO_VISITA_LABELS[ag.resultado_visita] || 'Pendente'}</p>
-              </div>
+              <div><label>Status Confirmação</label><p>{statusLabel}</p></div>
+              <div><label>Comparecimento</label><p>{RESULTADO_VISITA_LABELS[ag.resultado_visita] || 'Pendente'}</p></div>
               <div>
                 <label>Resultado Venda</label>
                 <p>
@@ -145,13 +127,11 @@ export default function VisualizarModal({
                   {ag.resultado_venda === RESULTADO_VENDA.VENDA_PERDIDA && '❌ Venda Perdida'}
                   {ag.resultado_venda === RESULTADO_VENDA.NAO_APLICAVEL && 'ℹ️ Não Aplicável'}
                   {ag.resultado_venda === RESULTADO_VENDA.PENDENTE && '⏳ Pendente'}
-                  {!ag.resultado_venda && '—'}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Dependentes */}
           {ag.dependentes && ag.dependentes.length > 0 && (
             <div className={styles.detalheSection}>
               <h3><Users size={16} /> Dependentes ({ag.dependentes.length})</h3>
@@ -166,7 +146,6 @@ export default function VisualizarModal({
             </div>
           )}
 
-          {/* Observações */}
           {ag.observacoes && (
             <div className={styles.detalheSection}>
               <h3>Observações</h3>
@@ -177,6 +156,8 @@ export default function VisualizarModal({
 
         {/* Footer */}
         <div className={styles.modalDetalheFooter}>
+          
+          
           <button 
             className={styles.btnFechar}
             disabled={isFinalizado || ag.status === STATUS_AGENDAMENTO.CANCELADO}
@@ -184,13 +165,9 @@ export default function VisualizarModal({
           >
             <XCircle size={16} /> Cancelar
           </button>
-          <button 
-            className={styles.btnFechar}
-            onClick={() => { onClose(); onExcluir(ag.codigo); }}
-          >
+          <button className={styles.btnFechar} onClick={() => { onClose(); onExcluir(ag.codigo); }}>
             <Trash2 size={16} /> Excluir
           </button>
-          <button className={styles.btnFechar} onClick={onClose}>Fechar</button>
           <button className={styles.btnEditar} onClick={() => { onClose(); onEditar(ag.codigo); }}>
             <Pencil size={16} /> Editar
           </button>

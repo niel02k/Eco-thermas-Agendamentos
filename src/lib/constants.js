@@ -63,9 +63,16 @@ export const RESULTADO_VENDA = {
 
 export const RESULTADO_VENDA_LABELS = {
   PENDENTE: 'Pendente',
-  VENDA_REALIZADA: 'Venda Realizada',
-  VENDA_PERDIDA: 'Venda Perdida',
-  NAO_APLICAVEL: 'Não Aplicável',
+  VENDA_REALIZADA: 'Vendido',
+  VENDA_PERDIDA: 'Não Vendido',
+  NAO_APLICAVEL: 'N/A',
+}
+
+export const RESULTADO_VENDA_COLORS = {
+  PENDENTE: '#94A3B8',
+  VENDA_REALIZADA: '#16A34A',
+  VENDA_PERDIDA: '#DC2626',
+  NAO_APLICAVEL: '#6B7280',
 }
 
 export const STATUS_CONTRATO = {

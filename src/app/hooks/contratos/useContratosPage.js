@@ -15,11 +15,8 @@ export function useContratosPage() {
   
   const [todosContratos, setTodosContratos] = useState([]);
 
-  // Carregar TODOS os contratos
   const carregarTodosContratos = useCallback(async () => {
     try {
-      console.log('🔍 Buscando contratos e usuários...');
-      
       const [contratosRes, usuariosRes] = await Promise.all([
         supabase
           .from('contratos')
@@ -30,14 +27,7 @@ export function useContratosPage() {
           .select('id, nome')
       ]);
 
-      if (contratosRes.error) {
-        console.error('❌ Erro contratos:', contratosRes.error);
-        return;
-      }
-      if (usuariosRes.error) {
-        console.error('❌ Erro usuarios:', usuariosRes.error);
-        return;
-      }
+      if (contratosRes.error || usuariosRes.error) return;
 
       const usuariosMap = {};
       (usuariosRes.data || []).forEach(u => {
@@ -49,10 +39,9 @@ export function useContratosPage() {
         vendedor: usuariosMap[c.vendedor_id] || null
       }));
 
-      console.log('✅ Contratos carregados:', contratosComVendedor.length);
       setTodosContratos(contratosComVendedor);
     } catch (e) {
-      console.error('❌ Erro:', e);
+      console.error('Erro:', e);
     }
   }, []);
 
@@ -138,8 +127,8 @@ export function useContratosPage() {
       contratos_pendentes: contratos.filter(c => c.status === 'PENDENTE').length,
       contratos_cancelados: contratos.filter(c => c.status === 'CANCELADO').length,
       total_dependentes: contratos
-         .filter(c => c.status === "ATIVO")
-  .       reduce((acc, c) => acc + (c.dependentes?.length || 0), 0),
+        .filter(c => c.status === "ATIVO")
+        .reduce((acc, c) => acc + (c.dependentes?.length || 0), 0), // 👈 Corrigido
     };
   }, [todosContratos]);
 
@@ -149,7 +138,6 @@ export function useContratosPage() {
     total_contratos: resumoGeral.total_contratos,
   }), [resumoGeral]);
 
-  // ═══════════ HANDLERS ═══════════
   const handleEditar = useCallback(async (id) => {
     try {
       const contrato = await detalhe.buscarDetalhe(id);
@@ -177,33 +165,15 @@ export function useContratosPage() {
     await onActionComplete();
   }, [onActionComplete]);
 
-  // ═══════════ EFFECTS ═══════════
   useEffect(() => {
     listagem.carregar();
     carregarTodosContratos();
-  }, []); // eslint-disable-line
+  }, []);
 
   useEffect(() => {
     listagem.carregar();
-  }, [listagem.pagina, listagem.busca, listagem.filtroStatus]); // eslint-disable-line
+  }, [listagem.pagina, listagem.busca, listagem.filtroStatus]);
 
-  // ═══════════ DEBUG ═══════════
-  useEffect(() => {
-    console.log('📊 STATE:', {
-      todosContratos: todosContratos.length,
-      rankingVendedores: rankingVendedores.length,
-      statusContratos: statusContratos.length,
-      resumoGeral,
-    });
-  }, [todosContratos, rankingVendedores, statusContratos, resumoGeral]);
-
-
-  console.log({
-  rankingVendedores,
-  statusContratos,
-  resumoGeral
-})
-  // ═══════════ RETURN ═══════════
   return {
     contratos: listagem.contratos,
     total: listagem.total,

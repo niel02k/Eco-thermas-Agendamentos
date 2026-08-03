@@ -18,7 +18,7 @@ import ConfirmModal from "@/app/Components/ModalAgendamento/ConfirmModal";
 import ModalRealizado from "@/app/Components/ModalAgendamento/ModalRealizado";
 import NewAppointment from "@/app/Components/modal/Newappointment.jsx";
 import ResultCard from "@/app/Components/Cards/ResultCard/ResultCard.jsx";
-import WeeklyAppointmentsChart from "@/app/Components/WeeklyAppointmentsChart/WeeklyAppointmentsChart.jsx";
+
 
 export default function Appointments() {
   const [visible, setVisible] = useState(false);
@@ -32,19 +32,19 @@ export default function Appointments() {
   const [showModalRealizado, setShowModalRealizado] = useState(false);
   const [agendamentoParaRealizar, setAgendamentoParaRealizar] = useState(null);
 
-  const {
-    agendamentos, total, pagina, totalPaginas,
-    loadingTabela, handleBusca, setPagina,
-    totalHoje, semanaData, statusCount, loadingStats,
-    criarAgendamento, loadingCriar, erroCriar, sucessoCriar, agendamentoCriado, resetarCriacao,
-    agendamentoSelecionado, modoModal,
-    abrirVisualizar, abrirEditar, fecharModal,
-    showResultadoVenda, agendamentoParaResultado, loadingResultado,
-    abrirResultadoVenda, fecharResultadoVenda,
-    confirmarResultadoVenda, confirmarRealizado, confirmarAgendamento, marcarComoFaltou,
-    cancelarAgendamento, excluir,
-    erro, recarregar,
-  } = useAgendamentos();
+const {
+  agendamentos, total, pagina, totalPaginas,
+  loadingTabela, handleBusca, setPagina,
+  totalHoje, semanaData, statusCount, statusCountVenda, loadingStats, // 👈 Adicionar statusCountVenda
+  criarAgendamento, loadingCriar, erroCriar, sucessoCriar, agendamentoCriado, resetarCriacao,
+  agendamentoSelecionado, modoModal,
+  abrirVisualizar, abrirEditar, fecharModal,
+  showResultadoVenda, agendamentoParaResultado, loadingResultado,
+  abrirResultadoVenda, fecharResultadoVenda,
+  confirmarResultadoVenda, confirmarRealizado, confirmarAgendamento, marcarComoFaltou,
+  cancelarAgendamento, excluir,
+  erro, recarregar,
+} = useAgendamentos();
 
   // ─── Animação ──────────────────────────────────────
   useEffect(() => {
@@ -82,19 +82,19 @@ export default function Appointments() {
   }, []);
 
   // Modal Realizado: SIM → REALIZADO + abre venda
- const handleConfirmarRealizado = useCallback(async (codigo) => {
-  await confirmarRealizado(codigo); // resultado_visita = REALIZADO
-  setShowModalRealizado(false);
-  
-  const ag = agendamentos.find(a => a.codigo === codigo);
-  if (ag) {
-    abrirResultadoVenda({
-      ...ag,
-      resultado_visita: 'REALIZADO',  // 👈 Mudou de status para resultado_visita
-      resultado_venda: 'PENDENTE'
-    });
-  }
-}, [confirmarRealizado, agendamentos, abrirResultadoVenda]);
+  const handleConfirmarRealizado = useCallback(async (codigo) => {
+    await confirmarRealizado(codigo); // resultado_visita = REALIZADO
+    setShowModalRealizado(false);
+
+    const ag = agendamentos.find(a => a.codigo === codigo);
+    if (ag) {
+      abrirResultadoVenda({
+        ...ag,
+        resultado_visita: 'REALIZADO',  // 👈 Mudou de status para resultado_visita
+        resultado_venda: 'PENDENTE'
+      });
+    }
+  }, [confirmarRealizado, agendamentos, abrirResultadoVenda]);
 
   // Modal Realizado: NÃO → FALTOU
   const handleFaltou = useCallback(async (codigo) => {
@@ -142,7 +142,7 @@ export default function Appointments() {
   return (
     <>
       {/* ═══════════ MODAIS ═══════════ */}
-      
+
       {/* Modal de Confirmação (Cancelar/Excluir) */}
       {confirm && (
         <ConfirmModal
@@ -227,19 +227,15 @@ export default function Appointments() {
             </div>
           )}
 
-          <AppointmentsStats
-            totalHoje={totalHoje}
-            semanaData={semanaData}
-            statusCount={statusCount}
-            loading={loadingStats}
-          />
+        
 
           <AppointmentsWeekStatus
             semanaData={semanaData}
             statusCount={statusCount}
+            statusCountVenda={statusCountVenda}  // 👈 Passar contagem de vendas
             loading={loadingStats}
           />
-
+          {/*  */}
           {/* Tabela ou Cards */}
           {isMobile ? (
             <AppointmentsMobile

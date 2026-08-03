@@ -25,6 +25,8 @@ export function useContratosList() {
         limite: LIMITE,
         busca,
         status,
+        ordenarPor: 'data_criacao', // 👈 ADICIONAR
+        ordem: 'desc',               // 👈 ADICIONAR
       });
       setContratos(resultado.contratos || []);
       setTotal(resultado.total || 0);

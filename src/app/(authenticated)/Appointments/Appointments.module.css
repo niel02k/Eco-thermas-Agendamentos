@@ -168,6 +168,18 @@
   box-shadow: var(--shadow-lg);
   transform: translateY(-2px);
 }
+.weekRightColumn {
+  display: grid;
+  grid-template-columns: 0.5fr 0.5fr;
+  gap: 0.4rem;
+
+}
+
+.statCard {
+  animation: fadeUp 0.5s var(--transition) both;
+}
+
+
 
 .cardHeader {
   margin-bottom: 1rem;
@@ -187,7 +199,46 @@
   color: var(--text-muted);
   font-weight: 500;
 }
+.voucherActions {
+  display: flex;
+  gap: 0.5rem;
+}
 
+.voucherBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 10px;
+  color: #1D4ED8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.voucherBtn:hover:not(:disabled) {
+  background: #DBEAFE;
+  transform: translateY(-1px);
+}
+
+.voucherBtnDownload {
+  background: #F0FDF4;
+  border-color: #BBF7D0;
+  color: #15803D;
+}
+
+.voucherBtnDownload:hover:not(:disabled) {
+  background: #DCFCE7;
+}
+
+.voucherBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 /* ═══════════════════════════════════════════════════════════════
    AGENDA DA SEMANA + STATUS
    ═══════════════════════════════════════════════════════════════ */

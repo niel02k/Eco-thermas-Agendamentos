@@ -37,7 +37,6 @@ export default function WeeklyAppointmentsChart({
 
   const temDados = chartData.some(d => d.total > 0);
 
-  console.log('📊 WeeklyAppointmentsChart data:', data);
 
   return (
     <div className={styles.chartCard}>
@@ -64,7 +63,7 @@ export default function WeeklyAppointmentsChart({
             <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
             <XAxis 
               dataKey="dia" 
-              tick={{ fontSize: 11, fill: "#94A3B8" }} 
+              tick={{ fontSize: 11, fill: "#484f58" }} 
               axisLine={false} 
               tickLine={false} 
             />
