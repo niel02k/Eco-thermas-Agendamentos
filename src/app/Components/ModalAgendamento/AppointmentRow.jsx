@@ -1,24 +1,16 @@
-// src/app/Components/ModalAgendamento/components/AppointmentRow.jsx
+// src/app/Components/ModalAgendamento/AppointmentRow.jsx
 "use client";
 
-import React, { memo, useState } from "react";
-import {
-  MoreVertical,
-  Eye,
-  Pencil,
-  CheckCircle2,
-  CircleDollarSign,
-  XCircle,
-  Trash2,
-} from "lucide-react";
+import React, { memo } from "react";
+import { Eye, Pencil, CheckCircle2, CircleDollarSign, XCircle, Trash2 } from "lucide-react";
 import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
-
-const STATUS_MAP = {
-  CONFIRMADO: { label: "Confirmado", color: "#3CC83C" },
-  PENDENTE: { label: "Pendente", color: "#FAD228" },
-  CANCELADO: { label: "Cancelado", color: "#FA643C" },
-  REALIZADO: { label: "Realizado", color: "#1E6EBE" },
-};
+import { 
+  STATUS_AGENDAMENTO, 
+  STATUS_AGENDAMENTO_LABELS, 
+  STATUS_AGENDAMENTO_COLORS,
+  RESULTADO_VISITA,
+  RESULTADO_VENDA 
+} from "@/lib/constants";
 
 function formatarData(dataISO) {
   if (!dataISO) return "—";
@@ -31,116 +23,113 @@ function formatarHorario(horario) {
   return horario.slice(0, 5);
 }
 
+// Único badge que muda conforme o estado
+function getBadgeInfo(ag) {
+  // FALTOU
+  if (ag.resultado_visita === RESULTADO_VISITA.FALTOU) {
+    return { label: 'Faltou', color: '#EF4444' };
+  }
+  // REALIZADO + VENDA_REALIZADA
+  if (ag.resultado_visita === RESULTADO_VISITA.REALIZADO && ag.resultado_venda === RESULTADO_VENDA.VENDA_REALIZADA) {
+    return { label: 'Vendido', color: '#16A34A' };
+  }
+  // REALIZADO + VENDA_PERDIDA
+  if (ag.resultado_visita === RESULTADO_VISITA.REALIZADO && ag.resultado_venda === RESULTADO_VENDA.VENDA_PERDIDA) {
+    return { label: 'Perdido', color: '#DC2626' };
+  }
+  // REALIZADO + PENDENTE ou NAO_APLICAVEL
+  if (ag.resultado_visita === RESULTADO_VISITA.REALIZADO) {
+    return { label: 'Realizado', color: '#1E6EBE' };
+  }
+  // Status normal (PENDENTE, CONFIRMADO, CANCELADO)
+  return {
+    label: STATUS_AGENDAMENTO_LABELS[ag.status] || ag.status,
+    color: STATUS_AGENDAMENTO_COLORS[ag.status] || '#94A3B8'
+  };
+}
+
 function AppointmentRow({
-  agendamento,
-  onSelecionar,
-  onVisualizar,
-  onEditar,
-  onConfirmarRealizado,
-  onResultadoVenda,
-  onCancelar,
-  onExcluir
+  agendamento, onSelecionar, onVisualizar, onEditar,
+  onConfirmarAgendamento, onConfirmarRealizado, onResultadoVenda, onCancelar, onExcluir
 }) {
   const ag = agendamento;
-  const statusInfo = STATUS_MAP[ag.status] || { label: ag.status, color: "#94A3B8" };
-  const [menuAberto, setMenuAberto] = useState(false);
+  const badge = getBadgeInfo(ag);
 
   return (
-    <div className={styles.tableRow}
-         onClick={() => onSelecionar(ag)}>
-      {/* Código */}
+    <div 
+      className={styles.tableRow} 
+      onClick={() => onSelecionar?.(ag.codigo)}
+      style={{ cursor: 'pointer' }}
+    >
       <span className={styles.colCodigo}>#{ag.codigo}</span>
       
-      {/* Cliente */}
       <span className={styles.colCliente}>
         <span className={styles.clienteNome}>{ag.cliente?.nome || "—"}</span>
         {ag.cliente?.telefone && <span className={styles.clienteSub}>{ag.cliente.telefone}</span>}
       </span>
       
-      {/* Data / Horário */}
       <span className={styles.colData}>
         <span>{formatarData(ag.data_visita)}</span>
         <span className={styles.clienteSub}>{formatarHorario(ag.horario_visita)}</span>
       </span>
       
-      {/* Pessoas */}
       <span className={styles.colPessoas}>{ag.quantidade_pessoas}</span>
-      
-      {/* Cidade */}
       <span className={styles.colCidade}>{ag.cidade || "—"}</span>
       
-      {/* Status */}
+      {/* Único badge que muda */}
       <span>
         <span className={styles.statusBadge} style={{
-          background: `${statusInfo.color}18`,
-          color: statusInfo.color,
-          border: `1px solid ${statusInfo.color}30`
+          background: `${badge.color}18`,
+          color: badge.color,
+          border: `1px solid ${badge.color}30`
         }}>
-          {statusInfo.label}
+          {badge.label}
         </span>
       </span>
 
       {/* Ações */}
-      <span className={styles.colActions}>
-        {/* Visualizar - sempre */}
+      <span className={styles.colActions} onClick={e => e.stopPropagation()}>
         <button className={styles.actionBtn} title="Visualizar" onClick={() => onVisualizar(ag.codigo)}>
           <Eye size={15} />
         </button>
-
-        {/* Editar - sempre */}
         <button className={styles.actionBtn} title="Editar" onClick={() => onEditar(ag.codigo)}>
           <Pencil size={15} />
         </button>
 
-        {/* Confirmar Realizado - APENAS para CONFIRMADO */}
-        {ag.status === 'CONFIRMADO' && (
-          <button
-            className={`${styles.actionBtn} ${styles.actionSuccess}`}
-            title="Confirmar Realização"
-            onClick={() => onConfirmarRealizado(ag.codigo)}
-          >
+        {/* PENDENTE → CONFIRMADO */}
+        {ag.status === STATUS_AGENDAMENTO.PENDENTE && (
+          <button className={`${styles.actionBtn} ${styles.actionSuccess}`} title="Confirmar"
+            onClick={() => onConfirmarAgendamento(ag.codigo)}>
             <CheckCircle2 size={15} />
           </button>
         )}
 
-        {/* Resultado de Venda - apenas para REALIZADO com resultado PENDENTE */}
-        {ag.status === 'REALIZADO' && ag.resultado_venda === 'PENDENTE' && (
-          <button
-            className={`${styles.actionBtn} ${styles.actionWarning}`}
-            title="Definir Resultado da Venda"
-            onClick={() => onResultadoVenda(ag)}
-          >
+        {/* CONFIRMADO → Realizado/Faltou (se ainda não tiver resultado_visita) */}
+        {ag.status === STATUS_AGENDAMENTO.CONFIRMADO && !ag.resultado_visita && (
+          <button className={`${styles.actionBtn} ${styles.actionWarning}`} title="Realizar"
+            onClick={() => onConfirmarRealizado(ag)}>
             <CircleDollarSign size={15} />
           </button>
         )}
 
-        {/* Badge de resultado já definido */}
-        {ag.status === 'REALIZADO' && ag.resultado_venda && ag.resultado_venda !== 'PENDENTE' && (
-          <span className={`${styles.resultBadge} ${
-            ag.resultado_venda === 'VENDA_REALIZADA' ? styles.resultSuccess :
-            ag.resultado_venda === 'VENDA_PERDIDA' ? styles.resultDanger : styles.resultNeutral
-          }`}>
-            {ag.resultado_venda === 'VENDA_REALIZADA' ? '✓ Vendido' :
-             ag.resultado_venda === 'VENDA_PERDIDA' ? '✗ Perdido' : 'N/A'}
-          </span>
+        {/* REALIZADO + venda PENDENTE → Definir Venda */}
+        {ag.resultado_visita === RESULTADO_VISITA.REALIZADO && ag.resultado_venda === RESULTADO_VENDA.PENDENTE && (
+          <button className={`${styles.actionBtn} ${styles.actionWarning}`} title="Resultado Venda"
+            onClick={() => onResultadoVenda(ag)}>
+            <CircleDollarSign size={15} />
+          </button>
         )}
 
-        {/* Cancelar - não aparece para CANCELADO nem REALIZADO */}
-        <button
-          className={`${styles.actionBtn} ${styles.actionDanger}`}
-          title="Cancelar"
-          disabled={ag.status === "CANCELADO" || ag.status === "REALIZADO"}
-          onClick={() => onCancelar(ag.codigo)}
-        >
+        {/* Cancelar */}
+        <button className={`${styles.actionBtn} ${styles.actionDanger}`} title="Cancelar"
+          disabled={ag.status === STATUS_AGENDAMENTO.CANCELADO || ag.resultado_visita === RESULTADO_VISITA.REALIZADO || ag.resultado_visita === RESULTADO_VISITA.FALTOU}
+          onClick={() => onCancelar(ag.codigo)}>
           <XCircle size={15} />
         </button>
 
-        {/* Excluir - sempre */}
-        <button
-          className={`${styles.actionBtn} ${styles.actionDanger}`}
-          title="Excluir"
-          onClick={() => onExcluir(ag.codigo)}
-        >
+        {/* Excluir */}
+        <button className={`${styles.actionBtn} ${styles.actionDanger}`} title="Excluir"
+          onClick={() => onExcluir(ag.codigo)}>
           <Trash2 size={15} />
         </button>
       </span>

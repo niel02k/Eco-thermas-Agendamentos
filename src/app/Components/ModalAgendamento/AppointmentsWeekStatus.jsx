@@ -4,28 +4,26 @@
 import React from "react";
 import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
 import WeeklyAppointmentsChart from "@/app/Components/WeeklyAppointmentsChart/WeeklyAppointmentsChart.jsx";
-
-
-const STATUS_MAP = {
-  CONFIRMADO: { label: "Confirmado", color: "#3CC83C" },
-  PENDENTE: { label: "Pendente", color: "#FAD228" },
-  CANCELADO: { label: "Cancelado", color: "#FA643C" },
-  REALIZADO: { label: "Realizado", color: "#1E6EBE" },
-};
+import { 
+  STATUS_AGENDAMENTO, 
+  STATUS_AGENDAMENTO_LABELS, 
+  STATUS_AGENDAMENTO_COLORS 
+} from "@/lib/constants";
 
 export default function AppointmentsWeekStatus({ semanaData, statusCount, loading }) {
   return (
     <div className={styles.weekStatusRow}>
       {/* Agenda da Semana */}
-      <div className={styles.cardChart}>
+      <div className={styles.card}>
+        <div className={styles.cardHeader}>
+          <h2>Agenda da Semana</h2>
+          <p>Agendamentos por dia</p>
+        </div>
         <WeeklyAppointmentsChart
           data={semanaData}
-          title="Agendamentos"
-          subtitle="Semana atual"
           height={200}
           barColor="#6EC8F0"
         />
-        
       </div>
 
       {/* Status */}
@@ -35,18 +33,15 @@ export default function AppointmentsWeekStatus({ semanaData, statusCount, loadin
           <p>Resumo operacional</p>
         </div>
         <div className={styles.statusList}>
-          {Object.entries(STATUS_MAP).map(([key, info]) => (
+          {Object.entries(STATUS_AGENDAMENTO).map(([key, value]) => (
             <div key={key} className={styles.statusItem}>
-              <div className={styles.statusDot} style={{ background: info.color }} />
-              <span>{info.label}</span>
-              <strong>{loading ? "—" : (statusCount?.[key] || 0)}</strong>
+              <div className={styles.statusDot} style={{ background: STATUS_AGENDAMENTO_COLORS[value] }} />
+              <span>{STATUS_AGENDAMENTO_LABELS[key]}</span>
+              <strong>{loading ? "—" : (statusCount?.[value] || 0)}</strong>
             </div>
           ))}
         </div>
       </div>
     </div>
-
-
-
   );
 }

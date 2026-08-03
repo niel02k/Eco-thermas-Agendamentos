@@ -1,24 +1,24 @@
-// src/app/Components/ModalAgendamento/components/VisualizarModal.jsx
+// src/app/Components/ModalAgendamento/VisualizarModal.jsx
 "use client";
 
 import React from "react";
-import { X, Pencil, User, Users, MapPin, CalendarDays } from "lucide-react";
+import { X, Pencil, CheckCircle2, CircleDollarSign, XCircle, Trash2, User, Users, MapPin, CalendarDays } from "lucide-react";
 import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
-
-const STATUS_MAP = {
-  CONFIRMADO: { label: "Confirmado", cls: "statusConfirmed", color: "#3CC83C" },
-  PENDENTE: { label: "Pendente", cls: "statusPending", color: "#FAD228" },
-  CANCELADO: { label: "Cancelado", cls: "statusCanceled", color: "#FA643C" },
-  REALIZADO: { label: "Realizado", cls: "statusFinished", color: "#1E6EBE" },
-};
+import { 
+  STATUS_AGENDAMENTO, 
+  STATUS_AGENDAMENTO_LABELS, 
+  STATUS_AGENDAMENTO_COLORS,
+  RESULTADO_VISITA,
+  RESULTADO_VISITA_LABELS,
+  RESULTADO_VISITA_COLORS,
+  RESULTADO_VENDA,
+  RESULTADO_VENDA_LABELS 
+} from "@/lib/constants";
 
 function formatarDataExtensa(dataISO) {
   if (!dataISO) return "—";
   return new Date(dataISO + "T12:00:00").toLocaleDateString("pt-BR", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
+    weekday: "long", day: "2-digit", month: "long", year: "numeric",
   });
 }
 
@@ -27,10 +27,20 @@ function formatarHorario(horario) {
   return horario.slice(0, 5);
 }
 
-export default function VisualizarModal({ agendamento, onClose, onEditar }) {
+export default function VisualizarModal({ 
+  agendamento, onClose, onEditar,
+  onConfirmarAgendamento, onConfirmarRealizado, onResultadoVenda, onCancelar, onExcluir 
+}) {
   if (!agendamento) return null;
+  const ag = agendamento;
+  
+  const statusColor = STATUS_AGENDAMENTO_COLORS[ag.status] || "#94A3B8";
+  const statusLabel = STATUS_AGENDAMENTO_LABELS[ag.status] || ag.status;
+  const visitaLabel = RESULTADO_VISITA_LABELS[ag.resultado_visita] || '';
+  const visitaColor = RESULTADO_VISITA_COLORS[ag.resultado_visita] || '';
 
-  const statusInfo = STATUS_MAP[agendamento.status] || { label: agendamento.status, color: "#94A3B8" };
+  // Verifica se já foi finalizado (realizado ou faltou)
+  const isFinalizado = ag.resultado_visita === RESULTADO_VISITA.REALIZADO || ag.resultado_visita === RESULTADO_VISITA.FALTOU;
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -39,22 +49,57 @@ export default function VisualizarModal({ agendamento, onClose, onEditar }) {
         {/* Header */}
         <div className={styles.modalDetalheHeader}>
           <div>
-            <h2>Agendamento {agendamento.codigo}</h2>
-            <span 
-              className={styles.modalStatusBadge}
-              style={{ 
-                background: `${statusInfo.color}18`, 
-                color: statusInfo.color,
-                border: `1px solid ${statusInfo.color}30`
-              }}
-            >
-              {statusInfo.label}
-            </span>
+            <h2>Agendamento {ag.codigo}</h2>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <span className={styles.modalStatusBadge} style={{
+                background: `${statusColor}18`,
+                color: statusColor,
+                border: `1px solid ${statusColor}30`
+              }}>
+                {statusLabel}
+              </span>
+              {visitaLabel && (
+                <span className={styles.modalStatusBadge} style={{
+                  background: `${visitaColor}18`,
+                  color: visitaColor,
+                  border: `1px solid ${visitaColor}30`
+                }}>
+                  {visitaLabel}
+                </span>
+              )}
+            </div>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button className={styles.actionButton} onClick={() => onEditar(agendamento.codigo)}>
+            {/* PENDENTE → CONFIRMADO (some se já finalizado) */}
+            {!isFinalizado && ag.status === STATUS_AGENDAMENTO.PENDENTE && (
+              <button className={styles.actionButton} title="Confirmar Agendamento"
+                onClick={() => { onClose(); onConfirmarAgendamento(ag.codigo); }}>
+                <CheckCircle2 size={16} color="#15803D" />
+              </button>
+            )}
+            
+            {/* CONFIRMADO → Abre modal Realizado/Faltou (some se já finalizado) */}
+            {!isFinalizado && ag.status === STATUS_AGENDAMENTO.CONFIRMADO && (
+              <button className={styles.actionButton} title="Realizar Agendamento"
+                onClick={() => { onClose(); onConfirmarRealizado(ag); }}>
+                <CheckCircle2 size={16} color="#A16207" />
+              </button>
+            )}
+            
+            {/* resultado_visita = REALIZADO + resultado_venda = PENDENTE → Definir Venda */}
+            {ag.resultado_visita === RESULTADO_VISITA.REALIZADO && ag.resultado_venda === RESULTADO_VENDA.PENDENTE && (
+              <button className={styles.actionButton} title="Resultado Venda"
+                onClick={() => { onClose(); onResultadoVenda(ag); }}>
+                <CircleDollarSign size={16} color="#A16207" />
+              </button>
+            )}
+            
+            {/* Editar */}
+            <button className={styles.actionButton} onClick={() => { onClose(); onEditar(ag.codigo); }}>
               <Pencil size={16} />
             </button>
+            
+            {/* Fechar */}
             <button className={styles.closeBtn} onClick={onClose}>
               <X size={20} />
             </button>
@@ -63,35 +108,16 @@ export default function VisualizarModal({ agendamento, onClose, onEditar }) {
 
         {/* Body */}
         <div className={styles.modalDetalheBody}>
-          
           {/* Cliente */}
           <div className={styles.detalheSection}>
             <h3><User size={16} /> Cliente</h3>
             <div className={styles.detalheGrid}>
-              <div>
-                <label>Nome</label>
-                <p>{agendamento.cliente?.nome || "—"}</p>
-              </div>
-              <div>
-                <label>CPF</label>
-                <p>{agendamento.cliente?.cpf || "—"}</p>
-              </div>
-              <div>
-                <label>Idade</label>
-                <p>{agendamento.cliente?.idade ? `${agendamento.cliente.idade} anos` : "—"}</p>
-              </div>
-              <div>
-                <label>Telefone</label>
-                <p>{agendamento.cliente?.telefone || "—"}</p>
-              </div>
-              <div>
-                <label>E-mail</label>
-                <p>{agendamento.cliente?.email || "—"}</p>
-              </div>
-              <div>
-                <label>Origem</label>
-                <p>{agendamento.cliente?.origem || agendamento.origem || "—"}</p>
-              </div>
+              <div><label>Nome</label><p>{ag.cliente?.nome || "—"}</p></div>
+              <div><label>CPF</label><p>{ag.cliente?.cpf || "—"}</p></div>
+              <div><label>Idade</label><p>{ag.cliente?.idade ? `${ag.cliente.idade} anos` : "—"}</p></div>
+              <div><label>Telefone</label><p>{ag.cliente?.telefone || "—"}</p></div>
+              <div><label>E-mail</label><p>{ag.cliente?.email || "—"}</p></div>
+              <div><label>Origem</label><p>{ag.origem || "—"}</p></div>
             </div>
           </div>
 
@@ -99,52 +125,41 @@ export default function VisualizarModal({ agendamento, onClose, onEditar }) {
           <div className={styles.detalheSection}>
             <h3><CalendarDays size={16} /> Agendamento</h3>
             <div className={styles.detalheGrid}>
+              <div><label>Data</label><p>{formatarDataExtensa(ag.data_visita)}</p></div>
+              <div><label>Horário</label><p>{formatarHorario(ag.horario_visita)}</p></div>
+              <div><label>Pessoas</label><p>{ag.quantidade_pessoas}</p></div>
+              <div><label>Cidade</label><p><MapPin size={14} style={{ display: 'inline' }} /> {ag.cidade || "—"}</p></div>
+              <div><label>Consultor</label><p>{ag.vendedor?.nome || "Não informado"}</p></div>
               <div>
-                <label>Data</label>
-                <p>{formatarDataExtensa(agendamento.data_visita)}</p>
+                <label>Status Confirmação</label>
+                <p>{statusLabel}</p>
               </div>
               <div>
-                <label>Horário</label>
-                <p>{formatarHorario(agendamento.horario_visita)}</p>
-              </div>
-              <div>
-                <label>Pessoas</label>
-                <p>{agendamento.quantidade_pessoas}</p>
-              </div>
-              <div>
-                <label>Cidade</label>
-                <p><MapPin size={14} style={{ display: 'inline' }} /> {agendamento.cidade || "—"}</p>
-              </div>
-              <div>
-                <label>Consultor</label>
-                <p>{agendamento.vendedor?.nome || "Não informado"}</p>
+                <label>Comparecimento</label>
+                <p>{RESULTADO_VISITA_LABELS[ag.resultado_visita] || 'Pendente'}</p>
               </div>
               <div>
                 <label>Resultado Venda</label>
                 <p>
-                  {agendamento.resultado_venda === 'VENDA_REALIZADA' && '✅ Venda Realizada'}
-                  {agendamento.resultado_venda === 'VENDA_PERDIDA' && '❌ Venda Perdida'}
-                  {agendamento.resultado_venda === 'NAO_APLICAVEL' && 'N/A'}
-                  {agendamento.resultado_venda === 'PENDENTE' && '⏳ Pendente'}
-                  {!agendamento.resultado_venda && '—'}
+                  {ag.resultado_venda === RESULTADO_VENDA.VENDA_REALIZADA && '✅ Venda Realizada'}
+                  {ag.resultado_venda === RESULTADO_VENDA.VENDA_PERDIDA && '❌ Venda Perdida'}
+                  {ag.resultado_venda === RESULTADO_VENDA.NAO_APLICAVEL && 'ℹ️ Não Aplicável'}
+                  {ag.resultado_venda === RESULTADO_VENDA.PENDENTE && '⏳ Pendente'}
+                  {!ag.resultado_venda && '—'}
                 </p>
               </div>
             </div>
           </div>
 
           {/* Dependentes */}
-          {agendamento.dependentes && agendamento.dependentes.length > 0 && (
+          {ag.dependentes && ag.dependentes.length > 0 && (
             <div className={styles.detalheSection}>
-              <h3><Users size={16} /> Dependentes ({agendamento.dependentes.length})</h3>
+              <h3><Users size={16} /> Dependentes ({ag.dependentes.length})</h3>
               <div className={styles.dependentesList}>
-                {agendamento.dependentes.map((dep, i) => (
+                {ag.dependentes.map((dep, i) => (
                   <div key={i} className={styles.dependenteItem}>
-                    <span className={styles.dependenteNome}>
-                      {i + 1}. {dep.nome}
-                    </span>
-                    <span className={styles.dependenteInfo}>
-                      {dep.idade} anos{dep.cpf ? ` · CPF: ${dep.cpf}` : ""}
-                    </span>
+                    <span className={styles.dependenteNome}>{i + 1}. {dep.nome}</span>
+                    <span className={styles.dependenteInfo}>{dep.idade} anos{dep.cpf ? ` · CPF: ${dep.cpf}` : ""}</span>
                   </div>
                 ))}
               </div>
@@ -152,20 +167,31 @@ export default function VisualizarModal({ agendamento, onClose, onEditar }) {
           )}
 
           {/* Observações */}
-          {agendamento.observacoes && (
+          {ag.observacoes && (
             <div className={styles.detalheSection}>
               <h3>Observações</h3>
-              <p className={styles.observacoes}>{agendamento.observacoes}</p>
+              <p className={styles.observacoes}>{ag.observacoes}</p>
             </div>
           )}
         </div>
 
         {/* Footer */}
         <div className={styles.modalDetalheFooter}>
-          <button className={styles.btnFechar} onClick={onClose}>
-            Fechar
+          <button 
+            className={styles.btnFechar}
+            disabled={isFinalizado || ag.status === STATUS_AGENDAMENTO.CANCELADO}
+            onClick={() => { onClose(); onCancelar(ag.codigo); }}
+          >
+            <XCircle size={16} /> Cancelar
           </button>
-          <button className={styles.btnEditar} onClick={() => onEditar(agendamento.codigo)}>
+          <button 
+            className={styles.btnFechar}
+            onClick={() => { onClose(); onExcluir(ag.codigo); }}
+          >
+            <Trash2 size={16} /> Excluir
+          </button>
+          <button className={styles.btnFechar} onClick={onClose}>Fechar</button>
+          <button className={styles.btnEditar} onClick={() => { onClose(); onEditar(ag.codigo); }}>
             <Pencil size={16} /> Editar
           </button>
         </div>

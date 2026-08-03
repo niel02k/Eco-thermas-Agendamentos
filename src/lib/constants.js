@@ -1,4 +1,5 @@
 // src/app/lib/constants.js
+
 export const CARGO = {
   ADM: 'ADM',
   CONSULTOR: 'CONSULTOR',
@@ -21,7 +22,36 @@ export const STATUS_AGENDAMENTO = {
   PENDENTE: 'PENDENTE',
   CONFIRMADO: 'CONFIRMADO',
   CANCELADO: 'CANCELADO',
+}
+
+export const STATUS_AGENDAMENTO_LABELS = {
+  PENDENTE: 'Pendente',
+  CONFIRMADO: 'Confirmado',
+  CANCELADO: 'Cancelado',
+}
+
+export const STATUS_AGENDAMENTO_COLORS = {
+  PENDENTE: '#FAD228',
+  CONFIRMADO: '#3CC83C',
+  CANCELADO: '#FA643C',
+}
+
+export const RESULTADO_VISITA = {
+  PENDENTE: 'PENDENTE',
   REALIZADO: 'REALIZADO',
+  FALTOU: 'FALTOU',
+}
+
+export const RESULTADO_VISITA_LABELS = {
+  PENDENTE: 'Pendente',
+  REALIZADO: 'Realizado',
+  FALTOU: 'Faltou',
+}
+
+export const RESULTADO_VISITA_COLORS = {
+  PENDENTE: '#94A3B8',
+  REALIZADO: '#1E6EBE',
+  FALTOU: '#EF4444',
 }
 
 export const RESULTADO_VENDA = {
@@ -29,6 +59,13 @@ export const RESULTADO_VENDA = {
   VENDA_REALIZADA: 'VENDA_REALIZADA',
   VENDA_PERDIDA: 'VENDA_PERDIDA',
   NAO_APLICAVEL: 'NAO_APLICAVEL',
+}
+
+export const RESULTADO_VENDA_LABELS = {
+  PENDENTE: 'Pendente',
+  VENDA_REALIZADA: 'Venda Realizada',
+  VENDA_PERDIDA: 'Venda Perdida',
+  NAO_APLICAVEL: 'Não Aplicável',
 }
 
 export const STATUS_CONTRATO = {
@@ -66,7 +103,6 @@ export const TIPO_REGRA = {
   GERAL: 'GERAL',
 }
 
-// Labels para exibição
 export const CARGO_LABELS = {
   ADM: 'Administrador',
   CONSULTOR: 'Consultor',

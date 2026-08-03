@@ -2,11 +2,12 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import {Plus, AlertTriangle,} from "lucide-react";
+import { Plus, AlertTriangle } from "lucide-react";
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
 import { useAgendamentos } from "@/app/hooks/useAgendamentos";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
+
 // Componentes
 import AppointmentsStats from "@/app/Components/ModalAgendamento/AppointmentsStats";
 import AppointmentsWeekStatus from "@/app/Components/ModalAgendamento/AppointmentsWeekStatus";
@@ -14,10 +15,10 @@ import AppointmentsTable from "@/app/Components/ModalAgendamento/AppointmentsTab
 import AppointmentsMobile from "@/app/Components/ModalAgendamento/AppointmentsMobile";
 import VisualizarModal from "@/app/Components/ModalAgendamento/VisualizarModal";
 import ConfirmModal from "@/app/Components/ModalAgendamento/ConfirmModal";
+import ModalRealizado from "@/app/Components/ModalAgendamento/ModalRealizado";
 import NewAppointment from "@/app/Components/modal/Newappointment.jsx";
 import ResultCard from "@/app/Components/Cards/ResultCard/ResultCard.jsx";
-import ApointmentCardT from "@/app/Components/cardTableAgen/ApointmentCardT.jsx";
-
+import WeeklyAppointmentsChart from "@/app/Components/WeeklyAppointmentsChart/WeeklyAppointmentsChart.jsx";
 
 export default function Appointments() {
   const [visible, setVisible] = useState(false);
@@ -26,7 +27,10 @@ export default function Appointments() {
   const [inputBusca, setInputBusca] = useState("");
   const debounceRef = useRef(null);
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const [cardSelecionado, setCardSelecionado] = useState(null);
+
+  // Modal de Realizado/Faltou
+  const [showModalRealizado, setShowModalRealizado] = useState(false);
+  const [agendamentoParaRealizar, setAgendamentoParaRealizar] = useState(null);
 
   const {
     agendamentos, total, pagina, totalPaginas,
@@ -37,7 +41,7 @@ export default function Appointments() {
     abrirVisualizar, abrirEditar, fecharModal,
     showResultadoVenda, agendamentoParaResultado, loadingResultado,
     abrirResultadoVenda, fecharResultadoVenda,
-    confirmarResultadoVenda, confirmarRealizado,
+    confirmarResultadoVenda, confirmarRealizado, confirmarAgendamento, marcarComoFaltou,
     cancelarAgendamento, excluir,
     erro, recarregar,
   } = useAgendamentos();
@@ -65,46 +69,69 @@ export default function Appointments() {
   }, [handleBusca]);
 
   // ─── Handlers ──────────────────────────────────────
+
+  // PENDENTE → CONFIRMADO
+  const handleConfirmarAgendamento = useCallback(async (codigo) => {
+    await confirmarAgendamento(codigo);
+  }, [confirmarAgendamento]);
+
+  // CONFIRMADO → Abre modal Realizado/Faltou
+  const handleAbrirModalRealizado = useCallback((agendamento) => {
+    setAgendamentoParaRealizar(agendamento);
+    setShowModalRealizado(true);
+  }, []);
+
+  // Modal Realizado: SIM → REALIZADO + abre venda
+ const handleConfirmarRealizado = useCallback(async (codigo) => {
+  await confirmarRealizado(codigo); // resultado_visita = REALIZADO
+  setShowModalRealizado(false);
+  
+  const ag = agendamentos.find(a => a.codigo === codigo);
+  if (ag) {
+    abrirResultadoVenda({
+      ...ag,
+      resultado_visita: 'REALIZADO',  // 👈 Mudou de status para resultado_visita
+      resultado_venda: 'PENDENTE'
+    });
+  }
+}, [confirmarRealizado, agendamentos, abrirResultadoVenda]);
+
+  // Modal Realizado: NÃO → FALTOU
+  const handleFaltou = useCallback(async (codigo) => {
+    await marcarComoFaltou(codigo);
+    setShowModalRealizado(false);
+  }, [marcarComoFaltou]);
+
+  // Resultado da venda
   const handleConfirmarResultado = useCallback(async (codigo, resultado) => {
     await confirmarResultadoVenda(codigo, resultado);
   }, [confirmarResultadoVenda]);
 
-  const handleConfirmarRealizado = useCallback(async (codigo) => {
-    const ag = agendamentos.find(a => a.codigo === codigo);
-    if (ag) {
-      abrirResultadoVenda({
-        ...ag,
-        status: 'REALIZADO',
-        resultado_venda: 'PENDENTE'
-      });
-    }
-    try {
-      await confirmarRealizado(codigo);
-    } catch (e) {
-      console.error('Erro ao confirmar:', e);
-    }
-  }, [agendamentos, abrirResultadoVenda, confirmarRealizado]);
-
+  // Editar
   const handleEditar = useCallback(async (codigo) => {
     fecharModal();
     await abrirEditar(codigo);
     setAbrirModal(true);
   }, [fecharModal, abrirEditar]);
 
+  // Fechar modal de criação/edição
   const handleCloseModal = useCallback(async () => {
     setAbrirModal(false);
     fecharModal();
     await recarregar();
   }, [fecharModal, recarregar]);
 
+  // Cancelar
   const pedirCancelamento = useCallback((codigo) => {
     setConfirm({ tipo: "cancelar", codigo });
   }, []);
 
+  // Excluir
   const pedirExclusao = useCallback((codigo) => {
     setConfirm({ tipo: "excluir", codigo });
   }, []);
 
+  // Confirmar ação do modal de confirmação
   const confirmarAcao = useCallback(async () => {
     if (!confirm) return;
     if (confirm.tipo === "cancelar") await cancelarAgendamento(confirm.codigo);
@@ -115,6 +142,8 @@ export default function Appointments() {
   return (
     <>
       {/* ═══════════ MODAIS ═══════════ */}
+      
+      {/* Modal de Confirmação (Cancelar/Excluir) */}
       {confirm && (
         <ConfirmModal
           mensagem={
@@ -127,14 +156,21 @@ export default function Appointments() {
         />
       )}
 
+      {/* Modal de Visualização */}
       {modoModal === 'visualizar' && agendamentoSelecionado && (
         <VisualizarModal
           agendamento={agendamentoSelecionado}
           onClose={fecharModal}
           onEditar={handleEditar}
+          onConfirmarAgendamento={handleConfirmarAgendamento}
+          onConfirmarRealizado={handleAbrirModalRealizado}
+          onResultadoVenda={abrirResultadoVenda}
+          onCancelar={pedirCancelamento}
+          onExcluir={pedirExclusao}
         />
       )}
 
+      {/* Modal de Resultado de Venda */}
       {showResultadoVenda && agendamentoParaResultado && (
         <ResultCard
           agendamento={agendamentoParaResultado}
@@ -144,6 +180,7 @@ export default function Appointments() {
         />
       )}
 
+      {/* Modal de Criar/Editar */}
       {abrirModal && (
         <NewAppointment
           onClose={handleCloseModal}
@@ -151,10 +188,13 @@ export default function Appointments() {
         />
       )}
 
-      {cardSelecionado && (
-        <ApointmentCardT
-          agendamento={cardSelecionado}
-          onClose={() => setCardSelecionado(null)}
+      {/* Modal Realizado/Faltou */}
+      {showModalRealizado && agendamentoParaRealizar && (
+        <ModalRealizado
+          agendamento={agendamentoParaRealizar}
+          onConfirm={handleConfirmarRealizado}
+          onFaltou={handleFaltou}
+          onClose={() => setShowModalRealizado(false)}
         />
       )}
 
@@ -200,8 +240,6 @@ export default function Appointments() {
             loading={loadingStats}
           />
 
-
-
           {/* Tabela ou Cards */}
           {isMobile ? (
             <AppointmentsMobile
@@ -209,7 +247,8 @@ export default function Appointments() {
               loading={loadingTabela}
               onVisualizar={abrirVisualizar}
               onEditar={handleEditar}
-              onConfirmarRealizado={handleConfirmarRealizado}
+              onConfirmarAgendamento={handleConfirmarAgendamento}
+              onConfirmarRealizado={handleAbrirModalRealizado}
               onResultadoVenda={abrirResultadoVenda}
               onCancelar={pedirCancelamento}
               onExcluir={pedirExclusao}
@@ -221,13 +260,14 @@ export default function Appointments() {
               total={total}
               pagina={pagina}
               totalPaginas={totalPaginas}
-              busca={inputBusca}                    // 👈 Passar busca
-              onBuscaChange={onChangeBusca}         // 👈 Passar handler
+              busca={inputBusca}
+              onBuscaChange={onChangeBusca}
               onPageChange={setPagina}
-              onSelecionar={setCardSelecionado}
+              onSelecionar={abrirVisualizar}
               onVisualizar={abrirVisualizar}
               onEditar={handleEditar}
-              onConfirmarRealizado={handleConfirmarRealizado}
+              onConfirmarAgendamento={handleConfirmarAgendamento}
+              onConfirmarRealizado={handleAbrirModalRealizado}
               onResultadoVenda={abrirResultadoVenda}
               onCancelar={pedirCancelamento}
               onExcluir={pedirExclusao}

@@ -1,19 +1,12 @@
-import * as XLSX from 'xlsx';
+// src/app/services/exportServices.js
+
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 
-// ═══════════════════════════════════════════════════════════════
-// EXPORTAÇÃO DE VOUCHERS COM EXCELJS (BORDAS E FORMATAÇÃO)
-// ═══════════════════════════════════════════════════════════════
+const VOUCHER_HEIGHT = 19;
+const VOUCHER_GAP = 4;
 
-/**
- * Exporta vouchers de agendamento para Excel (.xlsx) com formatação completa
- * @param {Array} agendamentos - Lista de agendamentos
- * @param {string} fileName - Nome do arquivo
- */
-export async function exportarVouchersExcel(agendamentos, fileName = 'vouchers_agendamento') {
+export async function exportarVouchersExcel(agendamentos, fileName = 'vouchers') {
   if (!agendamentos || agendamentos.length === 0) {
     alert('Não há agendamentos para gerar vouchers!');
     return;
@@ -21,36 +14,40 @@ export async function exportarVouchersExcel(agendamentos, fileName = 'vouchers_a
 
   try {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Voucher', {
+    const worksheet = workbook.addWorksheet('Vouchers', {
       views: [{ showGridLines: false }],
     });
 
-    // ═══════ CONFIGURAR COLUNAS ═══════
+    worksheet.pageSetup = {
+      paperSize: 9,
+      orientation: 'portrait',
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 0,
+      margins: {
+        left: 0.2, right: 0.2, top: 0.3, bottom: 0.3,
+        header: 0.1, footer: 0.1,
+      },
+    };
+
     worksheet.columns = [
-      { header: '', key: 'A', width: 3, hidden: true },
-      { header: '', key: 'B', width: 18 },
-      { header: '', key: 'C', width: 18 },
-      { header: '', key: 'D', width: 18 },
-      { header: '', key: 'E', width: 18 },
-      { header: '', key: 'F', width: 18 },
+      { width: 18 }, { width: 18 }, { width: 18 },
+      { width: 18 }, { width: 18 }, { width: 18 },
     ];
 
-    // ═══════ ORDENAR POR CÓDIGO ═══════
-    const dados = [...agendamentos].sort((a, b) => {
-      const codA = String(a.codigo || '').padStart(6, '0');
-      const codB = String(b.codigo || '').padStart(6, '0');
-      return codA.localeCompare(codB);
+    const dados = [...agendamentos].sort((a, b) =>
+      String(a.codigo || '').localeCompare(String(b.codigo || ''))
+    );
+
+    dados.forEach((ag, index) => {
+      const startRow = index * (VOUCHER_HEIGHT + VOUCHER_GAP) + 1;
+      criarVoucher(worksheet, ag, startRow);
     });
 
-    // ═══════ CRIAR VOUCHERS ═══════
-    dados.forEach((agendamento, index) => {
-      const startRow = index * 17 + 1; // Row 1-based no ExcelJS
-      criarVoucherExcelJS(worksheet, agendamento, startRow);
-    });
-
-    // ═══════ GERAR E BAIXAR ARQUIVO ═══════
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
     saveAs(blob, `${fileName}.xlsx`);
 
   } catch (error) {
@@ -59,139 +56,168 @@ export async function exportarVouchersExcel(agendamentos, fileName = 'vouchers_a
   }
 }
 
-/**
- * Cria um voucher individual usando ExcelJS
- */
-function criarVoucherExcelJS(worksheet, agendamento, startRow) {
-  const r = startRow; // Row number (1-based)
-  const codigo = String(agendamento.codigo || '000000').padStart(6, '0');
-  const data = formatarDataVoucher(agendamento.data_visita);
-  const nome = agendamento.cliente?.nome || '';
-  const idade = agendamento.cliente?.idade || '';
-  const cidade = agendamento.cidade || '';
-  const telefone = agendamento.cliente?.telefone || '';
-  const dependentes = agendamento.dependentes || [];
+function criarVoucher(worksheet, ag, r) {
+  const codigo = String(ag.codigo || '').padStart(6, '0');
+  const data = formatarData(ag.data_visita);
+  const cidade = ag.cidade || '';
+  const origem = ag.origem || 'OUTRO';
+  const cliente = ag.cliente || {};
+  const nome = cliente.nome || ag.titular_nome || '';
+  const cpf = formatarCPF(cliente.cpf || ag.titular_cpf || '');
+  const idade = cliente.idade || ag.titular_idade || '';
+  const telefone = formatarTelefone(cliente.telefone || ag.titular_telefone || '');
+  const dependentes = ag.dependentes || [];
 
-  // ═══════ CONFIGURAR ALTURA DAS LINHAS ═══════
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < VOUCHER_HEIGHT; i++) {
     worksheet.getRow(r + i).height = 18;
   }
-
-  // ═══════ ESTILOS PADRÃO ═══════
-  const thinBorder = {
-    top: { style: 'thin', color: { argb: 'FF000000' } },
-    bottom: { style: 'thin', color: { argb: 'FF000000' } },
-    left: { style: 'thin', color: { argb: 'FF000000' } },
-    right: { style: 'thin', color: { argb: 'FF000000' } },
-  };
-
-  const fontNormal = { name: 'Arial', size: 10, color: { argb: 'FF000000' } };
-  const fontBold = { name: 'Arial', size: 11, bold: true, color: { argb: 'FF000000' } };
-  const fontBold10 = { name: 'Arial', size: 10, bold: true, color: { argb: 'FF000000' } };
-
-  const alignCenter = { horizontal: 'center', vertical: 'middle', wrapText: false };
-  const alignLeft = { horizontal: 'left', vertical: 'middle', wrapText: false };
-
-  // ═══════ LINHA 0: TÍTULO + CÓDIGO ═══════
-  // B:F - merge para título
-  worksheet.mergeCells(r, 2, r, 5); // B:F
-  const titleCell = worksheet.getCell(r, 2);
-  titleCell.value = 'Voucher Agendamento';
-  titleCell.font = fontBold;
-  titleCell.alignment = alignCenter;
-  aplicarBorda(worksheet, r, 2, r, 5, thinBorder);
-
-  // F - código
-  const codigoCell = worksheet.getCell(r, 6);
-  codigoCell.value = `#${codigo}`;
-  codigoCell.font = fontBold;
-  codigoCell.alignment = alignCenter;
-  codigoCell.border = thinBorder;
-
-  // ═══════ LINHA 1: VAZIA ═══════
-  aplicarBorda(worksheet, r + 1, 2, r + 1, 6, thinBorder);
-
-  // ═══════ LINHA 2: DATA | CIDADE ═══════
-  // Data
-  setCell(worksheet, r + 2, 2, 'Data', fontNormal, alignLeft);
-  setCell(worksheet, r + 2, 3, data, fontNormal, alignLeft);
-  // Cidade
-  setCell(worksheet, r + 2, 4, 'Cidade', fontNormal, alignLeft);
-  setCell(worksheet, r + 2, 5, cidade, fontNormal, alignLeft);
-  aplicarBorda(worksheet, r + 2, 2, r + 2, 6, thinBorder);
-
-  // ═══════ LINHA 3: NOME | TELEFONE ═══════
-  setCell(worksheet, r + 3, 2, 'Nome', fontNormal, alignLeft);
-  setCell(worksheet, r + 3, 3, nome, fontNormal, alignLeft);
-  setCell(worksheet, r + 3, 4, 'Telefone', fontNormal, alignLeft);
-  setCell(worksheet, r + 3, 5, telefone, fontNormal, alignLeft);
-  aplicarBorda(worksheet, r + 3, 2, r + 3, 6, thinBorder);
-
-  // ═══════ LINHA 4: IDADE | VAZIO ═══════
-  setCell(worksheet, r + 4, 2, 'Idade', fontNormal, alignLeft);
-  setCell(worksheet, r + 4, 3, idade, fontNormal, alignCenter);
-  aplicarBorda(worksheet, r + 4, 2, r + 4, 6, thinBorder);
-
-  // ═══════ LINHA 5: VAZIA ═══════
-  aplicarBorda(worksheet, r + 5, 2, r + 5, 6, thinBorder);
-
-  // ═══════ LINHA 6: TÍTULO DEPENDENTES ═══════
-  worksheet.mergeCells(r + 6, 2, r + 6, 6);
-  setCell(worksheet, r + 6, 2, 'Dependentes Agendamentos', fontBold, alignCenter);
-  aplicarBorda(worksheet, r + 6, 2, r + 6, 6, thinBorder);
-
-  // ═══════ LINHA 7: CABEÇALHO TABELA ═══════
-  worksheet.mergeCells(r + 7, 2, r + 7, 3);
-  setCell(worksheet, r + 7, 2, 'Nome', fontBold10, alignCenter);
-  worksheet.mergeCells(r + 7, 4, r + 7, 5);
-  setCell(worksheet, r + 7, 4, 'CPF', fontBold10, alignCenter);
-  setCell(worksheet, r + 7, 6, 'Idade', fontBold10, alignCenter);
-  aplicarBorda(worksheet, r + 7, 2, r + 7, 6, thinBorder);
-
-  // ═══════ LINHAS 8-14: DEPENDENTES ═══════
   for (let i = 0; i < 7; i++) {
-    const row = r + 8 + i;
+    worksheet.getRow(r + 7 + i).height = 22;
+  }
+
+  // ═══════════ LINHA 1: TÍTULO (B-E) | CÓDIGO (F) ═══════════
+  merge(worksheet, r, 2, r, 5);
+  setCell(worksheet, r, 2, 'Agendamento Visita Cortesia', { bold: true, size: 11, align: 'center', border: true });
+  setCell(worksheet, r, 1, '', { border: true });
+  setCell(worksheet, r, 6, `#${codigo}`, { bold: true, size: 11, align: 'right', border: true });
+
+  // ═══════════ LINHA 2: DATA | CIDADE ═══════════
+  setCell(worksheet, r + 1, 1, 'Data:', { bold: true, size: 10, align: 'left', border: true });
+  merge(worksheet, r + 1, 2, r + 1, 3);
+  setCell(worksheet, r + 1, 2, data, { size: 10, align: 'left', border: true });
+  setCell(worksheet, r + 1, 4, 'Cidade:', { bold: true, size: 10, align: 'left', border: true });
+  setCell(worksheet, r + 1, 5, cidade, { size: 10, align: 'left', border: true });
+
+  // ═══════════ LINHA 3: NOME | IDADE ═══════════
+  setCell(worksheet, r + 2, 1, 'Nome:', { bold: true, size: 10, align: 'left', border: true });
+  merge(worksheet, r + 2, 2, r + 2, 3);
+  setCell(worksheet, r + 2, 2, nome, { size: 10, align: 'left', border: true });
+  setCell(worksheet, r + 2, 4, 'Idade:', { bold: true, size: 10, align: 'left', border: true });
+  setCell(worksheet, r + 2, 5, idade, { size: 10, align: 'center', border: true });
+
+  // ═══════════ LINHA 4: CPF | TELEFONE ═══════════
+  setCell(worksheet, r + 3, 1, 'CPF:', { bold: true, size: 10, align: 'left', border: true });
+  merge(worksheet, r + 3, 2, r + 3, 3);
+  setCell(worksheet, r + 3, 2, cpf, { size: 10, align: 'left', border: true });
+  setCell(worksheet, r + 3, 4, 'Telefone:', { bold: true, size: 10, align: 'left', border: true });
+  merge(worksheet, r + 3, 5, r + 3, 6);
+  setCell(worksheet, r + 3, 5, telefone, { size: 10, align: 'left', border: true });
+
+  // ═══════════ LINHA 5: CAPTAÇÃO ═══════════
+  setCell(worksheet, r + 4, 1, '', { border: true });
+  merge(worksheet, r + 4, 2, r + 4, 3);
+  setCell(worksheet, r + 4, 2, '', { border: true });
+  setCell(worksheet, r + 4, 4, 'Captação:', { bold: true, size: 10, align: 'left', border: true });
+  merge(worksheet, r + 4, 5, r + 4, 6);
+  setCell(worksheet, r + 4, 5, origem, { size: 10, align: 'left', border: true, color: 'FF15803D' });
+
+  // ═══════════ LINHA 6: ACOMPANHANTES ═══════════
+  merge(worksheet, r + 5, 1, r + 5, 6);
+  setCell(worksheet, r + 5, 1, 'ACOMPANHANTES', { bold: true, size: 11, align: 'center', border: true });
+
+  // ═══════════ LINHA 7: CABEÇALHO TABELA ═══════════
+  // CPF sem merge (D) | Idade com merge (E-F)
+  setCell(worksheet, r + 6, 1, 'Nº', { bold: true, size: 10, align: 'center', border: true });
+  merge(worksheet, r + 6, 2, r + 6, 3);
+  setCell(worksheet, r + 6, 2, 'Nome', { bold: true, size: 10, align: 'center', border: true });
+  merge(worksheet, r + 6, 4, r + 6, 5); // CPF: D-E
+  setCell(worksheet, r + 6, 4, 'CPF', { bold: true, size: 10, align: 'center', border: true });
+  setCell(worksheet, r + 6, 6, 'Idade', { bold: true, size: 10, align: 'center', border: true }); // Idade: F
+
+  // ═══════════ LINHAS 8-14: DEPENDENTES ═══════════
+  for (let i = 0; i < 7; i++) {
+    const row = r + 7 + i;
     const dep = dependentes[i] || null;
 
-    worksheet.mergeCells(row, 2, row, 3);
-    worksheet.mergeCells(row, 4, row, 5);
-
-    if (dep) {
-      setCell(worksheet, row, 2, dep.nome || '', fontNormal, alignLeft);
-      setCell(worksheet, row, 4, dep.cpf || '', fontNormal, alignCenter);
-      setCell(worksheet, row, 6, dep.idade || '', fontNormal, alignCenter);
-    }
-    aplicarBorda(worksheet, row, 2, row, 6, thinBorder);
+    setCell(worksheet, row, 1, i + 1, { size: 10, align: 'center', border: true });
+    merge(worksheet, row, 2, row, 3);
+    setCell(worksheet, row, 2, dep?.nome || '', { size: 10, align: 'left', border: true });
+    merge(worksheet, row, 4, row, 5); // CPF: D-E
+    setCell(worksheet, row, 4, dep?.cpf ? formatarCPF(dep.cpf) : '', { size: 10, align: 'center', border: true });
+    setCell(worksheet, row, 6, dep?.idade || '', { size: 10, align: 'center', border: true }); // Idade: F
   }
+
+  // ═══════════ LINHA 15: CONSULTOR | STATUS ═══════════
+  merge(worksheet, r + 14, 1, r + 14, 3);
+  setCell(worksheet, r + 14, 1, 'Consultor: ___________________', { size: 10, align: 'left', border: true });
+  merge(worksheet, r + 14, 4, r + 14, 6);
+  setCell(worksheet, r + 14, 4, 'Status: ______________________', { size: 10, align: 'left', border: true });
+
+  // ═══════════ LINHAS 16-19: OBSERVAÇÕES (alinhado no topo) ═══════════
+  merge(worksheet, r + 15, 1, r + 18, 6);
+  setCell(worksheet, r + 15, 1, 'Observações:', { 
+    bold: true, size: 10, align: 'left', vertical: 'top', border: true 
+  });
+
+  // ═══════════ BORDA EXTERNA ═══════════
+  aplicarBordaExterna(worksheet, r, 1, r + 18, 6);
 }
 
 // ═══════════════════════════════════════════════════════════════
-// FUNÇÕES AUXILIARES EXCELJS
+// FUNÇÕES AUXILIARES
 // ═══════════════════════════════════════════════════════════════
 
-function setCell(worksheet, row, col, value, font, alignment) {
+function setCell(worksheet, row, col, value, options = {}) {
   const cell = worksheet.getCell(row, col);
   cell.value = value ?? '';
-  if (font) cell.font = font;
-  if (alignment) cell.alignment = alignment;
+  cell.font = {
+    name: 'Arial',
+    size: options.size || 10,
+    bold: options.bold || false,
+    color: { argb: options.color || 'FF000000' },
+  };
+  cell.alignment = {
+    horizontal: options.align || 'left',
+    vertical: options.vertical || 'middle',
+    wrapText: false,
+  };
+  if (options.border) {
+    cell.border = {
+      top: { style: 'thin', color: { argb: 'FF000000' } },
+      bottom: { style: 'thin', color: { argb: 'FF000000' } },
+      left: { style: 'thin', color: { argb: 'FF000000' } },
+      right: { style: 'thin', color: { argb: 'FF000000' } },
+    };
+  }
 }
 
-function aplicarBorda(worksheet, startRow, startCol, endRow, endCol, border) {
+function merge(worksheet, startRow, startCol, endRow, endCol) {
+  worksheet.mergeCells(startRow, startCol, endRow, endCol);
+}
+
+function aplicarBordaExterna(worksheet, startRow, startCol, endRow, endCol) {
   for (let r = startRow; r <= endRow; r++) {
     for (let c = startCol; c <= endCol; c++) {
-      worksheet.getCell(r, c).border = border;
+      const cell = worksheet.getCell(r, c);
+      cell.border = {
+        top: { style: r === startRow ? 'medium' : 'thin', color: { argb: 'FF000000' } },
+        bottom: { style: r === endRow ? 'medium' : 'thin', color: { argb: 'FF000000' } },
+        left: { style: c === startCol ? 'medium' : 'thin', color: { argb: 'FF000000' } },
+        right: { style: c === endCol ? 'medium' : 'thin', color: { argb: 'FF000000' } },
+      };
     }
   }
 }
 
-function formatarDataVoucher(dataISO) {
+function formatarData(dataISO) {
   if (!dataISO) return '';
-  try {
-    const [ano, mes, dia] = dataISO.split('-');
-    return `${dia}/${mes}/${ano}`;
-  } catch {
-    return dataISO;
-  }
+  const [ano, mes, dia] = dataISO.split('-');
+  return `${dia}/${mes}/${ano}`;
+}
+
+function formatarCPF(cpf) {
+  if (!cpf) return '';
+  const nums = cpf.replace(/\D/g, '');
+  if (nums.length !== 11) return cpf;
+  return nums.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+}
+
+function formatarTelefone(tel) {
+  if (!tel) return '';
+  const nums = tel.replace(/\D/g, '');
+  if (nums.length === 11) return nums.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+  if (nums.length === 10) return nums.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+  return tel;
 }
 // ═══════════════════════════════════════════════════════════════
 // FUNÇÕES EXISTENTES (MANTIDAS)

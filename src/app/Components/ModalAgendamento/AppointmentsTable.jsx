@@ -2,15 +2,16 @@
 "use client";
 
 import React from "react";
+import { Search } from "lucide-react";
 import AppointmentRow from "@/app/Components/ModalAgendamento/AppointmentRow";
 import AppointmentsPagination from "@/app/Components/ModalAgendamento/AppointmentsPagination";
 import ExportVouchersButton from "@/app/Components/ModalAgendamento/ExportVouchersButton";
 import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
 
 export default function AppointmentsTable({
-  agendamentos, loading, total, pagina, totalPaginas,
+  agendamentos = [], loading, total, pagina, totalPaginas,
   onPageChange, onSelecionar, onVisualizar, onEditar,
-  onConfirmarRealizado, onResultadoVenda, onCancelar, onExcluir
+  onConfirmarAgendamento, onConfirmarRealizado, onResultadoVenda, onCancelar, onExcluir
 }) {
   return (
     <div className={styles.tableCard}>
@@ -22,12 +23,15 @@ export default function AppointmentsTable({
             {loading ? "Carregando..." : `${total} registro${total !== 1 ? "s" : ""}`}
           </span>
         </div>
-        
-        {/* Botão Exportar Vouchers */}
-        <ExportVouchersButton 
-          agendamentos={agendamentos} 
-          disabled={loading} 
-        />
+
+        {/* Busca + Exportar */}
+        <div className={styles.tableActions}>
+          
+          <ExportVouchersButton 
+            agendamentos={agendamentos} 
+            disabled={loading} 
+          />
+        </div>
       </div>
 
       {loading ? (
@@ -48,7 +52,7 @@ export default function AppointmentsTable({
             <span>Data / Horário</span>
             <span>Pessoas</span>
             <span>Cidade</span>
-            <span>Status</span>
+            <span>Confirmação</span>
           </div>
 
           {/* Linhas */}
@@ -57,9 +61,10 @@ export default function AppointmentsTable({
               <AppointmentRow
                 key={ag.codigo}
                 agendamento={ag}
-                onSelecionar={onSelecionar}
+                onSelecionar={() => onSelecionar(ag.codigo)}
                 onVisualizar={onVisualizar}
                 onEditar={onEditar}
+                onConfirmarAgendamento={onConfirmarAgendamento}
                 onConfirmarRealizado={onConfirmarRealizado}
                 onResultadoVenda={onResultadoVenda}
                 onCancelar={onCancelar}

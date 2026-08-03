@@ -2,7 +2,7 @@
 
 import React from "react";
 import styles from "@/app/Components/ModalContrato/Contracts.module.css";
-import { STATUS_CONTRATO_LABELS } from "@/lib/constats";
+import { STATUS_CONTRATO_LABELS } from "@/lib/constants";
 
 const formatCurrency = (v) =>
   Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });

@@ -13,7 +13,7 @@ import {
   PAGAMENTO, PAGAMENTO_LABELS, 
   COBRANCA, COBRANCA_LABELS, 
   STATUS_CONTRATO, STATUS_CONTRATO_LABELS
-} from "@/lib/constats.js";
+} from "@/lib/constants.js";
 
 /* -------------------------------------------------------------------------- */
 /* HELPERS                                                                     */

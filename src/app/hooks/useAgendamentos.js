@@ -34,7 +34,7 @@ export function useAgendamentos() {
   const [totalHoje, setTotalHoje] = useState(0);
   const [semanaData, setSemanaData] = useState([]);
   const [statusCount, setStatusCount] = useState({
-    CONFIRMADO: 0, PENDENTE: 0, CANCELADO: 0, REALIZADO: 0,
+    CONFIRMADO: 0, PENDENTE: 0, CANCELADO: 0,
   });
   const [loadingStats, setLoadingStats] = useState(true);
 
@@ -85,7 +85,7 @@ export function useAgendamentos() {
       ]);
       setTotalHoje(hoje);
       setSemanaData(DIAS_SEMANA.map((dia, i) => ({ day: dia, total: semana[i] ?? 0 })));
-      const counts = { CONFIRMADO: 0, PENDENTE: 0, CANCELADO: 0, REALIZADO: 0 };
+      const counts = { CONFIRMADO: 0, PENDENTE: 0, CANCELADO: 0 };
       (todos.agendamentos ?? []).forEach((a) => {
         if (counts[a.status] !== undefined) counts[a.status]++;
       });
@@ -130,51 +130,45 @@ export function useAgendamentos() {
   }, []);
 
   // ═══════════════════════════════════════════════════════════════
-  // CRIAR AGENDAMENTO
+  // CRIAR / EDITAR AGENDAMENTO
   // ═══════════════════════════════════════════════════════════════
-  // useAgendamentos.js
-
-const handleCriarAgendamento = useCallback(async (dados) => {
-  setLoadingCriar(true);
-  setErroCriar(null);
-  setSucessoCriar(false);
-  setAgendamentoCriado(null);
-  
-  try {
-    let agendamento;
-    
-    // 👇 Verifica se é edição ou criação
-    if (dados.codigo && modoModal === 'editar') {
-      // Atualizar existente (incluindo dependentes)
-      agendamento = await atualizarAgendamento(dados.codigo, {
-        cliente_id: dados.cliente_id,
-        vendedor_id: dados.vendedor_id,
-        data_visita: dados.data_visita,
-        horario_visita: dados.horario_visita,
-        quantidade_pessoas: dados.quantidade_pessoas,
-        status: dados.status,
-        observacoes: dados.observacoes,
-        cidade: dados.cidade,
-        dependentes: dados.dependentes, // 👈 Passa os dependentes
-      });
-    } else {
-      // Criar novo
-      agendamento = await criarAgendamento(dados);
+  const handleCriarAgendamento = useCallback(async (dados) => {
+    setLoadingCriar(true);
+    setErroCriar(null);
+    setSucessoCriar(false);
+    setAgendamentoCriado(null);
+    try {
+      let agendamento;
+      if (dados.codigo && modoModal === 'editar') {
+        agendamento = await atualizarAgendamento(dados.codigo, {
+          cliente_id: dados.cliente_id,
+          vendedor_id: dados.vendedor_id,
+          data_visita: dados.data_visita,
+          horario_visita: dados.horario_visita,
+          quantidade_pessoas: dados.quantidade_pessoas,
+          status: dados.status,
+          resultado_visita: dados.resultado_visita,
+          resultado_venda: dados.resultado_venda,
+          observacoes: dados.observacoes,
+          cidade: dados.cidade,
+          dependentes: dados.dependentes,
+        });
+      } else {
+        agendamento = await criarAgendamento(dados);
+      }
+      setAgendamentoCriado(agendamento);
+      setSucessoCriar(true);
+      await carregarAgendamentos(pagina, busca);
+      await carregarStats();
+      return { agendamento, erro: null };
+    } catch (e) {
+      const mensagem = e.message || 'Erro ao salvar agendamento';
+      setErroCriar(mensagem);
+      return { agendamento: null, erro: mensagem };
+    } finally {
+      setLoadingCriar(false);
     }
-    
-    setAgendamentoCriado(agendamento);
-    setSucessoCriar(true);
-    await carregarAgendamentos(pagina, busca);
-    await carregarStats();
-    return { agendamento, erro: null };
-  } catch (e) {
-    const mensagem = e.message || 'Erro ao salvar agendamento';
-    setErroCriar(mensagem);
-    return { agendamento: null, erro: mensagem };
-  } finally {
-    setLoadingCriar(false);
-  }
-}, [pagina, busca, modoModal, carregarAgendamentos, carregarStats]);
+  }, [pagina, busca, modoModal, carregarAgendamentos, carregarStats]);
 
   const resetarCriacao = useCallback(() => {
     setLoadingCriar(false);
@@ -182,6 +176,51 @@ const handleCriarAgendamento = useCallback(async (dados) => {
     setSucessoCriar(false);
     setAgendamentoCriado(null);
   }, []);
+
+  // ═══════════════════════════════════════════════════════════════
+  // CONFIRMAR AGENDAMENTO (PENDENTE → CONFIRMADO)
+  // ═══════════════════════════════════════════════════════════════
+  const confirmarAgendamento = useCallback(async (codigo) => {
+    try {
+      await atualizarAgendamento(codigo, { status: 'CONFIRMADO' });
+      await carregarAgendamentos(pagina, busca);
+      await carregarStats();
+      return { sucesso: true, erro: null };
+    } catch (e) {
+      setErro('Erro ao confirmar agendamento.');
+      return { sucesso: false, erro: e.message };
+    }
+  }, [pagina, busca, carregarAgendamentos, carregarStats]);
+
+  // ═══════════════════════════════════════════════════════════════
+  // MARCAR COMO REALIZADO (resultado_visita = REALIZADO)
+  // ═══════════════════════════════════════════════════════════════
+  const confirmarRealizado = useCallback(async (codigo) => {
+    try {
+      await marcarComoRealizado(codigo);
+      await carregarAgendamentos(pagina, busca);
+      await carregarStats();
+      return { sucesso: true, erro: null };
+    } catch (e) {
+      setErro('Erro ao confirmar agendamento.');
+      return { sucesso: false, erro: e.message };
+    }
+  }, [pagina, busca, carregarAgendamentos, carregarStats]);
+
+  // ═══════════════════════════════════════════════════════════════
+  // MARCAR COMO FALTOU (resultado_visita = FALTOU)
+  // ═══════════════════════════════════════════════════════════════
+  const marcarComoFaltou = useCallback(async (codigo) => {
+    try {
+      await atualizarAgendamento(codigo, { resultado_visita: 'FALTOU' });
+      await carregarAgendamentos(pagina, busca);
+      await carregarStats();
+      return { sucesso: true, erro: null };
+    } catch (e) {
+      setErro('Erro ao marcar como faltou.');
+      return { sucesso: false, erro: e.message };
+    }
+  }, [pagina, busca, carregarAgendamentos, carregarStats]);
 
   // ═══════════════════════════════════════════════════════════════
   // RESULTADO DE VENDA
@@ -211,21 +250,6 @@ const handleCriarAgendamento = useCallback(async (dados) => {
       setLoadingResultado(false);
     }
   }, [pagina, busca, carregarAgendamentos, carregarStats, fecharResultadoVenda]);
-
-  // ═══════════════════════════════════════════════════════════════
-  // MARCAR COMO REALIZADO
-  // ═══════════════════════════════════════════════════════════════
-  const confirmarRealizado = useCallback(async (codigo) => {
-    try {
-      await marcarComoRealizado(codigo);
-      await carregarAgendamentos(pagina, busca);
-      await carregarStats();
-      return { sucesso: true, erro: null };
-    } catch (e) {
-      setErro('Erro ao confirmar agendamento.');
-      return { sucesso: false, erro: e.message };
-    }
-  }, [pagina, busca, carregarAgendamentos, carregarStats]);
 
   // ═══════════════════════════════════════════════════════════════
   // HANDLERS DE AÇÕES
@@ -263,12 +287,13 @@ const handleCriarAgendamento = useCallback(async (dados) => {
   // EFEITOS
   // ═══════════════════════════════════════════════════════════════
   useEffect(() => {
+    carregarAgendamentos(1, '');
     carregarStats();
-  }, [carregarStats]);
+  }, []); // eslint-disable-line
 
   useEffect(() => {
     carregarAgendamentos(pagina, busca);
-  }, [pagina, busca, carregarAgendamentos]);
+  }, [pagina, busca]); // eslint-disable-line
 
   const totalPaginas = Math.ceil(total / LIMITE);
 
@@ -276,33 +301,19 @@ const handleCriarAgendamento = useCallback(async (dados) => {
   // RETORNO COMPLETO
   // ═══════════════════════════════════════════════════════════════
   return {
-    // Tabela
     agendamentos, total, pagina, totalPaginas,
     busca, loadingTabela, handleBusca, setPagina,
-
-    // Stats
     totalHoje, semanaData, statusCount, loadingStats,
-
-    // Criar
     criarAgendamento: handleCriarAgendamento,
-    loadingCriar, erroCriar, sucessoCriar,
-    agendamentoCriado, resetarCriacao,
-
-    // Visualizar/Editar
+    loadingCriar, erroCriar, sucessoCriar, agendamentoCriado, resetarCriacao,
     agendamentoSelecionado, loadingDetalhe, modoModal,
     abrirVisualizar, abrirEditar, fecharModal, buscarDetalhe,
-
-    // Resultado de Venda
     showResultadoVenda, agendamentoParaResultado, loadingResultado,
     abrirResultadoVenda, fecharResultadoVenda, confirmarResultadoVenda,
-
-    // Confirmar Realizado
+    confirmarAgendamento,
     confirmarRealizado,
-
-    // Ações
+    marcarComoFaltou,
     cancelarAgendamento, excluir,
-
-    // Util
     erro, recarregar: () => carregarAgendamentos(pagina, busca),
   };
 }

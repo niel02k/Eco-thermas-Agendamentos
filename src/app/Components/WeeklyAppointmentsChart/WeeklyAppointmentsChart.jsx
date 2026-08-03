@@ -37,6 +37,8 @@ export default function WeeklyAppointmentsChart({
 
   const temDados = chartData.some(d => d.total > 0);
 
+  console.log('📊 WeeklyAppointmentsChart data:', data);
+
   return (
     <div className={styles.chartCard}>
       {/* Header */}

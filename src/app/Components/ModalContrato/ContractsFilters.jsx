@@ -4,7 +4,7 @@
 import React from "react";
 import { Search, RefreshCw, X } from "lucide-react";
 import styles from "@/app/Components/ModalContrato/Contracts.module.css";
-import { STATUS_CONTRATO, STATUS_CONTRATO_LABELS } from "@/lib/constats";
+import { STATUS_CONTRATO, STATUS_CONTRATO_LABELS } from "@/lib/constants";
 
 export default function ContractsFilters({
   busca, filtroStatus, loading,

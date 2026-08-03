@@ -5,7 +5,7 @@ import React, { useMemo } from "react";
 import { Activity, BarChart3, TrendingUp, DollarSign, Award } from "lucide-react";
 import StatCard from "@/app/Components/Cards/StatCard/StatCard.jsx";
 import styles from "@/app/Components/ModalContrato/Contracts.module.css";
-import { STATUS_CONTRATO } from "@/lib/constats";
+import { STATUS_CONTRATO } from "@/lib/constants";
 
 const formatCurrency = (v) =>
   Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });

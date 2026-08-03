@@ -21,7 +21,10 @@ export default function NewAppointment({
     sucesso, 
     agendamentoSalvo,
     salvar, 
-    resetar 
+    resetar,
+    erroCPF,
+    verificandoCPF,
+    validarCPF,
   } = useAgendamentosForm(async (agendamento) => {
     if (onSubmit) {
       await onSubmit(agendamento);
@@ -48,16 +51,14 @@ export default function NewAppointment({
     origem: "OUTRO",
     observacoes: "",
     status: "PENDENTE",
-    resultado_venda: "PENDENTE", // 👈 Novo campo
+    resultado_visita: "PENDENTE",
+    resultado_venda: "PENDENTE",
   });
 
   const isEdicao = !!dadosEdicao;
 
-  // ── Verifica idade do titular ──────────────────────────────────
   const idadeTitular = Number(form.idade);
-  const titularMaiorIdade = idadeTitular >= 18;
 
-  // ── Datas disponíveis formatadas ──────────────────────────────
   const datasDisponiveis = useMemo(() => {
     if (!diasAbertos || diasAbertos.length === 0) return [];
     return diasAbertos.map(data => ({
@@ -66,25 +67,22 @@ export default function NewAppointment({
     }));
   }, [diasAbertos, formatarDataDisponivel]);
 
-  // ── Gerar código temporário para preview ──────────────────────
   useEffect(() => {
     if (!isEdicao) {
       const hoje = new Date();
       const ano = String(hoje.getFullYear()).slice(-2);
       const mes = String(hoje.getMonth() + 1).padStart(2, '0');
       const prefixo = `${ano}${mes}`;
-      setForm(prev => ({ ...prev, codigo: `${prefixo}XXX` }));
+      setForm(prev => ({ ...prev, codigo: `${prefixo}` }));
     }
   }, [isEdicao]);
 
-  // ── Mostrar código real após criação ──────────────────────────
   useEffect(() => {
     if (sucesso && agendamentoSalvo) {
       setForm(prev => ({ ...prev, codigo: agendamentoSalvo.codigo }));
     }
   }, [sucesso, agendamentoSalvo]);
 
-  // ── Preencher formulário se estiver editando ──────────────────
   useEffect(() => {
     if (dadosEdicao) {
       setForm({
@@ -100,7 +98,8 @@ export default function NewAppointment({
         origem: dadosEdicao.origem || "OUTRO",
         observacoes: dadosEdicao.observacoes || "",
         status: dadosEdicao.status || "PENDENTE",
-        resultado_venda: dadosEdicao.resultado_venda || "PENDENTE", // 👈 Novo campo
+        resultado_visita: dadosEdicao.resultado_visita || "PENDENTE",
+        resultado_venda: dadosEdicao.resultado_venda || "PENDENTE",
       });
 
       if (dadosEdicao.dependentes && dadosEdicao.dependentes.length > 0) {
@@ -120,7 +119,13 @@ export default function NewAppointment({
     }
   }, [dadosEdicao]);
 
-  // ── Validações ─────────────────────────────────────────────────
+  // Validar CPF duplicado
+  useEffect(() => {
+    if (form.cpf && form.cpf.replace(/\D/g, '').length === 11 && !isEdicao) {
+      validarCPF(form.cpf);
+    }
+  }, [form.cpf, isEdicao, validarCPF]);
+
   const idadeValida = idadeTitular >= 18 && idadeTitular < 120;
   const cpfValido = form.cpf.replace(/\D/g, "").length === 11;
 
@@ -132,7 +137,9 @@ export default function NewAppointment({
     form.dataVisita !== "" &&
     form.horario !== "" &&
     form.cidade.trim() !== "" &&
-    errorTime === "";
+    errorTime === "" &&
+    erroCPF === "" &&
+    !verificandoCPF;
 
   const companionsValid =
     companions.length === 0 ||
@@ -147,7 +154,6 @@ export default function NewAppointment({
       return nomeValido && idadeDepValida && cpfValido;
     });
 
-  // ── Handlers ───────────────────────────────────────────────────
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -161,9 +167,7 @@ export default function NewAppointment({
   const handleAmount = useCallback((e) => {
     const novaQuantidade = Number(e.target.value);
     const quantidadeAnterior = companions.length;
-
     if (novaQuantidade === quantidadeAnterior) return;
-
     if (novaQuantidade > quantidadeAnterior) {
       const novos = Array.from({ length: novaQuantidade - quantidadeAnterior }, () => ({
         nome: "", idade: "", cpf: "",
@@ -172,7 +176,6 @@ export default function NewAppointment({
     } else {
       setCompanions(prev => prev.slice(0, novaQuantidade));
     }
-    
     setAmount(novaQuantidade);
     if (currentCompanion >= novaQuantidade) {
       setCurrentCompanion(Math.max(0, novaQuantidade - 1));
@@ -206,7 +209,6 @@ export default function NewAppointment({
     setForm((prev) => ({ ...prev, cpf }));
   }, []);
 
-  // ── Finalizar ─────────────────────────────────────────────────
   const handleFinalizar = useCallback(async () => {
     const dados = {
       vendedor_id: form.vendedor_id || null,
@@ -217,7 +219,8 @@ export default function NewAppointment({
       cidade: form.cidade || "Não informada",
       origem: form.origem || "OUTRO",
       status: form.status || "PENDENTE",
-      resultado_venda: form.resultado_venda || "PENDENTE", // 👈 Enviar resultado_venda
+      resultado_visita: form.resultado_visita || "PENDENTE",
+      resultado_venda: form.resultado_venda || "PENDENTE",
       dependentes: companions.map(c => ({
         nome: c.nome,
         idade: Number(c.idade) || 0,
@@ -239,13 +242,11 @@ export default function NewAppointment({
     await salvar(dados, isEdicao);
   }, [form, companions, isEdicao, dadosEdicao, salvar]);
 
-  // ── Fechar e resetar ──────────────────────────────────────────
   const handleClose = useCallback(() => {
     resetar();
     onClose();
   }, [resetar, onClose]);
 
-  // ── Tela de Sucesso ────────────────────────────────────────────
   if (sucesso && agendamentoSalvo) {
     return (
       <div className={styles.overlay} onClick={handleClose}>
@@ -276,7 +277,6 @@ export default function NewAppointment({
     );
   }
 
-  // ── Render Principal ───────────────────────────────────────────
   return (
     <div className={styles.overlay} onClick={handleClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -292,14 +292,10 @@ export default function NewAppointment({
             </div>
 
             <div className={styles.body}>
-              {/* Código + Cliente */}
               <div className={styles.rowCode}>
                 <div className={`${styles.field} ${styles.codeField}`}>
                   <label>Código</label>
                   <input type="text" name="codigo" value={form.codigo} readOnly className={styles.readOnlyInput} placeholder="Gerado automaticamente" />
-                  <small style={{ color: '#94a3b8', fontSize: '0.75rem' }}>
-                    {isEdicao ? "Código do agendamento" : "Gerado automaticamente ao salvar"}
-                  </small>
                 </div>
                 <div className={styles.field}>
                   <label>Cliente (Titular) *</label>
@@ -307,7 +303,6 @@ export default function NewAppointment({
                 </div>
               </div>
 
-              {/* Idade + CPF */}
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>Idade * (mínimo 18 anos)</label>
@@ -319,10 +314,15 @@ export default function NewAppointment({
                 <div className={styles.field}>
                   <label>CPF *</label>
                   <input type="text" name="cpf" value={form.cpf} onChange={handleCpf} placeholder="000.000.000-00" maxLength={14} required disabled={isEdicao} />
+                  {verificandoCPF && (
+                    <small style={{ color: '#6B7280', fontSize: '0.75rem' }}>Verificando CPF...</small>
+                  )}
+                  {erroCPF && (
+                    <small style={{ color: '#DC2626', fontSize: '0.75rem' }}>{erroCPF}</small>
+                  )}
                 </div>
               </div>
 
-              {/* Data Visita + Horário */}
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>Data da Visita *</label>
@@ -344,7 +344,6 @@ export default function NewAppointment({
                 </div>
               </div>
 
-              {/* Consultor + Cidade */}
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>Consultor</label>
@@ -359,7 +358,6 @@ export default function NewAppointment({
                 </div>
               </div>
 
-              {/* Origem + Status (edição) */}
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>Origem</label>
@@ -379,18 +377,24 @@ export default function NewAppointment({
                     <select name="status" value={form.status} onChange={handleChange} className={styles.select}>
                       <option value="PENDENTE">Pendente</option>
                       <option value="CONFIRMADO">Confirmado</option>
-                      <option value="REALIZADO">Realizado</option>
                       <option value="CANCELADO">Cancelado</option>
                     </select>
                   </div>
                 )}
               </div>
 
-              {/* 👉 RESULTADO DA VENDA - aparece quando status é REALIZADO */}
-              {form.status === 'REALIZADO' && (
+              {isEdicao && (
                 <div className={styles.row}>
                   <div className={styles.field}>
-                    <label>Resultado da Venda</label>
+                    <label>Resultado Visita</label>
+                    <select name="resultado_visita" value={form.resultado_visita} onChange={handleChange} className={styles.select}>
+                      <option value="PENDENTE">Pendente</option>
+                      <option value="REALIZADO">Realizado</option>
+                      <option value="FALTOU">Faltou</option>
+                    </select>
+                  </div>
+                  <div className={styles.field}>
+                    <label>Resultado Venda</label>
                     <select name="resultado_venda" value={form.resultado_venda} onChange={handleChange} className={styles.select}>
                       <option value="PENDENTE">Pendente</option>
                       <option value="VENDA_REALIZADA">Venda Realizada</option>
@@ -401,13 +405,11 @@ export default function NewAppointment({
                 </div>
               )}
 
-              {/* Observações */}
               <div className={styles.field}>
                 <label>Observações</label>
                 <textarea name="observacoes" value={form.observacoes} onChange={handleChange} rows="4" placeholder="Digite alguma observação..." maxLength={500} />
               </div>
 
-              {/* Confirmação */}
               <div className={styles.confirmArea}>
                 <input type="checkbox" id="confirm" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} />
                 <label htmlFor="confirm">Declaro que revisei todas as informações acima e confirmo que estão corretas.</label>

@@ -4,7 +4,7 @@
 import React from "react";
 import { X, Pencil, User, CreditCard, Users, MapPin, Calendar, DollarSign } from "lucide-react";
 import styles from "./VisualizarContrato.module.css";
-import { STATUS_CONTRATO_LABELS, PAGAMENTO_LABELS } from "@/lib/constats";
+import { STATUS_CONTRATO_LABELS, PAGAMENTO_LABELS } from "@/lib/constants";
 
 /* -------------------------------------------------------------------------- */
 /* HELPERS                                                                     */

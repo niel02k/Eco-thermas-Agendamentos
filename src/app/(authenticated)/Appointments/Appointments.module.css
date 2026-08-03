@@ -359,10 +359,69 @@
   border-bottom: none;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   MODAL REALIZADO / FALTOU
+   ═══════════════════════════════════════════════════════════════ */
+
+.btnRealizado {
+  flex: 1;
+  padding: 0.85rem;
+  background: #15803D;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.btnRealizado:hover:not(:disabled) {
+  background: #166534;
+  transform: translateY(-1px);
+}
+
+.btnRealizado:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btnFaltou {
+  flex: 1;
+  padding: 0.85rem;
+  background: #DC2626;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.btnFaltou:hover:not(:disabled) {
+  background: #B91C1C;
+  transform: translateY(-1px);
+}
+
+.btnFaltou:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .colCodigo {
   font-weight: 700;
   color: var(--color-blue);
-  font-family: 'Courier New', monospace;
   font-size: 0.85rem;
 }
 
