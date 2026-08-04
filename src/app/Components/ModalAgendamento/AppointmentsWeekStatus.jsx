@@ -61,7 +61,7 @@ export default function AppointmentsWeekStatus({ semanaData, statusCount, status
             value={String(vendasPerdidas)} 
             label="Vendas perdidas" 
             icon={TrendingDown} 
-            color="red" 
+             color="purpl" 
           />
         </div>
         <div className={styles.statCard}>

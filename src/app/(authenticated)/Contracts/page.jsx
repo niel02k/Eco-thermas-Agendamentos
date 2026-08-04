@@ -12,10 +12,10 @@ import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 import ContractsFilters from "@/app/Components/ModalContrato/ContractsFilters";
 import ContractsKPIs from "@/app/Components/ModalContrato/ContractsKPIs";
 import ContractsInsights from "@/app/Components/ModalContrato/ContractsInsights";
-import ContractsTable from "@/app/Components/ModalContrato/ContractsTable";
-import ContractsMobile from "@/app/Components/ModalContrato/ContractsMobile";
 import FormContrato from "@/app/Components/ModalContrato/Form/formcontrato.jsx";
-import VisualizarContrato from "@/app/Components/ModalContrato/Visualizar/VisualizarContratoModal.jsx";
+import VisualizarModal from "@/app/Components/Shared/VisualizarModal";
+import MobileList from "@/app/Components/Shared/MobileList";
+import DataTable from "@/app/Components/Shared/DataTable";
 import ReceitaMensalChart from "@/app/Components/ReceitaMensal/ReceitaMensalChart.jsx";
 
 export default function Contracts() {
@@ -41,42 +41,30 @@ export default function Contracts() {
     return () => clearTimeout(t);
   }, []);
 
-  // Handlers
-  const handleVisualizar = useCallback((id) => buscarContrato(id), [buscarContrato]);
-  
-  const handleExcluirWrapper = useCallback((id) => {
-    if (window.confirm("Tem certeza que deseja excluir este contrato?")) {
-      handleExcluir(id);
-    }
-  }, [handleExcluir]);
+  const handleRowClick = useCallback((contrato) => {
+    buscarContrato(contrato.id);
+  }, [buscarContrato]);
 
-
-  useEffect(() => {
-  console.log('📊 Dados recebidos do hook:', {
-    rankingVendedores,
-    statusContratos,
-    resumoGeral,
-    total,
-    contratosLength: contratos?.length,
-  });
-}, [rankingVendedores, statusContratos, resumoGeral, total, contratos]); 
   return (
     <>
-
+      {/* ═══════════ MODAIS (FORA DO CONTAINER) ═══════════ */}
+      
       {/* Modal de Visualização */}
       {modalAberto && contratoSelecionado && (
-        <VisualizarContrato
+        <VisualizarModal
+          tipo="contrato"
           contrato={contratoSelecionado}
           onClose={() => setModalAberto(false)}
-          onEditar={(id) => { setModalAberto(false); handleEditar(id); }}
+          onEditar={handleEditar}
+          onExcluirContrato={handleExcluir}
         />
       )}
 
       {/* Modal de Criar Contrato */}
       {showCriarContrato && (
-        <FormContrato 
-          onClose={() => setShowCriarContrato(false)} 
-          onSuccess={handleContratoCriado} 
+        <FormContrato
+          onClose={() => setShowCriarContrato(false)}
+          onSuccess={handleContratoCriado}
         />
       )}
 
@@ -88,106 +76,84 @@ export default function Contracts() {
           onSuccess={handleContratoEditado}
         />
       )}
-      
-    <div className={styles.container}>
-      <main className={`${styles.main} ${visible ? styles.mainVisible : ""}`}>
-        <PageHeader
-          title="Contratos"
-          subtitle="Gestão e análise de contratos emitidos"
-          actionLabel="Novo Contrato"
-          actionIcon={Plus}
-          onAction={() => setShowCriarContrato(true)}
-        />
 
-        {/* Filtros */}
-        <ContractsFilters
-          busca={busca}
-          filtroStatus={filtroStatus}
-          loading={loading}
-          onBuscaChange={(val) => { setBusca(val); if (!val) { setPagina(1); carregarContratos(); } }}
-          onBuscaSubmit={() => { setPagina(1); carregarContratos(); }}
-          onStatusChange={setFiltroStatus}
-          onRefresh={recarregarTudo}
-        />
-
-        {/* Erro */}
-        {error && (
-          <div className={styles.errorBanner}>
-            <span>{error}</span>
-            <button onClick={() => setError(null)}>✕</button>
-          </div>
-        )}
-
-        {/* KPIs */}
-        <ContractsKPIs
-          contratos={contratos}
-          total={total}
-          resumoGeral={resumoGeral}
-          ticketInfo={ticketInfo}
-        />
-
-        {/* Insights */}
-        <ContractsInsights
-          rankingVendedores={rankingVendedores}
-          statusContratos={statusContratos}
-          total={total}
-          resumoGeral={resumoGeral}
-        />
-
-        {/* Tabela ou Cards */}
-        {isMobile ? (
-          <ContractsMobile
-            contratos={contratos}
-            loading={loading}
-            busca={busca}
-            onVisualizar={handleVisualizar}
-            onEditar={handleEditar}
-            onExcluir={handleExcluirWrapper}
+      {/* ═══════════ CONTEÚDO PRINCIPAL ═══════════ */}
+      <div className={styles.container}>
+        <main className={`${styles.main} ${visible ? styles.mainVisible : ""}`}>
+          <PageHeader
+            title="Contratos"
+            subtitle="Gestão e análise de contratos emitidos"
+            actionLabel="Novo Contrato"
+            actionIcon={Plus}
+            onAction={() => setShowCriarContrato(true)}
           />
-        ) : (
-          <ContractsTable
-            contratos={contratos}
+
+          <ContractsFilters
+            busca={busca}
+            filtroStatus={filtroStatus}
             loading={loading}
+            onBuscaChange={(val) => { setBusca(val); if (!val) { setPagina(1); carregarContratos(); } }}
+            onBuscaSubmit={() => { setPagina(1); carregarContratos(); }}
+            onStatusChange={setFiltroStatus}
+            onRefresh={recarregarTudo}
+          />
+
+          {error && (
+            <div className={styles.errorBanner}>
+              <span>{error}</span>
+              <button onClick={() => setError(null)}>✕</button>
+            </div>
+          )}
+
+          <ContractsKPIs
+            contratos={contratos}
             total={total}
-            pagina={pagina}
-            totalPaginas={totalPaginas}
-            busca={busca}
-            onPageChange={setPagina}
-            onVisualizar={handleVisualizar}
-            onEditar={handleEditar}
-            onExcluir={handleExcluirWrapper}
+            resumoGeral={resumoGeral}
+            ticketInfo={ticketInfo}
           />
-        )}
 
-        {/* Gráfico */}
-        {receita8m?.length > 0 && (
-          <ReceitaMensalChart
-            data={receita8m}
-            height={300}
-            title="Receita Mensal"
-            subtitle="Últimos 8 meses"
+          <ContractsInsights
+            rankingVendedores={rankingVendedores}
+            statusContratos={statusContratos}
+            total={total}
+            resumoGeral={resumoGeral}
           />
-        )}
 
-        {/* Modais */}
-        {modalAberto && contratoSelecionado && (
-          <VisualizarContrato
-            contrato={contratoSelecionado}
-            onClose={() => setModalAberto(false)}
-            onEditar={(id) => { setModalAberto(false); handleEditar(id); }}
-          />
-        )}
+          {isMobile ? (
+            <MobileList
+              tipo="contrato"
+              dados={contratos}
+              loading={loading}
+              total={total}
+              pagina={pagina}
+              totalPaginas={totalPaginas}
+              onPageChange={setPagina}
+              onCardClick={handleRowClick}
+              emptyMessage="Nenhum contrato encontrado"
+            />
+          ) : (
+            <DataTable
+              tipo="contrato"
+              dados={contratos}
+              loading={loading}
+              total={total}
+              pagina={pagina}
+              totalPaginas={totalPaginas}
+              onPageChange={setPagina}
+              onRowClick={handleRowClick}
+            />
+          )}
 
-     
-        {showEditarContrato && contratoParaEditar && (
-          <FormContrato
-            contrato={contratoParaEditar}
-            onClose={() => { setShowEditarContrato(false); setContratoParaEditar(null); }}
-            onSuccess={handleContratoEditado}
-          />
-        )}
-      </main>
-    </div>
+          {receita8m?.length > 0 && (
+            <ReceitaMensalChart
+              data={receita8m}
+              height={300}
+              title="Receita Mensal"
+              subtitle="Últimos 8 meses"
+            />
+          )}
+        </main>
+      </div>
     </>
   );
 }

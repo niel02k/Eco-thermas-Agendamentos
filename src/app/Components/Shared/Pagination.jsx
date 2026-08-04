@@ -1,12 +1,11 @@
-// src/app/Components/ModalAgendamento/components/AppointmentsPagination.jsx
+// src/app/Components/Shared/Pagination.jsx
 "use client";
 
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
+import styles from "@/app/Components/Shared/Shared.module.css";
 
-
-export default function AppointmentsPagination({ pagina, totalPaginas, total, onPageChange }) {
+export default function Pagination({ pagina, totalPaginas, total, onPageChange }) {
   return (
     <div className={styles.pagination}>
       <button className={styles.pageBtn} disabled={pagina <= 1} onClick={() => onPageChange(pagina - 1)}>

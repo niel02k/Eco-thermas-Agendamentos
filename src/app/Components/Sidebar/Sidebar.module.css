@@ -138,6 +138,8 @@
   .sidebar {
     transform: translateX(-100%); /* Esconde a sidebar à esquerda */
     box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
+    background-color: #1c3955d8; /* var(--color-blue-main) */
+
   }
 
   .sidebar.open {
