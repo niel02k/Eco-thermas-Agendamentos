@@ -32,19 +32,19 @@ export default function Appointments() {
   const [showModalRealizado, setShowModalRealizado] = useState(false);
   const [agendamentoParaRealizar, setAgendamentoParaRealizar] = useState(null);
 
-const {
-  agendamentos, total, pagina, totalPaginas,
-  loadingTabela, handleBusca, setPagina,
-  totalHoje, semanaData, statusCount, statusCountVenda, loadingStats, // 👈 Adicionar statusCountVenda
-  criarAgendamento, loadingCriar, erroCriar, sucessoCriar, agendamentoCriado, resetarCriacao,
-  agendamentoSelecionado, modoModal,
-  abrirVisualizar, abrirEditar, fecharModal,
-  showResultadoVenda, agendamentoParaResultado, loadingResultado,
-  abrirResultadoVenda, fecharResultadoVenda,
-  confirmarResultadoVenda, confirmarRealizado, confirmarAgendamento, marcarComoFaltou,
-  cancelarAgendamento, excluir,
-  erro, recarregar,
-} = useAgendamentos();
+  const {
+    agendamentos, total, pagina, totalPaginas,
+    loadingTabela, handleBusca, setPagina,
+    totalHoje, semanaData, statusCount, statusCountVenda, loadingStats, // 👈 Adicionar statusCountVenda
+    criarAgendamento, loadingCriar, erroCriar, sucessoCriar, agendamentoCriado, resetarCriacao,
+    agendamentoSelecionado, modoModal,
+    abrirVisualizar, abrirEditar, fecharModal,
+    showResultadoVenda, agendamentoParaResultado, loadingResultado,
+    abrirResultadoVenda, fecharResultadoVenda,
+    confirmarResultadoVenda, confirmarRealizado, confirmarAgendamento, marcarComoFaltou,
+    cancelarAgendamento, excluir,
+    erro, recarregar,
+  } = useAgendamentos();
 
   // ─── Animação ──────────────────────────────────────
   useEffect(() => {
@@ -227,7 +227,7 @@ const {
             </div>
           )}
 
-        
+
 
           <AppointmentsWeekStatus
             semanaData={semanaData}
@@ -241,13 +241,7 @@ const {
             <AppointmentsMobile
               agendamentos={agendamentos}
               loading={loadingTabela}
-              onVisualizar={abrirVisualizar}
-              onEditar={handleEditar}
-              onConfirmarAgendamento={handleConfirmarAgendamento}
-              onConfirmarRealizado={handleAbrirModalRealizado}
-              onResultadoVenda={abrirResultadoVenda}
-              onCancelar={pedirCancelamento}
-              onExcluir={pedirExclusao}
+              onCardClick={(ag) => abrirVisualizar(ag.codigo)} // 👈 Clica no card = abre visualização
             />
           ) : (
             <AppointmentsTable
@@ -255,7 +249,7 @@ const {
               loading={loadingTabela}
               total={total}
               pagina={pagina}
-              totalPaginas={totalPaginas}
+              totalPaginas={totalPaginas}/*  */
               busca={inputBusca}
               onBuscaChange={onChangeBusca}
               onPageChange={setPagina}

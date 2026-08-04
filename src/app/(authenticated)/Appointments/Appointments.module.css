@@ -1208,6 +1208,24 @@
   flex-wrap: wrap;
 }
 
+.mobileCard {
+  cursor: pointer;
+  position: relative;
+}
+
+.mobileCard:active {
+  transform: scale(0.98);
+}
+
+.mobileCardArrow {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
 /* Responsivo */
 @media (max-width: 640px) {
   .exportBtn {

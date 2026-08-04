@@ -64,7 +64,7 @@ export default function VisualizarModal({
               )}
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem' , gridTemplateColumns: 'repeat(auto-fit, minmax(40px, 1fr))'}}>
             <VoucherPDFButton agendamento={ag} />
             {!isFinalizado && ag.status === STATUS_AGENDAMENTO.PENDENTE && (
               <button className={styles.actionButton} title="Confirmar Agendamento"
@@ -157,19 +157,8 @@ export default function VisualizarModal({
         {/* Footer */}
         <div className={styles.modalDetalheFooter}>
           
-          
-          <button 
-            className={styles.btnFechar}
-            disabled={isFinalizado || ag.status === STATUS_AGENDAMENTO.CANCELADO}
-            onClick={() => { onClose(); onCancelar(ag.codigo); }}
-          >
-            <XCircle size={16} /> Cancelar
-          </button>
           <button className={styles.btnFechar} onClick={() => { onClose(); onExcluir(ag.codigo); }}>
             <Trash2 size={16} /> Excluir
-          </button>
-          <button className={styles.btnEditar} onClick={() => { onClose(); onEditar(ag.codigo); }}>
-            <Pencil size={16} /> Editar
           </button>
         </div>
       </div>

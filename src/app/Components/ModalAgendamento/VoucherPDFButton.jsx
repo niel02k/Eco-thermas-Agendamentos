@@ -35,14 +35,13 @@ export default function VoucherPDFButton({ agendamento, disabled = false }) {
           backgroundColor: copyState === "success" ? '#3CC83C' : (copyState === "error" ? '#ef4444' : '#FA643C'),
           color: 'white',
           border: 'none',
-          padding: '8px 12px',
+          padding: '4px',
           borderRadius: '8px',
           display: 'flex',
           alignItems: 'center',
-          gap: '6px',
           cursor: 'pointer',
           transition: 'all 0.2s',
-          minWidth: '150px',
+          minWidth: '75px',
           justifyContent: 'center'
         }}
         title="Copiar Voucher como Imagem para o WhatsApp"

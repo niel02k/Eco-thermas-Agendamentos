@@ -1,4 +1,4 @@
-// src/app/Components/ModalAgendamento/components/AppointmentsMobile.jsx
+// src/app/Components/ModalAgendamento/AppointmentsMobile.jsx
 "use client";
 
 import React from "react";
@@ -6,9 +6,7 @@ import AppointmentMobileCard from "./AppointmentMobileCard";
 import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
 
 export default function AppointmentsMobile({
-  agendamentos, loading,
-  onVisualizar, onEditar, onConfirmarRealizado,
-  onResultadoVenda, onCancelar, onExcluir
+  agendamentos, loading, onCardClick
 }) {
   if (loading) {
     return (
@@ -19,7 +17,7 @@ export default function AppointmentsMobile({
     );
   }
 
-  if (agendamentos.length === 0) {
+  if (!agendamentos || agendamentos.length === 0) {
     return (
       <div className={styles.emptyBox}>
         <p>Nenhum agendamento encontrado</p>
@@ -33,14 +31,9 @@ export default function AppointmentsMobile({
         <AppointmentMobileCard
           key={ag.codigo}
           agendamento={ag}
-          onVisualizar={onVisualizar}
-          onEditar={onEditar}
-          onConfirmarRealizado={onConfirmarRealizado}
-          onResultadoVenda={onResultadoVenda}
-          onCancelar={onCancelar}
-          onExcluir={onExcluir}
+          onClick={onCardClick}
         />
       ))}
-    </div>
+    </div> 
   );
 }
