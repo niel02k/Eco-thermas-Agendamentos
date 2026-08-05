@@ -90,8 +90,13 @@
 .colCodigo { font-weight: 700; font-size: 0.85rem; }
 .colCliente { display: flex; flex-direction: column; gap: 0.1rem; }
 .clienteNome {
-  font-weight: 600; color: var(--text-primary); font-size: 0.875rem;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  white-space: nowrap;       /* 👈 Não quebra linha */
+  overflow: hidden;           /* 👈 Esconde o que passar */
+  text-overflow: ellipsis;    /* 👈 Mostra "..." no final */
+  max-width: 100%; 
 }
 .clienteSub { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
 .colData { display: flex; margin-left: 10px; flex-direction: column; gap: 0.1rem; font-size: 0.85rem; color: var(--text-primary); font-weight: 500; }
