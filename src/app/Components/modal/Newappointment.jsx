@@ -311,7 +311,7 @@ export default function NewAppointment({
                 </div>
                 <div className={styles.field}>
                   <label>Cliente (Titular) *</label>
-                  <input type="text" name="cliente" value={form.cliente} onChange={handleLettersOnly} placeholder="Nome do titular..." maxLength={100} required disabled={isEdicao} />
+                  <input type="text" name="cliente" value={form.cliente} onChange={handleLettersOnly} placeholder="Nome do titular..." maxLength={100}  />
                 </div>
               </div>
 
