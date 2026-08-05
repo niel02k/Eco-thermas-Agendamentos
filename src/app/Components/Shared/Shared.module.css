@@ -86,6 +86,7 @@
   transition: background var(--transition);
   cursor: pointer;
   min-width: 0;  /* 👈 Permite que as colunas encolham */
+  overflow: hidden;  /* 👈 Esconde o que passar */
 }
 
 
@@ -102,7 +103,8 @@
   white-space: nowrap;       /* 👈 Não quebra linha */
   overflow: hidden;           /* 👈 Esconde o que passar */
   text-overflow: ellipsis;    /* 👈 Mostra "..." no final */
-  max-width: 100%; 
+    max-width: 100%;  /* Já tem, mas garante que respeita */
+  display: block;   /* 👈 Adicionar para o max-width funcionar */
 }
 .clienteSub { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
 .colData { display: flex; margin-left: 10px; flex-direction: column; gap: 0.1rem; font-size: 0.85rem; color: var(--text-primary); font-weight: 500; }
