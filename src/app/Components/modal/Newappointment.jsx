@@ -6,20 +6,20 @@ import { useConsultores } from "@/app/hooks/useConsultores";
 import { useDisponibilidadeParque } from "@/app/hooks/useDisponibilidadeParque";
 import { useAgendamentosForm } from "@/app/hooks/agendamentos/useAgendamentosForm";
 
-export default function NewAppointment({ 
-  onClose, 
+export default function NewAppointment({
+  onClose,
   onSubmit,
   dadosEdicao = null
 }) {
   const { consultores, loading: loadingConsultores } = useConsultores();
   const { diasAbertos, loading: loadingDias, formatarDataDisponivel } = useDisponibilidadeParque();
-  
-  const { 
-    loading, 
-    erro, 
-    sucesso, 
+
+  const {
+    loading,
+    erro,
+    sucesso,
     agendamentoSalvo,
-    salvar, 
+    salvar,
     resetar,
     erroCPF,
     verificandoCPF,
@@ -29,7 +29,7 @@ export default function NewAppointment({
       await onSubmit(agendamento);
     }
   });
-  
+
   const [errorTime, setErrorTime] = useState('');
   const [step, setStep] = useState(1);
   const [amount, setAmount] = useState(0);
@@ -148,8 +148,8 @@ export default function NewAppointment({
       const depMenor6Anos = idadeDep > 0 && idadeDep < 6;
       const nomeValido = person.nome.trim().length >= 3;
       const idadeDepValida = idadeDep > 0 && idadeDep < 120;
-      const cpfValido = depMenor6Anos 
-        ? true 
+      const cpfValido = depMenor6Anos
+        ? true
         : person.cpf.replace(/\D/g, "").length === 11;
       return nomeValido && idadeDepValida && cpfValido;
     });
@@ -311,7 +311,17 @@ export default function NewAppointment({
                 </div>
                 <div className={styles.field}>
                   <label>Cliente (Titular) *</label>
-                  <input type="text" name="cliente" value={form.cliente} onChange={handleLettersOnly} placeholder="Nome do titular..." maxLength={100}  />
+                  <input
+                    type="text"
+                    name="cliente"
+                    value={form.cliente}
+                    onChange={handleLettersOnly}
+                    placeholder="Nome do titular..."
+                    maxLength={100}
+                    required
+                  // 👇 Remover ou comentar esta linha
+                  // disabled={isEdicao} 
+                  />
                 </div>
               </div>
 
