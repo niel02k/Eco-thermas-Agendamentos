@@ -1,4 +1,3 @@
-// src/app/Components/modal/Newappointment.jsx
 "use client";
 
 import styles from "./modal.module.css";
@@ -44,6 +43,7 @@ export default function NewAppointment({
     cliente: "",
     idade: "",
     cpf: "",
+    telefone: "",
     dataVisita: "",
     horario: "",
     vendedor_id: "",
@@ -91,6 +91,7 @@ export default function NewAppointment({
         cliente: dadosEdicao.cliente?.nome || "",
         idade: dadosEdicao.cliente?.idade || "",
         cpf: dadosEdicao.cliente?.cpf || "",
+        telefone: dadosEdicao.cliente?.telefone || "",
         dataVisita: dadosEdicao.data_visita || "",
         horario: dadosEdicao.horario_visita?.slice(0, 5) || "",
         vendedor_id: dadosEdicao.vendedor_id || "",
@@ -119,7 +120,6 @@ export default function NewAppointment({
     }
   }, [dadosEdicao]);
 
-  // Validar CPF duplicado
   useEffect(() => {
     if (form.cpf && form.cpf.replace(/\D/g, '').length === 11 && !isEdicao) {
       validarCPF(form.cpf);
@@ -162,6 +162,16 @@ export default function NewAppointment({
   const handleIdadeChange = useCallback((e) => {
     const value = e.target.value.replace(/\D/g, "").slice(0, 3);
     setForm((prev) => ({ ...prev, idade: value }));
+  }, []);
+
+  const handleTelefone = useCallback((e) => {
+    let tel = e.target.value.replace(/\D/g, "").slice(0, 11);
+    if (tel.length <= 10) {
+      tel = tel.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+    } else {
+      tel = tel.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+    }
+    setForm((prev) => ({ ...prev, telefone: tel }));
   }, []);
 
   const handleAmount = useCallback((e) => {
@@ -236,6 +246,7 @@ export default function NewAppointment({
         nome: form.cliente,
         cpf: form.cpf,
         idade: Number(form.idade) || null,
+        telefone: form.telefone || null,
       };
     }
 
@@ -263,6 +274,7 @@ export default function NewAppointment({
               <p><strong>Cliente:</strong> {form.cliente}</p>
               <p><strong>Idade:</strong> {form.idade} anos</p>
               <p><strong>CPF:</strong> {form.cpf}</p>
+              {form.telefone && <p><strong>Telefone:</strong> {form.telefone}</p>}
               <p><strong>Data:</strong> {new Date(form.dataVisita + "T00:00:00").toLocaleDateString("pt-BR")}</p>
               <p><strong>Horário:</strong> {form.horario}</p>
               <p><strong>Pessoas:</strong> {1 + companions.length}</p>
@@ -312,6 +324,13 @@ export default function NewAppointment({
                   )}
                 </div>
                 <div className={styles.field}>
+                  <label>Telefone</label>
+                  <input type="text" name="telefone" value={form.telefone} onChange={handleTelefone} placeholder="(00) 00000-0000" maxLength={15} disabled={isEdicao} />
+                </div>
+              </div>
+
+              <div className={styles.row}>
+                <div className={styles.field}>
                   <label>CPF *</label>
                   <input type="text" name="cpf" value={form.cpf} onChange={handleCpf} placeholder="000.000.000-00" maxLength={14} required disabled={isEdicao} />
                   {verificandoCPF && (
@@ -320,6 +339,9 @@ export default function NewAppointment({
                   {erroCPF && (
                     <small style={{ color: '#DC2626', fontSize: '0.75rem' }}>{erroCPF}</small>
                   )}
+                </div>
+                <div className={styles.field}>
+                  {/* espaço vazio ou outro campo */}
                 </div>
               </div>
 
