@@ -18,7 +18,7 @@ export function useAgendamentosForm(onSuccess) {
       setErroCPF('');
       return true;
     }
-    
+
     const cpfLimpo = cpf.replace(/\D/g, '');
     if (cpfLimpo.length !== 11) {
       setErroCPF('');
@@ -44,6 +44,8 @@ export function useAgendamentosForm(onSuccess) {
     }
   }, []);
 
+  // src/app/hooks/agendamentos/useAgendamentosForm.js
+
   const salvar = useCallback(async (dados, isEdicao = false) => {
     setLoading(true);
     setErro(null);
@@ -51,20 +53,10 @@ export function useAgendamentosForm(onSuccess) {
     setAgendamentoSalvo(null);
 
     try {
-      // Verificar CPF duplicado antes de salvar
-      const cpf = dados.cliente?.cpf || dados.titular_cpf;
-      if (cpf && !isEdicao) {
-        const { duplicado } = await verificarCPFDuplicado(cpf);
-        if (duplicado) {
-          setErro('Este CPF já possui um agendamento ativo no sistema.');
-          setLoading(false);
-          return { agendamento: null, erro: 'CPF duplicado' };
-        }
-      }
-
       let agendamento;
 
       if (isEdicao && dados.codigo) {
+        // 👇 Precisa passar os dados do cliente também
         agendamento = await atualizarAgendamento(dados.codigo, {
           vendedor_id: dados.vendedor_id,
           data_visita: dados.data_visita,
@@ -77,6 +69,9 @@ export function useAgendamentosForm(onSuccess) {
           resultado_venda: dados.resultado_venda,
           observacoes: dados.observacoes,
           dependentes: dados.dependentes,
+          // 👇 Adicionar dados do cliente
+          cliente: dados.cliente,
+          cliente_id: dados.cliente_id,
         });
       } else {
         agendamento = await criarAgendamento(dados);
@@ -84,11 +79,7 @@ export function useAgendamentosForm(onSuccess) {
 
       setAgendamentoSalvo(agendamento);
       setSucesso(true);
-
-      if (onSuccess) {
-        await onSuccess(agendamento);
-      }
-
+      if (onSuccess) await onSuccess(agendamento);
       return { agendamento, erro: null };
     } catch (e) {
       const mensagem = e.message || 'Erro ao salvar agendamento.';

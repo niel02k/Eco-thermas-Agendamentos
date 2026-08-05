@@ -321,6 +321,20 @@ export async function criarAgendamento(dados) {
 // ============ ATUALIZAR ============
 
 export async function atualizarAgendamento(codigo, dados) {
+  // Se tiver dados do cliente, atualizar o cliente primeiro
+  if (dados.cliente && dados.cliente_id) {
+    const { error: clienteError } = await supabase
+      .from('clientes')
+      .update({
+        nome: dados.cliente.nome,
+        idade: dados.cliente.idade,
+        telefone: dados.cliente.telefone,
+      })
+      .eq('id', dados.cliente_id);
+    
+    if (clienteError) console.error('Erro ao atualizar cliente:', clienteError);
+  }
+
   const updateData = {
     vendedor_id: dados.vendedor_id,
     data_visita: dados.data_visita,
@@ -347,25 +361,10 @@ export async function atualizarAgendamento(codigo, dados) {
 
   if (error) throw error;
 
-  if (dados.dependentes !== undefined) {
-    await supabase.from('agendamento_dependentes').delete().eq('agendamento_id', codigo);
-
-    if (dados.dependentes && dados.dependentes.length > 0) {
-      const deps = dados.dependentes.map(dep => ({
-        agendamento_id: codigo,
-        nome: dep.nome,
-        idade: Number(dep.idade) || 0,
-        cpf: dep.cpf || null,
-      }));
-
-      const { error: depError } = await supabase.from('agendamento_dependentes').insert(deps);
-      if (depError) throw depError;
-    }
-  }
-
+  // Atualizar dependentes...
+  
   return data;
 }
-
 // ============ STATUS / RESULTADO ============
 
 export async function atualizarResultadoVenda(codigo, resultadoVenda) {
