@@ -220,38 +220,45 @@ export default function NewAppointment({
   }, []);
 
   const handleFinalizar = useCallback(async () => {
-    const dados = {
-      vendedor_id: form.vendedor_id || null,
-      data_visita: form.dataVisita,
-      horario_visita: form.horario,
-      quantidade_pessoas: 1 + companions.length,
-      observacoes: form.observacoes || null,
-      cidade: form.cidade || "Não informada",
-      origem: form.origem || "OUTRO",
-      status: form.status || "PENDENTE",
-      resultado_visita: form.resultado_visita || "PENDENTE",
-      resultado_venda: form.resultado_venda || "PENDENTE",
-      dependentes: companions.map(c => ({
-        nome: c.nome,
-        idade: Number(c.idade) || 0,
-        cpf: Number(c.idade) < 6 ? null : (c.cpf || null),
-      })),
+  const dados = {
+    vendedor_id: form.vendedor_id || null,
+    data_visita: form.dataVisita,
+    horario_visita: form.horario,
+    quantidade_pessoas: 1 + companions.length,
+    observacoes: form.observacoes || null,
+    cidade: form.cidade || "Não informada",
+    origem: form.origem || "OUTRO",
+    status: form.status || "PENDENTE",
+    resultado_visita: form.resultado_visita || "PENDENTE",
+    resultado_venda: form.resultado_venda || "PENDENTE",
+    dependentes: companions.map(c => ({
+      nome: c.nome,
+      idade: Number(c.idade) || 0,
+      cpf: Number(c.idade) < 6 ? null : (c.cpf || null),
+    })),
+  };
+
+  if (isEdicao) {
+    dados.codigo = dadosEdicao.codigo;
+    dados.cliente_id = dadosEdicao.cliente_id;
+    // 👇 Adicionar dados do cliente na edição também
+    dados.cliente = {
+      nome: form.cliente,
+      cpf: form.cpf,
+      idade: Number(form.idade) || null,
+      telefone: form.telefone || null,
     };
+  } else {
+    dados.cliente = {
+      nome: form.cliente,
+      cpf: form.cpf,
+      idade: Number(form.idade) || null,
+      telefone: form.telefone || null,
+    };
+  }
 
-    if (isEdicao) {
-      dados.codigo = dadosEdicao.codigo;
-      dados.cliente_id = dadosEdicao.cliente_id;
-    } else {
-      dados.cliente = {
-        nome: form.cliente,
-        cpf: form.cpf,
-        idade: Number(form.idade) || null,
-        telefone: form.telefone || null,
-      };
-    }
-
-    await salvar(dados, isEdicao);
-  }, [form, companions, isEdicao, dadosEdicao, salvar]);
+  await salvar(dados, isEdicao);
+}, [form, companions, isEdicao, dadosEdicao, salvar]);
 
   const handleClose = useCallback(() => {
     resetar();
