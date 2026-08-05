@@ -1,3 +1,4 @@
+// src/app/Components/modal/Newappointment.jsx
 "use client";
 
 import styles from "./modal.module.css";
@@ -220,45 +221,38 @@ export default function NewAppointment({
   }, []);
 
   const handleFinalizar = useCallback(async () => {
-  const dados = {
-    vendedor_id: form.vendedor_id || null,
-    data_visita: form.dataVisita,
-    horario_visita: form.horario,
-    quantidade_pessoas: 1 + companions.length,
-    observacoes: form.observacoes || null,
-    cidade: form.cidade || "Não informada",
-    origem: form.origem || "OUTRO",
-    status: form.status || "PENDENTE",
-    resultado_visita: form.resultado_visita || "PENDENTE",
-    resultado_venda: form.resultado_venda || "PENDENTE",
-    dependentes: companions.map(c => ({
-      nome: c.nome,
-      idade: Number(c.idade) || 0,
-      cpf: Number(c.idade) < 6 ? null : (c.cpf || null),
-    })),
-  };
-
-  if (isEdicao) {
-    dados.codigo = dadosEdicao.codigo;
-    dados.cliente_id = dadosEdicao.cliente_id;
-    // 👇 Adicionar dados do cliente na edição também
-    dados.cliente = {
-      nome: form.cliente,
-      cpf: form.cpf,
-      idade: Number(form.idade) || null,
-      telefone: form.telefone || null,
+    const dados = {
+      vendedor_id: form.vendedor_id || null,
+      data_visita: form.dataVisita,
+      horario_visita: form.horario,
+      quantidade_pessoas: 1 + companions.length,
+      observacoes: form.observacoes || null,
+      cidade: form.cidade || "Não informada",
+      origem: form.origem || "OUTRO",
+      status: form.status || "PENDENTE",
+      resultado_visita: form.resultado_visita || "PENDENTE",
+      resultado_venda: form.resultado_venda || "PENDENTE",
+      dependentes: companions.map(c => ({
+        nome: c.nome,
+        idade: Number(c.idade) || 0,
+        cpf: Number(c.idade) < 6 ? null : (c.cpf || null),
+      })),
+      // 👇 Sempre enviar dados do cliente
+      cliente: {
+        nome: form.cliente,
+        cpf: form.cpf,
+        idade: Number(form.idade) || null,
+        telefone: form.telefone || null,
+      },
     };
-  } else {
-    dados.cliente = {
-      nome: form.cliente,
-      cpf: form.cpf,
-      idade: Number(form.idade) || null,
-      telefone: form.telefone || null,
-    };
-  }
 
-  await salvar(dados, isEdicao);
-}, [form, companions, isEdicao, dadosEdicao, salvar]);
+    if (isEdicao) {
+      dados.codigo = dadosEdicao.codigo;
+      dados.cliente_id = dadosEdicao.cliente_id;
+    }
+
+    await salvar(dados, isEdicao);
+  }, [form, companions, isEdicao, dadosEdicao, salvar]);
 
   const handleClose = useCallback(() => {
     resetar();
@@ -318,38 +312,28 @@ export default function NewAppointment({
                 </div>
                 <div className={styles.field}>
                   <label>Cliente (Titular) *</label>
-                  <input
-                    type="text"
-                    name="cliente"
-                    value={form.cliente}
-                    onChange={handleLettersOnly}
-                    placeholder="Nome do titular..."
-                    maxLength={100}
-                    required
-                  // 👇 Remover ou comentar esta linha
-                  // disabled={isEdicao} 
-                  />
+                  <input type="text" name="cliente" value={form.cliente} onChange={handleLettersOnly} placeholder="Nome do titular..." maxLength={100} required />
                 </div>
               </div>
 
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>Idade * (mínimo 18 anos)</label>
-                  <input type="text" name="idade" value={form.idade} onChange={handleIdadeChange} placeholder="Ex: 35" maxLength={3} required disabled={isEdicao} />
+                  <input type="text" name="idade" value={form.idade} onChange={handleIdadeChange} placeholder="Ex: 35" maxLength={3} required />
                   {form.idade !== "" && !idadeValida && (
                     <small style={{ color: '#FA643C', fontSize: '0.75rem' }}>O titular deve ser maior de idade (18 anos ou mais)</small>
                   )}
                 </div>
                 <div className={styles.field}>
                   <label>Telefone</label>
-                  <input type="text" name="telefone" value={form.telefone} onChange={handleTelefone} placeholder="(00) 00000-0000" maxLength={15} disabled={isEdicao} />
+                  <input type="text" name="telefone" value={form.telefone} onChange={handleTelefone} placeholder="(00) 00000-0000" maxLength={15} />
                 </div>
               </div>
 
               <div className={styles.row}>
                 <div className={styles.field}>
                   <label>CPF *</label>
-                  <input type="text" name="cpf" value={form.cpf} onChange={handleCpf} placeholder="000.000.000-00" maxLength={14} required disabled={isEdicao} />
+                  <input type="text" name="cpf" value={form.cpf} onChange={handleCpf} placeholder="000.000.000-00" maxLength={14} required />
                   {verificandoCPF && (
                     <small style={{ color: '#6B7280', fontSize: '0.75rem' }}>Verificando CPF...</small>
                   )}
@@ -357,9 +341,7 @@ export default function NewAppointment({
                     <small style={{ color: '#DC2626', fontSize: '0.75rem' }}>{erroCPF}</small>
                   )}
                 </div>
-                <div className={styles.field}>
-                  {/* espaço vazio ou outro campo */}
-                </div>
+                <div className={styles.field}></div>
               </div>
 
               <div className={styles.row}>
