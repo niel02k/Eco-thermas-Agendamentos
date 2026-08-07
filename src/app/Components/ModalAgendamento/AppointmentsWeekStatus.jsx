@@ -31,7 +31,7 @@ export default function AppointmentsWeekStatus({ semanaData, statusCount, status
       <div className={styles.cardChart}>
         <WeeklyAppointmentsChart
           data={semanaData}
-          height={200}
+          height={220}
           barColor="#6EC8F0"
         />
       </div>

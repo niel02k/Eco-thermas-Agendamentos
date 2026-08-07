@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Plus, Users, CalendarCheck, TrendingUp, Activity, LayoutDashboard } from 'lucide-react';
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Plus, Users, CalendarCheck,} from 'lucide-react';
 import PageHeader from '@/app/Components/PageHeader/PageHeader.jsx';
 import StatCard from '@/app/Components/Cards/StatCard/StatCard.jsx';
 import styles from './Dashboard.module.css';
@@ -20,7 +19,6 @@ const Dashboard = () => {
     error,
     totalHoje,
     semanaData,
-    dadosReceita,
     ticketMedioData,
     taxaConversaoData,
     proximosDiasComAgendamento,
@@ -41,14 +39,6 @@ const Dashboard = () => {
     return `R$ ${num.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
   };
 
-  // Dados para gráfico de semana
-  const dadosSemanaFormatado = Array.isArray(semanaData)
-    ? semanaData.map(item => ({
-      dia: item.day,
-      total: item.total || 0
-    }))
-    : [];
-
   return (
     <div className={styles.container}>
       <main className={`${styles.mainContent} ${visible ? styles.mainVisible : ''}`}>
@@ -56,7 +46,7 @@ const Dashboard = () => {
           <PageHeader
             title="Dashboard"
             subtitle="Visão geral operacional — ECO-THERMAS TUPÃ"
-            badge={{ text: "Parque Aberto", type: "success" }}
+            badge={{ text: "Bem vindo ao Eco Manager", type: "success" }}
             actionLabel="Novo Agendamento"
             actionIcon={Plus}
             onAction={() => setShowAppointmentModal(true)}
@@ -137,28 +127,24 @@ const Dashboard = () => {
           <div className={styles.chartsRow}>
             {/* Gráfico de Receita - USANDO O COMPONENTE RECEITAMENSALCHART */}
             <div className={styles.chartCardWrapper}>
-              <ReceitaMensalChart 
-                title="Receita Mensal" 
+              <ReceitaMensalChart
+                title="Receita Mensal"
                 subtitle="Últimos 8 meses"
               />
             </div>
 
             {/* Gráfico de Agendamentos por Dia */}
             <div className={styles.chartCardWrapper}>
-              {dadosSemanaFormatado.length > 0 ? (
-                <WeeklyAppointmentsChart
-                  data={semanaData}
-                  title="Agendamentos"
-                  subtitle="Semana atual"
-                  height={200}
-                  barColor="#6EC8F0"
-                />
-              ) : (
-                <div className={styles.emptyChart}>
-                  <p>Nenhum agendamento nesta semana</p>
-                </div>
-              )}
+              <WeeklyAppointmentsChart
+                data={semanaData}
+                title="Agendamentos"
+                subtitle="Semana atual"
+                height={220} A
+                barColor="#6EC8F0"
+                loading={!semanaData || semanaData.length === 0}
+              />
             </div>
+
           </div>
 
           {/* Quick Strip - Indicadores */}

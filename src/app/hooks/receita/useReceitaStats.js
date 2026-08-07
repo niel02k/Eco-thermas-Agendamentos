@@ -47,7 +47,7 @@ export function useReceitaStats(ano = null) {
 
       // Atualiza o faturamento do mês atual
       await atualizarFaturamentoMesAtual();
-      
+
       // Recarrega os dados
       await carregarDados();
     } catch (err) {
@@ -107,21 +107,21 @@ export function useReceitaStats(ano = null) {
     loading,
     error,
     atualizando,
-    
+
     // Totalizadores
     totalReceita,
     totalContratos,
     mediaMensal,
-    
+
     // Funções
     carregarDados,
     atualizarDados,
     finalizarMes: finalizarMesHandler,
-    
+
     // Utilitários
     formatarMoeda,
     formatarNumero,
-    
+
     // Dados brutos (caso precise)
     dadosBrutos: data
   };

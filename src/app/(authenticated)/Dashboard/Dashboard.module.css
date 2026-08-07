@@ -19,10 +19,47 @@
   margin-left: 5vw;
 }
 
+
+
+
 .mainVisible {
   opacity: 1;
   transform: translateY(0);
 }
+
+
+
+
+.chartCardWrapper {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 16px rgba(30, 110, 190, 0.06);
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chartCardWrapper > div {
+  flex: 1;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+}
+
+.emptyChart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 220px;
+  background: #F8FAFC;
+  border-radius: 12px;
+  color: #94A3B8;
+  font-size: 0.9rem;
+}
+
 
 /* ─── Content area ────────────────────────────────────────── */
 .content {
@@ -57,7 +94,7 @@
 /* ─── Charts row ──────────────────────────────────────────── */
 .chartsRow {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1.75fr 1.25fr;
   gap: 1.25rem;
   width: 100%;
   animation: cardIn 0.55s 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;

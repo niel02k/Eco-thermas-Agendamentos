@@ -1,32 +1,34 @@
 /* WeeklyAppointmentsChart.module.css */
 
 .chartCard {
-  background: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  border-radius: 18px;
-  padding: 2rem;
-  box-shadow: 0 4px 16px rgba(30, 110, 190, 0.06);
+  background: transparent;  /* 👈 Já que o wrapper tem fundo */
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  height: 100%;
 }
 
 .chartHeader {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  margin-bottom: 0.5rem;
 }
 
 .chartTitle {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #1E293B;
   font-family: 'Montserrat', sans-serif;
 }
 
 .chartSub {
-  margin-top: 0.25rem;
+  margin-top: 0.2rem;
   font-size: 0.78rem;
   color: #94A3B8;
   font-weight: 500;
@@ -48,13 +50,13 @@
   color: #1E6EBE;
 }
 
-/* ─── Empty ─────────────────────────── */
 .emptyChart {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  height: 100%;
   background: #F8FAFC;
   border-radius: 12px;
   color: #94A3B8;
@@ -70,11 +72,12 @@
   font-weight: 500;
 }
 
-/* ─── Skeleton Loading ──────────────── */
+/* Skeleton */
 .skeletonChart {
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  height: 100%;
   background: #F8FAFC;
   border-radius: 12px;
   padding: 1rem;
@@ -94,18 +97,34 @@
   100% { background-position: 600px 0; }
 }
 
-/* ─── Responsivo ────────────────────── */
-@media (max-width: 768px) {
-  .chartCard {
-    padding: 1rem;
-    border-radius: 14px;
-  }
-  
-  .chartTitle {
-    font-size: 0.85rem;
-  }
-  
-  .chartSub {
-    font-size: 0.7rem;
-  }
+/* WeeklyAppointmentsChart.module.css */
+
+.skeletonBars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  width: 100%;
+  height: 100%;
+  padding: 0 10px;
+  gap: 12px;
+}
+
+.skeletonBarItem {
+  flex: 1;
+  background: linear-gradient(180deg, #E2E8F0 0%, #F1F5F9 100%);
+  border-radius: 4px 4px 0 0;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.skeletonBarItem:nth-child(1) { animation-delay: 0s; }
+.skeletonBarItem:nth-child(2) { animation-delay: 0.1s; }
+.skeletonBarItem:nth-child(3) { animation-delay: 0.2s; }
+.skeletonBarItem:nth-child(4) { animation-delay: 0.3s; }
+.skeletonBarItem:nth-child(5) { animation-delay: 0.4s; }
+.skeletonBarItem:nth-child(6) { animation-delay: 0.5s; }
+.skeletonBarItem:nth-child(7) { animation-delay: 0.6s; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }
