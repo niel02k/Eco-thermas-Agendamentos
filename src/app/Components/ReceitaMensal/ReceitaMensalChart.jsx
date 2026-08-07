@@ -1,10 +1,10 @@
 // src/app/Components/ReceitaMensal/ReceitaMensalChart.jsx
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingUp, RefreshCw } from 'lucide-react';
-import { ReceitaService } from '@/app/services/receitaServices';
+import { useReceitaStats } from '@/app/hooks/receita/useReceitaStats';
 import styles from './ReceitaMensalChart.module.css';
 
 const formatarMoeda = (valor) => 
@@ -15,54 +15,16 @@ export default function ReceitaMensalChart({
   subtitle = "Últimos 8 meses",
   ano = null
 }) {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [resumo, setResumo] = useState(null);
-  const [atualizando, setAtualizando] = useState(false);
-
-  const carregarDados = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Busca os dados dos últimos 8 meses
-      const dadosGrafico = await ReceitaService.receitaPorMes(ano);
-      setData(dadosGrafico);
-
-      // Busca resumo do faturamento
-      const anoAtual = ano || new Date().getFullYear();
-      const resumoData = await ReceitaService.getResumoFaturamento(anoAtual);
-      setResumo(resumoData);
-
-    } catch (err) {
-      console.error('Erro ao carregar dados do faturamento:', err);
-      setError('Não foi possível carregar os dados de faturamento');
-    } finally {
-      setLoading(false);
-      setAtualizando(false);
-    }
-  };
-
-  const atualizarDados = async () => {
-    try {
-      setAtualizando(true);
-      
-      // Atualiza o faturamento do mês atual
-      await ReceitaService.atualizarFaturamentoMesAtual();
-      
-      // Recarrega os dados
-      await carregarDados();
-    } catch (err) {
-      console.error('Erro ao atualizar dados:', err);
-      setError('Erro ao atualizar dados');
-      setAtualizando(false);
-    }
-  };
-
-  useEffect(() => {
-    carregarDados();
-  }, [ano]);
+  const {
+    dadosGrafico,
+    resumo,
+    loading,
+    error,
+    atualizando,
+    totalReceita,
+    atualizarDados,
+    formatarMoeda: formatarMoedaHook
+  } = useReceitaStats(ano);
 
   if (loading) {
     return (
@@ -93,7 +55,7 @@ export default function ReceitaMensalChart({
     );
   }
 
-  if (!data || data.length === 0) {
+  if (!dadosGrafico || dadosGrafico.length === 0) {
     return (
       <div className={styles.chartCard}>
         <div className={styles.chartHeader}>
@@ -112,8 +74,6 @@ export default function ReceitaMensalChart({
     );
   }
 
-  const totalReceita = data.reduce((sum, item) => sum + item.receita, 0);
-
   return (
     <div className={styles.chartCard}>
       <div className={styles.chartHeader}>
@@ -124,9 +84,9 @@ export default function ReceitaMensalChart({
             {resumo && (
               <span className={styles.resumoInfo}>
                 {' • '}
-                <strong>Total: {formatarMoeda(resumo.total_ano)}</strong>
+                <strong>Total: {formatarMoedaHook(resumo.total_ano)}</strong>
                 {' • '}
-                Média: {formatarMoeda(resumo.media_mensal)}
+                Média: {formatarMoedaHook(resumo.media_mensal)}
               </span>
             )}
           </p>
@@ -142,7 +102,7 @@ export default function ReceitaMensalChart({
       </div>
 
       <ResponsiveContainer width="100%" height={200}>
-        <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+        <AreaChart data={dadosGrafico} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="gradReceita" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#1E6EBE" stopOpacity={0.18} />
