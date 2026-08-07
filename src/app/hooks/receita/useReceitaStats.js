@@ -7,7 +7,7 @@ import {
   finalizarMes,
   getResumoFaturamento,
   receitaPorMes,
-} from '@/app/services/receitaServices';
+} from '@/app/services/receitaService';
 
 export function useReceitaStats(ano = null) {
   const [data, setData] = useState([]);
