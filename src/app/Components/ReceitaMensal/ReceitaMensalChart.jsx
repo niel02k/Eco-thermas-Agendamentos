@@ -1,74 +1,37 @@
-// src/app/Components/Charts/ReceitaMensalChart.jsx
+// src/app/Components/ReceitaMensal/ReceitaMensalChart.jsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { TrendingUp } from 'lucide-react';
-import { ReceitaService } from '@/services/ReceitaService';
+import { TrendingUp, RefreshCw } from 'lucide-react';
+import { ReceitaService } from '@/app/services/receitaServices';
 import styles from './ReceitaMensalChart.module.css';
 
 const formatarMoeda = (valor) => 
   `R$ ${Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
 
-// Mapeamento de meses
-const MESES = {
-  1: 'Jan',
-  2: 'Fev',
-  3: 'Mar',
-  4: 'Abr',
-  5: 'Mai',
-  6: 'Jun',
-  7: 'Jul',
-  8: 'Ago',
-  9: 'Set',
-  10: 'Out',
-  11: 'Nov',
-  12: 'Dez'
-};
-
 export default function ReceitaMensalChart({ 
   title = "Receita Mensal", 
   subtitle = "Últimos 8 meses",
-  ano = null // Se não informar, usa o ano atual
+  ano = null
 }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [resumo, setResumo] = useState(null);
-
-  useEffect(() => {
-    carregarDados();
-  }, [ano]);
+  const [atualizando, setAtualizando] = useState(false);
 
   const carregarDados = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Define o ano (atual se não informado)
-      const anoAtual = ano || new Date().getFullYear();
-
-      // Busca os dados do ano
-      const dados = await ReceitaService.getFaturamentoAcumuladoAno(anoAtual);
-      
-      // Transforma para o formato do gráfico
-      const dadosGrafico = dados.map(item => ({
-        mes: MESES[item.mes] || item.mes,
-        mesNumero: item.mes,
-        receita: Number(item.valor_total),
-        quantidade: item.quantidade_contratos,
-        acumulado: item.valor_acumulado,
-        dataCalculo: item.data_calculo
-      }));
-
-      // Pega os últimos 8 meses ou todos se tiver menos
-      const ultimosMeses = dadosGrafico.length > 8 
-        ? dadosGrafico.slice(-8) 
-        : dadosGrafico;
-
-      setData(ultimosMeses);
+      // Busca os dados dos últimos 8 meses
+      const dadosGrafico = await ReceitaService.receitaPorMes(ano);
+      setData(dadosGrafico);
 
       // Busca resumo do faturamento
+      const anoAtual = ano || new Date().getFullYear();
       const resumoData = await ReceitaService.getResumoFaturamento(anoAtual);
       setResumo(resumoData);
 
@@ -77,14 +40,13 @@ export default function ReceitaMensalChart({
       setError('Não foi possível carregar os dados de faturamento');
     } finally {
       setLoading(false);
+      setAtualizando(false);
     }
   };
 
-  // Atualizar dados manualmente
   const atualizarDados = async () => {
     try {
-      setLoading(true);
-      const anoAtual = ano || new Date().getFullYear();
+      setAtualizando(true);
       
       // Atualiza o faturamento do mês atual
       await ReceitaService.atualizarFaturamentoMesAtual();
@@ -94,10 +56,13 @@ export default function ReceitaMensalChart({
     } catch (err) {
       console.error('Erro ao atualizar dados:', err);
       setError('Erro ao atualizar dados');
-    } finally {
-      setLoading(false);
+      setAtualizando(false);
     }
   };
+
+  useEffect(() => {
+    carregarDados();
+  }, [ano]);
 
   if (loading) {
     return (
@@ -147,13 +112,15 @@ export default function ReceitaMensalChart({
     );
   }
 
+  const totalReceita = data.reduce((sum, item) => sum + item.receita, 0);
+
   return (
     <div className={styles.chartCard}>
       <div className={styles.chartHeader}>
         <div>
           <h2 className={styles.chartTitle}>{title}</h2>
           <p className={styles.chartSub}>
-            {subtitle} 
+            {subtitle}
             {resumo && (
               <span className={styles.resumoInfo}>
                 {' • '}
@@ -165,8 +132,12 @@ export default function ReceitaMensalChart({
           </p>
         </div>
         <div className={styles.chartBadge} onClick={atualizarDados} style={{ cursor: 'pointer' }}>
-          <TrendingUp size={13} />
-          {data[data.length - 1]?.quantidade || 0} contratos ativos
+          {atualizando ? (
+            <RefreshCw size={13} className={styles.spinning} />
+          ) : (
+            <TrendingUp size={13} />
+          )}
+          {totalReceita > 0 ? formatarMoeda(totalReceita) : 'Sem dados'}
         </div>
       </div>
 
@@ -192,10 +163,7 @@ export default function ReceitaMensalChart({
             tickFormatter={v => `R$${(v / 1000).toFixed(0)}k`} 
           />
           <Tooltip 
-            formatter={(v, name) => {
-              if (name === 'receita') return [formatarMoeda(v), 'Receita'];
-              return [v, name];
-            }}
+            formatter={(v) => [formatarMoeda(v), 'Receita']}
             labelFormatter={(label) => `Mês: ${label}`}
             contentStyle={{
               backgroundColor: '#fff',
