@@ -3,22 +3,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  listarReceitas,
-  buscarReceitaPorId,
-  buscarReceitaPorMesAno,
-  buscarReceitasPorAno,
-  calcularFaturamentoMesAtual,
-  calcularFaturamentoDoMes,
   atualizarFaturamentoMesAtual,
   finalizarMes,
-  criarReceita,
-  atualizarReceita,
-  excluirReceita,
-  getFaturamentoAcumuladoAno,
   getResumoFaturamento,
-  isMesFinalizado,
   receitaPorMes,
-} from '@/app/services/receitaService';
+} from '@/app/services/receitaServices';
 
 export function useReceitaStats(ano = null) {
   const [data, setData] = useState([]);
