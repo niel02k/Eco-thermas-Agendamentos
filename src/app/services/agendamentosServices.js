@@ -321,18 +321,34 @@ export async function criarAgendamento(dados) {
 // ============ ATUALIZAR ============
 
 export async function atualizarAgendamento(codigo, dados) {
-  // Se tiver dados do cliente, atualizar o cliente primeiro
+  console.log('🔍 [atualizarAgendamento] Dados recebidos:', JSON.stringify(dados, null, 2));
+  
+  // Atualizar cliente
   if (dados.cliente && dados.cliente_id) {
-    const { error: clienteError } = await supabase
+    console.log('👤 Atualizando cliente:', dados.cliente_id, dados.cliente);
+    
+    const { data: clienteData, error: clienteError } = await supabase
       .from('clientes')
       .update({
         nome: dados.cliente.nome,
         idade: dados.cliente.idade,
         telefone: dados.cliente.telefone,
       })
-      .eq('id', dados.cliente_id);
+      .eq('id', dados.cliente_id)
+      .select();
+
+    console.log('📊 Resultado update cliente:', { data: clienteData, error: clienteError });
     
-    if (clienteError) console.error('Erro ao atualizar cliente:', clienteError);
+    if (clienteError) {
+      console.error('❌ Erro ao atualizar cliente:', clienteError);
+    }
+  } else {
+    console.log('⚠️ Não atualizou cliente - faltando:', { 
+      temCliente: !!dados.cliente, 
+      temId: !!dados.cliente_id,
+      cliente: dados.cliente,
+      cliente_id: dados.cliente_id 
+    });
   }
 
   const updateData = {

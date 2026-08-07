@@ -9,7 +9,7 @@ import styles from './Dashboard.module.css';
 import { useDashboardStats } from '@/app/hooks/dashboard/useDashboardStats';
 import NewAppointment from "@/app/Components/modal/Newappointment";
 import WeeklyAppointmentsChart from "@/app/Components/WeeklyAppointmentsChart/WeeklyAppointmentsChart.jsx";
-
+import ReceitaMensalChart from '@/app/Components/ReceitaMensal/ReceitaMensalChart';
 
 const Dashboard = () => {
   const [visible, setVisible] = useState(false);
@@ -48,8 +48,6 @@ const Dashboard = () => {
       total: item.total || 0
     }))
     : [];
-
-
 
   return (
     <div className={styles.container}>
@@ -137,56 +135,16 @@ const Dashboard = () => {
 
           {/* Charts Row */}
           <div className={styles.chartsRow}>
-            {/* Gráfico de Receita */}
-            <div className={styles.chartCard}>
-              <div className={styles.chartHeader}>
-                <div>
-                  <h2 className={styles.chartTitle}>Receita Mensal</h2>
-                  <p className={styles.chartSub}>Últimos 8 meses</p>
-                </div>
-                <div className={styles.chartBadge}>
-                  <TrendingUp size={13} />
-                  Contratos ativos
-                </div>
-              </div>
-              {dadosReceita.length > 0 ? (
-                <ResponsiveContainer width="100%" height={200}>
-                  <AreaChart data={dadosReceita} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="gradReceita" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#1E6EBE" stopOpacity={0.18} />
-                        <stop offset="95%" stopColor="#1E6EBE" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
-                    <XAxis dataKey="mes" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                    <YAxis
-                      tick={{ fontSize: 11, fill: '#94a3b8' }}
-                      axisLine={false}
-                      tickLine={false}
-                      tickFormatter={v => `R$${(v / 1000).toFixed(0)}k`}
-                    />
-                    <Tooltip formatter={(v) => [formatarMoeda(v), 'Receita']} />
-                    <Area
-                      type="monotone"
-                      dataKey="receita"
-                      stroke="#1E6EBE"
-                      strokeWidth={2.5}
-                      fill="url(#gradReceita)"
-                      dot={{ r: 4, fill: '#fff', stroke: '#1E6EBE', strokeWidth: 2.5 }}
-                      activeDot={{ r: 6 }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className={styles.emptyChart}>
-                  <p>Nenhum dado de receita disponível</p>
-                </div>
-              )}
+            {/* Gráfico de Receita - USANDO O COMPONENTE RECEITAMENSALCHART */}
+            <div className={styles.chartCardWrapper}>
+              <ReceitaMensalChart 
+                title="Receita Mensal" 
+                subtitle="Últimos 8 meses"
+              />
             </div>
 
             {/* Gráfico de Agendamentos por Dia */}
-            
+            <div className={styles.chartCardWrapper}>
               {dadosSemanaFormatado.length > 0 ? (
                 <WeeklyAppointmentsChart
                   data={semanaData}
@@ -200,7 +158,7 @@ const Dashboard = () => {
                   <p>Nenhum agendamento nesta semana</p>
                 </div>
               )}
-       
+            </div>
           </div>
 
           {/* Quick Strip - Indicadores */}
@@ -230,9 +188,6 @@ const Dashboard = () => {
                 {ticketMedioData?.total_contratos || 0}
               </span>
             </div>
-
-            {/* Valor Total */}
-
           </div>
 
           {error && (
