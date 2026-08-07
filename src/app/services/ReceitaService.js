@@ -369,7 +369,6 @@ export async function receitaPorMes(ano = null) {
   for (let i = 7; i >= 0; i--) {
     const mesIndex = (mesAtual - i + 12) % 12;
     const mesNome = meses[mesIndex];
-    // Verifica se é um mês do ano atual ou do ano passado
     const mesNumero = mesIndex + 1;
     const anoMes = mesNumero > (mesAtual + 1) ? anoAtual - 1 : anoAtual;
     
@@ -383,22 +382,3 @@ export async function receitaPorMes(ano = null) {
 
   return ultimos8Meses;
 }
-
-// ============ EXPORTAÇÃO PARA USO EM COMPONENTES ============
-export const ReceitaService = {
-  listarReceitas,
-  buscarReceitaPorId,
-  buscarReceitaPorMesAno,
-  buscarReceitasPorAno,
-  calcularFaturamentoMesAtual,
-  calcularFaturamentoDoMes,
-  atualizarFaturamentoMesAtual,
-  finalizarMes,
-  criarReceita,
-  atualizarReceita,
-  excluirReceita,
-  getFaturamentoAcumuladoAno,
-  getResumoFaturamento,
-  isMesFinalizado,
-  receitaPorMes
-};

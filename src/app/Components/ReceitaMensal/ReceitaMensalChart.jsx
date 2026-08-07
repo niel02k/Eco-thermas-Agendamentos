@@ -7,9 +7,6 @@ import { TrendingUp, RefreshCw } from 'lucide-react';
 import { useReceitaStats } from '@/app/hooks/receita/useReceitaStats';
 import styles from './ReceitaMensalChart.module.css';
 
-const formatarMoeda = (valor) => 
-  `R$ ${Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-
 export default function ReceitaMensalChart({ 
   title = "Receita Mensal", 
   subtitle = "Últimos 8 meses",
@@ -23,7 +20,7 @@ export default function ReceitaMensalChart({
     atualizando,
     totalReceita,
     atualizarDados,
-    formatarMoeda: formatarMoedaHook
+    formatarMoeda
   } = useReceitaStats(ano);
 
   if (loading) {
@@ -84,9 +81,9 @@ export default function ReceitaMensalChart({
             {resumo && (
               <span className={styles.resumoInfo}>
                 {' • '}
-                <strong>Total: {formatarMoedaHook(resumo.total_ano)}</strong>
+                <strong>Total: {formatarMoeda(resumo.total_ano)}</strong>
                 {' • '}
-                Média: {formatarMoedaHook(resumo.media_mensal)}
+                Média: {formatarMoeda(resumo.media_mensal)}
               </span>
             )}
           </p>

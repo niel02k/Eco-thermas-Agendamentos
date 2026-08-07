@@ -2,7 +2,23 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { ReceitaService } from '@/app/services/receitaServices';
+import {
+  listarReceitas,
+  buscarReceitaPorId,
+  buscarReceitaPorMesAno,
+  buscarReceitasPorAno,
+  calcularFaturamentoMesAtual,
+  calcularFaturamentoDoMes,
+  atualizarFaturamentoMesAtual,
+  finalizarMes,
+  criarReceita,
+  atualizarReceita,
+  excluirReceita,
+  getFaturamentoAcumuladoAno,
+  getResumoFaturamento,
+  isMesFinalizado,
+  receitaPorMes,
+} from '@/app/services/receitaServices';
 
 export function useReceitaStats(ano = null) {
   const [data, setData] = useState([]);
@@ -19,11 +35,11 @@ export function useReceitaStats(ano = null) {
       setError(null);
 
       // Busca os dados dos últimos 8 meses
-      const dadosGrafico = await ReceitaService.receitaPorMes(anoAtual);
+      const dadosGrafico = await receitaPorMes(anoAtual);
       setData(dadosGrafico);
 
       // Busca resumo do faturamento
-      const resumoData = await ReceitaService.getResumoFaturamento(anoAtual);
+      const resumoData = await getResumoFaturamento(anoAtual);
       setResumo(resumoData);
 
     } catch (err) {
@@ -41,7 +57,7 @@ export function useReceitaStats(ano = null) {
       setError(null);
 
       // Atualiza o faturamento do mês atual
-      await ReceitaService.atualizarFaturamentoMesAtual();
+      await atualizarFaturamentoMesAtual();
       
       // Recarrega os dados
       await carregarDados();
@@ -52,11 +68,11 @@ export function useReceitaStats(ano = null) {
     }
   }, [carregarDados]);
 
-  const finalizarMes = useCallback(async (mes, anoFinalizar) => {
+  const finalizarMesHandler = useCallback(async (mes, anoFinalizar) => {
     try {
       setAtualizando(true);
       const anoRef = anoFinalizar || anoAtual;
-      await ReceitaService.finalizarMes(anoRef, mes);
+      await finalizarMes(anoRef, mes);
       await carregarDados();
       return { success: true };
     } catch (err) {
@@ -73,14 +89,14 @@ export function useReceitaStats(ano = null) {
   }, [carregarDados]);
 
   // Formatações
-  const formatarMoeda = (valor) => {
+  const formatarMoeda = useCallback((valor) => {
     const num = Number(valor) || 0;
     return `R$ ${num.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-  };
+  }, []);
 
-  const formatarNumero = (valor) => {
+  const formatarNumero = useCallback((valor) => {
     return new Intl.NumberFormat('pt-BR').format(valor || 0);
-  };
+  }, []);
 
   // Dados para o gráfico
   const dadosGrafico = data.map(item => ({
@@ -111,7 +127,7 @@ export function useReceitaStats(ano = null) {
     // Funções
     carregarDados,
     atualizarDados,
-    finalizarMes,
+    finalizarMes: finalizarMesHandler,
     
     // Utilitários
     formatarMoeda,
