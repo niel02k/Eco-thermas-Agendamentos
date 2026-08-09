@@ -57,10 +57,12 @@ export async function exportarVouchersExcel(agendamentos, fileName = 'vouchers')
 }
 
 function criarVoucher(worksheet, ag, r) {
-  const codigo = String(ag.codigo || '').padStart(6, '0');
+ const codigo = String(ag.codigo || '').padStart(6, '0');
   const data = formatarData(ag.data_visita);
+  const horario = ag.horario_visita?.slice(0, 5) || ''; // 👈 horario_visita
   const cidade = ag.cidade || '';
   const origem = ag.origem || 'OUTRO';
+  const observacoes = ag.observacoes || ''; // 👈 Adicionar observações
   const cliente = ag.cliente || {};
   const nome = cliente.nome || ag.titular_nome || '';
   const cpf = formatarCPF(cliente.cpf || ag.titular_cpf || '');
@@ -82,11 +84,14 @@ function criarVoucher(worksheet, ag, r) {
   setCell(worksheet, r, 6, `#${codigo}`, { bold: true, size: 11, align: 'right', border: true });
 
   // ═══════════ LINHA 2: DATA | CIDADE ═══════════
-  setCell(worksheet, r + 1, 1, 'Data:', { bold: true, size: 10, align: 'left', border: true });
-  merge(worksheet, r + 1, 2, r + 1, 3);
-  setCell(worksheet, r + 1, 2, data, { size: 10, align: 'left', border: true });
-  setCell(worksheet, r + 1, 4, 'Cidade:', { bold: true, size: 10, align: 'left', border: true });
-  setCell(worksheet, r + 1, 5, cidade, { size: 10, align: 'left', border: true });
+const dataHora = `${data} às ${horario}`; // 👈 Juntar data e horário
+
+setCell(worksheet, r + 1, 1, 'Data:', { bold: true, size: 10, align: 'left', border: true });
+merge(worksheet, r + 1, 2, r + 1, 3);
+setCell(worksheet, r + 1, 2, dataHora, { size: 10, align: 'left', border: true }); // 👈 dataHora
+setCell(worksheet, r + 1, 4, 'Cidade:', { bold: true, size: 10, align: 'left', border: true });
+merge(worksheet, r + 1, 5, r + 1, 6);
+setCell(worksheet, r + 1, 5, cidade, { size: 10, align: 'left', border: true });
 
   // ═══════════ LINHA 3: NOME | IDADE ═══════════
   setCell(worksheet, r + 2, 1, 'Nome:', { bold: true, size: 10, align: 'left', border: true });
@@ -144,8 +149,8 @@ function criarVoucher(worksheet, ag, r) {
   setCell(worksheet, r + 14, 4, 'Status: ______________________', { size: 10, align: 'left', border: true });
 
   // ═══════════ LINHAS 16-19: OBSERVAÇÕES (alinhado no topo) ═══════════
-  merge(worksheet, r + 15, 1, r + 18, 6);
-  setCell(worksheet, r + 15, 1, 'Observações:', { 
+merge(worksheet, r + 15, 1, r + 18, 6);
+  setCell(worksheet, r + 15, 1, observacoes ? `Observações: ${observacoes}` : 'Observações:', { 
     bold: true, size: 10, align: 'left', vertical: 'top', border: true 
   });
 

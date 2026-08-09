@@ -1,50 +1,50 @@
-// src/app/Components/ModalAgendamento/components/ExportVouchersButton.jsx
+// src/app/Components/ModalAgendamento/ExportVouchersButton.jsx
 "use client";
 
 import React, { useState } from "react";
-import { FileSpreadsheet, Loader2, X } from "lucide-react";
-import { exportarVouchersExcel } from "@/app/services/exportServices";
+import { FileSpreadsheet, X } from "lucide-react";
+import { exportarVouchersExcel, listarAgendamentos } from "@/app/services/exportServices";
 import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
 
-export default function ExportVouchersButton({ agendamentos, disabled = false }) {
+export default function ExportVouchersButton({ disabled = false }) {
   const [loading, setLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
   const handleExport = async () => {
-    if (!agendamentos || agendamentos.length === 0) {
-      alert("Não há agendamentos para exportar!");
-      return;
-    }
-
-    const filtrados = agendamentos.filter(ag => ag.data_visita === selectedDate);
-
-    if (filtrados.length === 0) {
-      alert(`Nenhum agendamento encontrado para a data ${formatarData(selectedDate)}`);
-      return;
-    }
-
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // 👇 Buscar TODOS os agendamentos da data (sem paginação)
+      const { listarAgendamentos } = await import('@/app/services/agendamentosServices');
       
+      const resultado = await listarAgendamentos({
+        pagina: 1,
+        limite: 1000, // 👈 Buscar até 1000 registros
+      });
+
+      // Filtrar pela data selecionada
+      const filtrados = (resultado.agendamentos || []).filter(
+        ag => ag.data_visita === selectedDate
+      );
+
+      if (filtrados.length === 0) {
+        alert(`Nenhum agendamento encontrado para ${formatarData(selectedDate)}`);
+        setLoading(false);
+        return;
+      }
+
       const dataFormatada = selectedDate.replace(/-/g, "");
-      const nomeArquivo = `vouchers_${dataFormatada}`;
-      
-      await exportarVouchersExcel(filtrados, nomeArquivo);
+      await exportarVouchersExcel(filtrados, `vouchers_${dataFormatada}`);
       setShowDatePicker(false);
     } catch (error) {
       console.error("Erro ao exportar:", error);
-      alert("Erro ao gerar vouchers. Tente novamente.");
+      alert("Erro ao gerar vouchers.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCancel = () => {
-    setShowDatePicker(false);
-    setSelectedDate(new Date().toISOString().split('T')[0]);
-  };
+  const handleCancel = () => setShowDatePicker(false);
 
   const formatarData = (data) => {
     const [ano, mes, dia] = data.split('-');
@@ -66,23 +66,13 @@ export default function ExportVouchersButton({ agendamentos, disabled = false })
             disabled={loading}
             className={styles.exportConfirmBtn}
           >
-            {loading ? (
-              <>
-                <Loader2 size={16} className={styles.spinning} />
-                Gerando...
-              </>
-            ) : (
-              <>
-                <FileSpreadsheet size={16} />
-                Exportar
-              </>
-            )}
+            <FileSpreadsheet size={16} />
+            {loading ? "Gerando..." : "Exportar"}
           </button>
           <button
             onClick={handleCancel}
             disabled={loading}
             className={styles.exportCancelBtn}
-            title="Cancelar"
           >
             <X size={16} />
           </button>
