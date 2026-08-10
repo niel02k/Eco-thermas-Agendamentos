@@ -27,6 +27,11 @@ export function useAgendamentosStats() {
     PENDENTE: 0,
     CANCELADO: 0,
     REALIZADO: 0,
+    FALTOU: 0,
+  });
+  const [statusCountVenda, setStatusCountVenda] = useState({
+    VENDA_REALIZADA: 0,
+    VENDA_PERDIDA: 0,
   });
 
   const carregar = useCallback(async () => {
@@ -55,12 +60,34 @@ export function useAgendamentosStats() {
       setTaxaConversao(taxa ?? 0);
       setTotalClientes(clientes ?? 0);
 
-      // Contagem de status
-      const counts = { CONFIRMADO: 0, PENDENTE: 0, CANCELADO: 0, REALIZADO: 0 };
+      // ── Janela da semana atual (Seg 00:00 → Dom 23:59) ──────────
+      const agora = new Date();
+      const diaSemana = agora.getDay();
+      const inicioSemana = new Date(agora);
+      inicioSemana.setDate(agora.getDate() - (diaSemana === 0 ? 6 : diaSemana - 1));
+      inicioSemana.setHours(0, 0, 0, 0);
+      const fimSemana = new Date(inicioSemana);
+      fimSemana.setDate(inicioSemana.getDate() + 6);
+      fimSemana.setHours(23, 59, 59, 999);
+
+      // Contagem de status (operacional) + resultado_visita (FALTOU)
+      const counts = { CONFIRMADO: 0, PENDENTE: 0, CANCELADO: 0, REALIZADO: 0, FALTOU: 0 };
+      // Contagem de resultado de venda, restrita à semana atual
+      const countsVenda = { VENDA_REALIZADA: 0, VENDA_PERDIDA: 0 };
+
       (todos.agendamentos ?? []).forEach((a) => {
         if (counts[a.status] !== undefined) counts[a.status]++;
+        if (a.resultado_visita === 'FALTOU') counts.FALTOU++;
+
+        const dataVisita = new Date(a.data_visita + 'T00:00:00');
+        const naSemana = dataVisita >= inicioSemana && dataVisita <= fimSemana;
+        if (naSemana && countsVenda[a.resultado_venda] !== undefined) {
+          countsVenda[a.resultado_venda]++;
+        }
       });
+
       setStatusCount(counts);
+      setStatusCountVenda(countsVenda);
 
     } catch (e) {
       console.error('Erro ao carregar estatísticas:', e);
@@ -83,6 +110,7 @@ export function useAgendamentosStats() {
     taxaConversao,
     totalClientes,
     statusCount,
+    statusCountVenda,
     carregar,
   };
 }

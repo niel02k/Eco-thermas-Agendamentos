@@ -6,7 +6,9 @@ import {
   atualizarAgendamento, 
   excluirAgendamento,
   atualizarResultadoVenda,
-  marcarComoRealizado 
+  marcarComoRealizado,
+  marcarComoFaltou as marcarComoFaltouService,
+  cancelarAgendamento as cancelarAgendamentoService,
 } from '@/app/services/agendamentosServices';
 
 export function useAgendamentosActions(onActionComplete) {
@@ -34,12 +36,17 @@ export function useAgendamentosActions(onActionComplete) {
     }
   }, [onActionComplete]);
 
-  // Cancelar agendamento
-  const cancelar = useCallback((codigo) => {
+  // Confirmar agendamento (PENDENTE → CONFIRMADO)
+  const confirmarAgendamento = useCallback((codigo) => {
     return handleAction(
-      (cod) => atualizarAgendamento(cod, { status: 'CANCELADO' }),
+      (cod) => atualizarAgendamento(cod, { status: 'CONFIRMADO' }),
       codigo
     );
+  }, [handleAction]);
+
+  // Cancelar agendamento
+  const cancelar = useCallback((codigo) => {
+    return handleAction(cancelarAgendamentoService, codigo);
   }, [handleAction]);
 
   // Excluir agendamento
@@ -47,9 +54,14 @@ export function useAgendamentosActions(onActionComplete) {
     return handleAction(excluirAgendamento, codigo);
   }, [handleAction]);
 
-  // Confirmar como realizado
+  // Confirmar como realizado (resultado_visita = REALIZADO)
   const confirmarRealizado = useCallback((codigo) => {
     return handleAction(marcarComoRealizado, codigo);
+  }, [handleAction]);
+
+  // Marcar como faltou (resultado_visita = FALTOU)
+  const marcarComoFaltou = useCallback((codigo) => {
+    return handleAction(marcarComoFaltouService, codigo);
   }, [handleAction]);
 
   // Abrir modal de resultado de venda
@@ -85,9 +97,11 @@ export function useAgendamentosActions(onActionComplete) {
   return {
     loading,
     erro,
+    confirmarAgendamento,
     cancelar,
     excluir,
     confirmarRealizado,
+    marcarComoFaltou,
     // Resultado de venda
     showResultadoVenda,
     agendamentoParaResultado,

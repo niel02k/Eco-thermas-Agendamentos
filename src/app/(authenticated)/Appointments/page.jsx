@@ -1,12 +1,12 @@
-// src/app/Components/ModalAgendamento/Appointments.jsx
+// src/app/(authenticated)/Appointments/page.jsx
 "use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Plus, AlertTriangle } from "lucide-react";
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
-import { useAgendamentos } from "@/app/hooks/useAgendamentos";
+import { useAgendamentos } from "@/app/hooks/agendamentos";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
-import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
+import styles from "./Appointments.module.css";
 
 // Componentes
 import AppointmentsWeekStatus from "@/app/Components/ModalAgendamento/AppointmentsWeekStatus";
@@ -18,7 +18,7 @@ import ResultCard from "@/app/Components/Cards/ResultCard/ResultCard.jsx";
 import MobileList from "@/app/Components/Shared/MobileList";
 import DataTable from "@/app/Components/Shared/DataTable";
 
-export default function Appointments() {
+export default function AppointmentsPage() {
   const [visible, setVisible] = useState(false);
   const [abrirModal, setAbrirModal] = useState(false);
   const [confirm, setConfirm] = useState(null);
@@ -29,11 +29,13 @@ export default function Appointments() {
   const [showModalRealizado, setShowModalRealizado] = useState(false);
   const [agendamentoParaRealizar, setAgendamentoParaRealizar] = useState(null);
 
+  // ── Nota: a criação/edição em si (loading/erro/sucesso) é
+  // gerenciada internamente pelo NewAppointment via useAgendamentosForm.
+  // Este hook aqui cuida de listagem, stats, detalhe e ações pontuais.
   const {
     agendamentos, total, pagina, totalPaginas,
     loadingTabela, handleBusca, setPagina,
     semanaData, statusCount, statusCountVenda, loadingStats,
-    criarAgendamento, loadingCriar, erroCriar, sucessoCriar, agendamentoCriado, resetarCriacao,
     agendamentoSelecionado, modoModal,
     abrirVisualizar, abrirEditar, fecharModal,
     showResultadoVenda, agendamentoParaResultado, loadingResultado,
@@ -47,13 +49,6 @@ export default function Appointments() {
     const t = setTimeout(() => setVisible(true), 100);
     return () => clearTimeout(t);
   }, []);
-
-  useEffect(() => {
-    if (sucessoCriar) {
-      setAbrirModal(false);
-      resetarCriacao();
-    }
-  }, [sucessoCriar, resetarCriacao]);
 
   const onChangeBusca = useCallback((e) => {
     const val = e.target.value;
@@ -155,8 +150,7 @@ export default function Appointments() {
             badge={{ text: "Sistema Ativo", type: "success" }} actionLabel="Novo Agendamento" actionIcon={Plus}
             onAction={() => { fecharModal(); setAbrirModal(true); }} />
 
-          {(erro || erroCriar) && <div className={styles.errorBanner}><AlertTriangle size={16} /><span>{erro || erroCriar}</span></div>}
-          {sucessoCriar && agendamentoCriado && <div className={styles.successBanner}>✅ Agendamento {agendamentoCriado.codigo} criado com sucesso!</div>}
+          {erro && <div className={styles.errorBanner}><AlertTriangle size={16} /><span>{erro}</span></div>}
 
           <AppointmentsWeekStatus semanaData={semanaData} statusCount={statusCount} statusCountVenda={statusCountVenda} loading={loadingStats} />
 

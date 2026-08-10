@@ -38,6 +38,8 @@ export default function NewAppointment({
   const [confirmed, setConfirmed] = useState(false);
   const [confirmedCompanions, setConfirmedCompanions] = useState(false);
   const [currentCompanion, setCurrentCompanion] = useState(0);
+  const [companionCpfErrors, setCompanionCpfErrors] = useState({});
+  const [verificandoCpfAcompanhante, setVerificandoCpfAcompanhante] = useState(false);
   const [form, setForm] = useState({
     codigo: "",
     cliente_id: "",
@@ -142,9 +144,21 @@ export default function NewAppointment({
     erroCPF === "" &&
     !verificandoCPF;
 
+  // Verifica se o CPF já existe na lista de acompanhantes
+  const verificarCpfDuplicadoNaLista = useCallback((cpf, indexIgnorar) => {
+    const cpfLimpo = cpf?.replace(/\D/g, '') || '';
+    if (cpfLimpo.length !== 11) return false;
+    
+    return companions.some((person, index) => {
+      if (index === indexIgnorar) return false;
+      const personCpf = person.cpf?.replace(/\D/g, '') || '';
+      return personCpf === cpfLimpo;
+    });
+  }, [companions]);
+
   const companionsValid =
     companions.length === 0 ||
-    companions.every((person) => {
+    companions.every((person, index) => {
       const idadeDep = Number(person.idade);
       const depMenor6Anos = idadeDep > 0 && idadeDep < 6;
       const nomeValido = person.nome.trim().length >= 3;
@@ -152,7 +166,11 @@ export default function NewAppointment({
       const cpfValido = depMenor6Anos
         ? true
         : person.cpf.replace(/\D/g, "").length === 11;
-      return nomeValido && idadeDepValida && cpfValido;
+      
+      // Verifica se o CPF não está duplicado na lista
+      const cpfDuplicado = !depMenor6Anos && verificarCpfDuplicadoNaLista(person.cpf, index);
+      
+      return nomeValido && idadeDepValida && cpfValido && !cpfDuplicado;
     });
 
   const handleChange = useCallback((e) => {
@@ -191,18 +209,102 @@ export default function NewAppointment({
     if (currentCompanion >= novaQuantidade) {
       setCurrentCompanion(Math.max(0, novaQuantidade - 1));
     }
+    // Limpa erros ao mudar quantidade
+    setCompanionCpfErrors({});
   }, [companions, currentCompanion]);
+
+  // ✅ Função para validar CPF do acompanhante ao sair do campo (onBlur)
+  const validarCpfAcompanhante = useCallback(async (index) => {
+    const person = companions[index];
+    if (!person) return;
+    
+    const rawCpf = person.cpf?.replace(/\D/g, '') || '';
+    const idadeDep = Number(person.idade || 0);
+    const isMenor6 = idadeDep > 0 && idadeDep < 6;
+    
+    // Se for menor de 6 anos, não precisa de CPF
+    if (isMenor6) {
+      setCompanionCpfErrors(prev => ({ ...prev, [index]: null }));
+      return;
+    }
+    
+    // Se o campo estiver vazio
+    if (!rawCpf) {
+      setCompanionCpfErrors(prev => ({ 
+        ...prev, 
+        [index]: 'CPF é obrigatório para maiores de 6 anos' 
+      }));
+      return;
+    }
+    
+    // Se não tem 11 dígitos
+    if (rawCpf.length !== 11) {
+      setCompanionCpfErrors(prev => ({ 
+        ...prev, 
+        [index]: 'CPF deve ter 11 dígitos' 
+      }));
+      return;
+    }
+    
+    // Valida no banco (validação matemática + duplicidade)
+    setVerificandoCpfAcompanhante(true);
+    const cpfValido = await validarCPF(rawCpf);
+    setVerificandoCpfAcompanhante(false);
+    
+    // Se o CPF for inválido (matematicamente ou duplicado no banco)
+    if (!cpfValido) {
+      setCompanionCpfErrors(prev => ({
+        ...prev,
+        [index]: 'CPF inválido ou já cadastrado no sistema'
+      }));
+      return;
+    }
+    
+    // Verifica duplicidade na lista de acompanhantes
+    const duplicado = verificarCpfDuplicadoNaLista(person.cpf, index);
+    if (duplicado) {
+      setCompanionCpfErrors(prev => ({
+        ...prev,
+        [index]: 'CPF já cadastrado na lista de acompanhantes'
+      }));
+      return;
+    }
+    
+    // ✅ CPF válido - limpa o erro
+    setCompanionCpfErrors(prev => ({
+      ...prev,
+      [index]: null
+    }));
+  }, [companions, validarCPF, verificarCpfDuplicadoNaLista]);
 
   const handleCompanionChange = useCallback((field, value) => {
     const list = [...companions];
-    if (field === "nome") value = value.replace(/[^A-Za-zÀ-ÿ\s]/g, "");
-    if (field === "idade") value = value.replace(/\D/g, "").slice(0, 3);
+    
+    if (field === "nome") {
+      value = value.replace(/[^A-Za-zÀ-ÿ\s]/g, "");
+    }
+    
+    if (field === "idade") {
+      value = value.replace(/\D/g, "").slice(0, 3);
+    }
+    
     if (field === "cpf") {
-      value = value.replace(/\D/g, "").slice(0, 11);
-      value = value.replace(/^(\d{3})(\d)/, "$1.$2")
+      // Pega só os números
+      const rawCpf = value.replace(/\D/g, "").slice(0, 11);
+      
+      // Aplica máscara
+      value = rawCpf.replace(/^(\d{3})(\d)/, "$1.$2")
         .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
         .replace(/\.(\d{3})(\d)/, ".$1-$2");
+      
+      // Limpa o erro enquanto digita (só formata, não valida)
+      setCompanionCpfErrors(prev => ({
+        ...prev,
+        [currentCompanion]: null
+      }));
     }
+    
+    // Atualiza o campo
     list[currentCompanion][field] = value;
     setCompanions(list);
   }, [companions, currentCompanion]);
@@ -237,7 +339,6 @@ export default function NewAppointment({
         idade: Number(c.idade) || 0,
         cpf: Number(c.idade) < 6 ? null : (c.cpf || null),
       })),
-      // 👇 Sempre enviar dados do cliente
       cliente: {
         nome: form.cliente,
         cpf: form.cpf,
@@ -465,11 +566,47 @@ export default function NewAppointment({
               {companions.length > 0 && (
                 <div className={styles.cardPerson}>
                   <h3>Acompanhante {currentCompanion + 1} de {companions.length}</h3>
-                  <div className={styles.field}><label>Nome *</label><input type="text" value={companions[currentCompanion]?.nome || ""} onChange={(e) => handleCompanionChange("nome", e.target.value)} placeholder="Nome completo" /></div>
-                  <div className={styles.field}><label>Idade *</label><input type="text" value={companions[currentCompanion]?.idade || ""} onChange={(e) => handleCompanionChange("idade", e.target.value)} placeholder="Ex: 10" maxLength={3} /></div>
+                  <div className={styles.field}>
+                    <label>Nome *</label>
+                    <input 
+                      type="text" 
+                      value={companions[currentCompanion]?.nome || ""} 
+                      onChange={(e) => handleCompanionChange("nome", e.target.value)} 
+                      placeholder="Nome completo" 
+                    />
+                  </div>
+                  <div className={styles.field}>
+                    <label>Idade *</label>
+                    <input 
+                      type="text" 
+                      value={companions[currentCompanion]?.idade || ""} 
+                      onChange={(e) => handleCompanionChange("idade", e.target.value)} 
+                      placeholder="Ex: 10" 
+                      maxLength={3} 
+                    />
+                  </div>
                   <div className={styles.field}>
                     <label>CPF {Number(companions[currentCompanion]?.idade) >= 6 ? "*" : "(opcional)"}</label>
-                    <input type="text" value={companions[currentCompanion]?.cpf || ""} onChange={(e) => handleCompanionChange("cpf", e.target.value)} placeholder={Number(companions[currentCompanion]?.idade) < 6 ? "Opcional para menores de 6 anos" : "000.000.000-00"} maxLength={14} required={Number(companions[currentCompanion]?.idade) >= 6} />
+                    <input 
+                      type="text" 
+                      value={companions[currentCompanion]?.cpf || ""} 
+                      onChange={(e) => handleCompanionChange("cpf", e.target.value)}
+                      onBlur={() => validarCpfAcompanhante(currentCompanion)}
+                      placeholder={Number(companions[currentCompanion]?.idade) < 6 ? "Opcional para menores de 6 anos" : "000.000.000-00"} 
+                      maxLength={14} 
+                      required={Number(companions[currentCompanion]?.idade) >= 6}
+                      className={companionCpfErrors[currentCompanion] ? styles.inputError : ''}
+                    />
+                    {verificandoCpfAcompanhante && (
+                      <small style={{ color: '#6B7280', fontSize: '0.75rem', display: 'block', marginTop: '4px' }}>
+                        ⏳ Verificando CPF...
+                      </small>
+                    )}
+                    {companionCpfErrors[currentCompanion] && !verificandoCpfAcompanhante && (
+                      <small style={{ color: '#DC2626', fontSize: '0.75rem', display: 'block', marginTop: '4px' }}>
+                        ⚠️ {companionCpfErrors[currentCompanion]}
+                      </small>
+                    )}
                   </div>
                   <div className={styles.navigationButtons}>
                     <button type="button" className={styles.navButton} disabled={currentCompanion === 0} onClick={() => setCurrentCompanion((prev) => prev - 1)}>Anterior</button>

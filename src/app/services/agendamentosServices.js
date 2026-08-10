@@ -180,32 +180,85 @@ export async function taxaDeConversao({ inicio, fim } = {}) {
 
 // ============ CRUD ============
 
-export async function listarAgendamentos({ pagina = 1, limite = 10, busca = '', status = null, ordenarPor = 'data_criacao', ordem = 'asc' } = {}) {
+// src/app/services/agendamentosServices.js
+
+export async function listarAgendamentos({ 
+  pagina = 1, 
+  limite = 10, 
+  busca = '', 
+  status = null, 
+  ordenarPor = 'data_criacao', 
+  ordem = 'asc',
+  dataInicio = null,
+  dataFim = null,
+  periodoMeses = 3,
+  campoData = 'data_visita'
+} = {}) {
   const inicio = (pagina - 1) * limite;
   const fim = inicio + limite - 1;
   
   let query = supabase
     .from('agendamentos')
-    .select(`*, cliente:cliente_id (nome, cpf, telefone, email, idade, origem), dependentes:agendamento_dependentes (nome, idade, cpf)`, { count: 'exact' });
+    .select(`
+      *,
+      cliente:cliente_id (id, nome, cpf, telefone, email, idade, origem),
+      dependentes:agendamento_dependentes (id, nome, idade, cpf)
+    `, { count: 'exact' });
 
-  if (busca) {
+  // ============================================================
+  // 🔥 FILTRO POR PERÍODO
+  // ============================================================
+  if (dataInicio && dataFim) {
+    // Usa as datas passadas
+    console.log(`📅 Filtrando por período: ${dataInicio} até ${dataFim}`);
+    query = query.gte(campoData, dataInicio).lte(campoData, dataFim);
+  } else {
+    // Usa o período padrão (3 meses)
+    const dataAtual = new Date();
+    const dataInicioPadrao = new Date();
+    dataInicioPadrao.setMonth(dataAtual.getMonth() - periodoMeses);
+    
+    const dataInicioStr = dataInicioPadrao.toISOString().split('T')[0];
+    const dataFimStr = dataAtual.toISOString().split('T')[0];
+    
+    console.log(`📅 Filtrando últimos ${periodoMeses} meses: ${dataInicioStr} até ${dataFimStr}`);
+    query = query.gte(campoData, dataInicioStr).lte(campoData, dataFimStr);
+  }
+
+  // ============================================================
+  // 🔥 BUSCA
+  // ============================================================
+  if (busca && busca.trim() !== '') {
+    const buscaLimpa = busca.trim();
     query = query.or(
-      `cliente_id.in.(SELECT id FROM clientes WHERE nome.ilike.%${busca}%),` +
-      `codigo.in.(SELECT agendamento_id FROM agendamento_dependentes WHERE nome.ilike.%${busca}%)`
+      `codigo.ilike.%${buscaLimpa}%,` +
+      `cliente_id.in.(SELECT id FROM clientes WHERE nome.ilike.%${buscaLimpa}%),` +
+      `cliente_id.in.(SELECT id FROM clientes WHERE cpf.ilike.%${buscaLimpa}%)`
     );
   }
 
+  // ============================================================
+  // 🔥 STATUS
+  // ============================================================
   if (status) {
-    if (Array.isArray(status)) {
+    if (Array.isArray(status) && status.length > 0) {
       query = query.in('status', status);
-    } else {
+    } else if (typeof status === 'string' && status.trim() !== '') {
       query = query.eq('status', status);
     }
   }
 
-  const ascending = ordem === 'asc';
-  query = query.order(ordenarPor, { ascending });
+  // ============================================================
+  // 🔥 ORDENAÇÃO
+  // ============================================================
+  const colunasPermitidas = ['data_criacao', 'data_visita', 'status', 'codigo', 'quantidade_pessoas'];
+  const ordenarPorValido = colunasPermitidas.includes(ordenarPor) ? ordenarPor : 'data_criacao';
+  const ordemValida = ordem === 'desc' ? 'desc' : 'asc';
+  query = query.order(ordenarPorValido, { ascending: ordemValida === 'asc' });
 
+  // ============================================================
+  // 🔥 EXECUTA
+  // ============================================================
   const { data, count, error } = await query.range(inicio, fim);
   
   if (error) throw error;
@@ -214,8 +267,62 @@ export async function listarAgendamentos({ pagina = 1, limite = 10, busca = '', 
     agendamentos: data || [],
     total: count || 0,
     pagina,
-    totalPaginas: Math.ceil((count || 0) / limite)
+    totalPaginas: Math.ceil((count || 0) / limite),
+    filtroPeriodo: {
+      dataInicio: dataInicio || new Date(new Date().setMonth(new Date().getMonth() - periodoMeses)).toISOString().split('T')[0],
+      dataFim: dataFim || new Date().toISOString().split('T')[0],
+      periodoMeses: periodoMeses,
+      campoData: campoData
+    }
   };
+}
+
+
+export async function buscarDatasComAgendamentos({ 
+  dataInicio = null, 
+  dataFim = null,
+  periodoMeses = 3,
+  campoData = 'data_visita'
+} = {}) {
+  try {
+    let query = supabase
+      .from('agendamentos')
+      .select(campoData)
+      .order(campoData, { ascending: true });
+
+    // Filtro por período
+    if (dataInicio && dataFim) {
+      query = query.gte(campoData, dataInicio).lte(campoData, dataFim);
+    } else {
+      const dataAtual = new Date();
+      const dataInicioPadrao = new Date();
+      dataInicioPadrao.setMonth(dataAtual.getMonth() - periodoMeses);
+      
+      const dataInicioStr = dataInicioPadrao.toISOString().split('T')[0];
+      const dataFimStr = dataAtual.toISOString().split('T')[0];
+      
+      query = query.gte(campoData, dataInicioStr).lte(campoData, dataFimStr);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    // Remove duplicatas e formata
+    const datasUnicas = [...new Set(data.map(item => item[campoData]))];
+    
+    return datasUnicas.map(dataStr => ({
+      value: dataStr,
+      label: new Date(dataStr + 'T00:00:00').toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      })
+    }));
+  } catch (error) {
+    console.error('Erro ao buscar datas com agendamentos:', error);
+    return [];
+  }
 }
 
 export async function buscarAgendamentoPorCodigo(codigo) {
