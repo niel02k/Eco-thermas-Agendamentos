@@ -1,51 +1,71 @@
 // src/app/hooks/agendamentos/index.js
 "use client";
 
-import { useCallback, useEffect } from 'react';
-import { useAgendamentosList } from './useAgendamentosList';
-import { useAgendamentosStats } from './useAgendamentosStats';
-import { useAgendamentosForm } from './useAgendamentosForm';
-import { useAgendamentoDetalhe } from './useAgendamentoDetalhe';
-import { useAgendamentosActions } from './useAgendamentosActions';
-
-const DIAS_SEMANA = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+import { useCallback, useEffect, useState } from "react";
+import { useAgendamentosList } from "./useAgendamentosList";
+import { useAgendamentosStats } from "./useAgendamentosStats";
+import { useAgendamentosForm } from "./useAgendamentosForm";
+import { useAgendamentoDetalhe } from "./useAgendamentoDetalhe";
+import { useAgendamentosActions } from "./useAgendamentosActions";
 
 export function useAgendamentos() {
-  // ── Listagem ──────────────────────────────────────────────
+  const [dataFiltro, setDataFiltro] = useState(null);
+
+  // Listagem
   const listagem = useAgendamentosList();
-  
-  // ── Stats ─────────────────────────────────────────────────
+
+  // Stats
   const stats = useAgendamentosStats();
-  
-  // ── Callback executado após qualquer ação ─────────────────
+
+  // Carrega a lista aplicando o filtro de data
+  const carregarLista = useCallback(
+    async (pagina, busca) => {
+      await listagem.carregar(pagina, busca, dataFiltro);
+    },
+    [listagem.carregar, dataFiltro]
+  );
+
+  // Callback executado após qualquer ação
   const onActionComplete = useCallback(async () => {
     await Promise.all([
-      listagem.carregar(listagem.pagina, listagem.busca),
+      carregarLista(listagem.pagina, listagem.busca),
       stats.carregar(),
     ]);
-  }, [listagem.carregar, listagem.pagina, listagem.busca, stats.carregar]);
-  
-  // ── Formulário (Criar/Editar) ────────────────────────────
+  }, [
+    carregarLista,
+    listagem.pagina,
+    listagem.busca,
+    stats.carregar,
+  ]);
+
+  // Formulário
   const form = useAgendamentosForm(onActionComplete);
-  
-  // ── Detalhe ───────────────────────────────────────────────
+
+  // Detalhe
   const detalhe = useAgendamentoDetalhe();
-  
-  // ── Ações (Cancelar, Excluir, Resultado Venda) ────────────
+
+  // Ações
   const actions = useAgendamentosActions(onActionComplete);
 
-  // ── Efeitos iniciais ──────────────────────────────────────
+  // Carrega estatísticas uma vez
   useEffect(() => {
-    listagem.carregar(1, '');
     stats.carregar();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [stats.carregar]);
 
-  // Recarregar lista quando mudar página ou busca
+  // Carrega a lista ao iniciar e quando mudar página, busca ou filtro
   useEffect(() => {
-    listagem.carregar(listagem.pagina, listagem.busca);
-  }, [listagem.pagina, listagem.busca]); // eslint-disable-line react-hooks/exhaustive-deps
+    carregarLista(listagem.pagina, listagem.busca);
+  }, [
+    carregarLista,
+    listagem.pagina,
+    listagem.busca,
+  ]);
 
-  // ── Retorno compatível com a página atual ─────────────────
+  const handleFiltroDataChange = useCallback((data) => {
+    setDataFiltro(data);
+    listagem.setPagina(1);
+  }, [listagem.setPagina]);
+
   return {
     // Tabela
     agendamentos: listagem.agendamentos,
@@ -57,10 +77,15 @@ export function useAgendamentos() {
     handleBusca: listagem.handleBusca,
     setPagina: listagem.setPagina,
 
+    // Filtro
+    dataFiltro,
+    handleFiltroDataChange,
+
     // Stats
     totalHoje: stats.totalHoje,
     semanaData: stats.semanaData,
     statusCount: stats.statusCount,
+    statusCountVenda: stats.statusCountVenda,
     loadingStats: stats.loading,
 
     // Criar/Editar
@@ -94,9 +119,14 @@ export function useAgendamentos() {
     excluir: actions.excluir,
 
     // Erro
-    erro: listagem.erro || stats.erro || form.erro || detalhe.erro || actions.erro,
+    erro:
+      listagem.erro ||
+      stats.erro ||
+      form.erro ||
+      detalhe.erro ||
+      actions.erro,
 
     // Utilidades
-    recarregar: () => onActionComplete(),
+    recarregar: onActionComplete,
   };
 }

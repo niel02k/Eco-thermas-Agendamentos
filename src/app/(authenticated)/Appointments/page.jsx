@@ -23,7 +23,6 @@ export default function AppointmentsPage() {
   const [abrirModal, setAbrirModal] = useState(false);
   const [confirm, setConfirm] = useState(null);
   const [inputBusca, setInputBusca] = useState("");
-  const [dataFiltro, setDataFiltro] = useState(null);
   const debounceRef = useRef(null);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -40,7 +39,7 @@ export default function AppointmentsPage() {
     abrirResultadoVenda, fecharResultadoVenda,
     confirmarResultadoVenda, confirmarRealizado, confirmarAgendamento, marcarComoFaltou,
     cancelarAgendamento, excluir,
-    erro, recarregar,
+    erro, recarregar,handleFiltroDataChange,
   } = useAgendamentos(); 
 
   useEffect(() => {
@@ -64,10 +63,6 @@ export default function AppointmentsPage() {
     setShowModalRealizado(true);
   }, []);
 
-  const handleFiltroDataChange = useCallback((data) => {
-  setDataFiltro(data);
-  setPagina(1);
-}, [setPagina]);
 
   const handleConfirmarRealizado = useCallback(async (codigo) => {
     await confirmarRealizado(codigo);

@@ -14,7 +14,11 @@ export function useAgendamentosList() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(null);
 
-  const carregar = useCallback(async (pag = pagina, termoBusca = busca) => {
+const carregar = useCallback(async (
+  pag = pagina,
+  termoBusca = busca,
+  filtroData = null
+) => {
   setLoading(true);
   setErro(null);
 
@@ -23,21 +27,19 @@ export function useAgendamentosList() {
       pagina: pag,
       limite: LIMITE,
       busca: termoBusca,
+      dataInicio: filtroData,
+      dataFim: filtroData,
     });
 
     setAgendamentos(resultado.agendamentos ?? []);
     setTotal(resultado.total ?? 0);
   } catch (e) {
-    setErro('Erro ao carregar agendamentos.');
+    setErro("Erro ao carregar agendamentos.");
     console.error(e);
   } finally {
     setLoading(false);
   }
 }, [pagina, busca]);
-
-useEffect(() => {
-  carregar(pagina, busca);
-}, [pagina, busca, carregar]);
 
   const handleBusca = useCallback((termo) => {
     setBusca(termo);
