@@ -29,9 +29,6 @@ export default function AppointmentsPage() {
   const [showModalRealizado, setShowModalRealizado] = useState(false);
   const [agendamentoParaRealizar, setAgendamentoParaRealizar] = useState(null);
 
-  // ── Nota: a criação/edição em si (loading/erro/sucesso) é
-  // gerenciada internamente pelo NewAppointment via useAgendamentosForm.
-  // Este hook aqui cuida de listagem, stats, detalhe e ações pontuais.
   const {
     agendamentos, total, pagina, totalPaginas,
     loadingTabela, handleBusca, setPagina,
@@ -158,9 +155,18 @@ export default function AppointmentsPage() {
             <MobileList tipo="agendamento" dados={agendamentos} loading={loadingTabela} total={total} pagina={pagina} totalPaginas={totalPaginas}
               onPageChange={setPagina} onCardClick={(ag) => abrirVisualizar(ag.codigo)} emptyMessage="Nenhum agendamento encontrado" />
           ) : (
-            <DataTable tipo="agendamento" dados={agendamentos} loading={loadingTabela} total={total} pagina={pagina} totalPaginas={totalPaginas}
-              busca={inputBusca} onBuscaChange={onChangeBusca} onPageChange={setPagina} onRowClick={(ag) => abrirVisualizar(ag.codigo)}
-              showExport={true} showSearch={true} />
+            <DataTable tipo="agendamento" 
+            dados={agendamentos} 
+            loading={loadingTabela} 
+            total={total}
+            pagina={pagina} 
+            totalPaginas={totalPaginas}
+             busca={inputBusca} 
+              onBuscaChange={onChangeBusca} 
+              onPageChange={setPagina}
+               onRowClick={(ag) => abrirVisualizar(ag.codigo)}
+              showExport={true} 
+              showSearch={true} />
           )}
         </main>
       </div>
