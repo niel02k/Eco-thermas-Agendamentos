@@ -133,19 +133,45 @@
   inset: 0;
   z-index: 1000;
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-  padding: 88px 32px 32px;
-  background: rgba(15, 23, 42, 0.32);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .filterModal {
-  width: 340px;
-  padding: 22px;
+  width: 400px;
+  max-width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
   border: 1px solid #E2E8F0;
   border-radius: 14px;
   background: #FFFFFF;
-  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+  animation: slideUp 0.25s ease;
 }
 
 .filterModalHeader {
@@ -160,6 +186,7 @@
   margin: 0 0 5px;
   color: #0F172A;
   font-size: 17px;
+  font-weight: 600;
 }
 
 .filterModalHeader span {
@@ -178,6 +205,8 @@
   background: transparent;
   color: #64748B;
   cursor: pointer;
+  transition: 0.2s;
+  flex-shrink: 0;
 }
 
 .filterCloseButton:hover {
@@ -202,6 +231,7 @@
   color: #0F172A;
   font-size: 14px;
   outline: none;
+  transition: 0.2s;
 }
 
 .filterDateInput:focus {
@@ -219,11 +249,12 @@
 .filterClearButton,
 .filterApplyButton {
   height: 38px;
-  padding: 0 14px;
+  padding: 0 16px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  transition: 0.2s;
 }
 
 .filterClearButton {
@@ -232,10 +263,20 @@
   color: #475569;
 }
 
+.filterClearButton:hover {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+}
+
 .filterApplyButton {
   border: 1px solid #EA580C;
   background: #F97316;
   color: #FFFFFF;
+}
+
+.filterApplyButton:hover {
+  background: #EA580C;
+  border-color: #C2410C;
 }
 
 .filterApplyButton:disabled {
@@ -243,15 +284,85 @@
   cursor: not-allowed;
 }
 
+.filterApplyButton:disabled:hover {
+  background: #F97316;
+}
+
+/* ============================================================ */
+/* RESPOSIVO */
+/* ============================================================ */
 @media (max-width: 640px) {
   .filterOverlay {
-    align-items: flex-end;
-    justify-content: center;
-    padding: 20px;
+    align-items: center;
+    padding: 16px;
   }
 
   .filterModal {
     width: 100%;
+    max-width: 100%;
+    padding: 20px;
+    border-radius: 12px;
+    max-height: 85vh;
+  }
+}/* src/app/Components/Shared/Shared.module.css */
+
+.filterRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filterField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filterSelect {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  color: #0F172A;
+  font-size: 14px;
+  background: #FFFFFF;
+  outline: none;
+  cursor: pointer;
+  transition: 0.2s;
+  appearance: auto;
+}
+
+.filterSelect:focus {
+  border-color: #F97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
+}
+
+.filterSelect option {
+  padding: 8px;
+}
+
+.filterLabel {
+  display: block;
+  margin-bottom: 4px;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Responsivo */
+@media (max-width: 640px) {
+  .filterRow {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 400px) {
+  .filterRow {
+    grid-template-columns: 1fr;
   }
 }
 
