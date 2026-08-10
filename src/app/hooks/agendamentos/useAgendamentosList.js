@@ -14,24 +14,30 @@ export function useAgendamentosList() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(null);
 
-  const carregar = useCallback(async (pag, termoBusca) => {
-    setLoading(true);
-    setErro(null);
-    try {
-      const resultado = await listarAgendamentos({
-        pagina: pag || pagina,
-        limite: LIMITE,
-        busca: termoBusca !== undefined ? termoBusca : busca,
-      });
-      setAgendamentos(resultado.agendamentos ?? []);
-      setTotal(resultado.total ?? 0);
-    } catch (e) {
-      setErro('Erro ao carregar agendamentos.');
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  }, [pagina, busca]);
+  const carregar = useCallback(async (pag = pagina, termoBusca = busca) => {
+  setLoading(true);
+  setErro(null);
+
+  try {
+    const resultado = await listarAgendamentos({
+      pagina: pag,
+      limite: LIMITE,
+      busca: termoBusca,
+    });
+
+    setAgendamentos(resultado.agendamentos ?? []);
+    setTotal(resultado.total ?? 0);
+  } catch (e) {
+    setErro('Erro ao carregar agendamentos.');
+    console.error(e);
+  } finally {
+    setLoading(false);
+  }
+}, [pagina, busca]);
+
+useEffect(() => {
+  carregar(pagina, busca);
+}, [pagina, busca, carregar]);
 
   const handleBusca = useCallback((termo) => {
     setBusca(termo);

@@ -106,6 +106,155 @@
     max-width: 100%;  /* Já tem, mas garante que respeita */
   display: block;   /* 👈 Adicionar para o max-width funcionar */
 }
+.filterButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  background: #FFFFFF;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.filterButton:hover {
+  border-color: #F97316;
+  color: #EA580C;
+  background: #FFF7ED;
+}
+
+.filterOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 88px 32px 32px;
+  background: rgba(15, 23, 42, 0.32);
+}
+
+.filterModal {
+  width: 340px;
+  padding: 22px;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  background: #FFFFFF;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
+}
+
+.filterModalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.filterModalHeader h4 {
+  margin: 0 0 5px;
+  color: #0F172A;
+  font-size: 17px;
+}
+
+.filterModalHeader span {
+  color: #64748B;
+  font-size: 13px;
+}
+
+.filterCloseButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #64748B;
+  cursor: pointer;
+}
+
+.filterCloseButton:hover {
+  background: #F1F5F9;
+  color: #0F172A;
+}
+
+.filterLabel {
+  display: block;
+  margin-bottom: 8px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.filterDateInput {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  color: #0F172A;
+  font-size: 14px;
+  outline: none;
+}
+
+.filterDateInput:focus {
+  border-color: #F97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
+}
+
+.filterModalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.filterClearButton,
+.filterApplyButton {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filterClearButton {
+  border: 1px solid #E2E8F0;
+  background: #FFFFFF;
+  color: #475569;
+}
+
+.filterApplyButton {
+  border: 1px solid #EA580C;
+  background: #F97316;
+  color: #FFFFFF;
+}
+
+.filterApplyButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .filterOverlay {
+    align-items: flex-end;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .filterModal {
+    width: 100%;
+  }
+}
+
 .clienteSub { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
 .colData { display: flex; margin-left: 10px; flex-direction: column; gap: 0.1rem; font-size: 0.85rem; color: var(--text-primary); font-weight: 500; }
 .colPessoas { font-weight: 600; margin-left: 1vw; color: var(--text-primary); }

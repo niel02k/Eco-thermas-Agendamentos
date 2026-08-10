@@ -5,7 +5,7 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { Plus } from "lucide-react";
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
 import styles from "./Contracts.module.css";
-import { useContratosPage } from "@/app/hooks/contratos/useContratosPage";
+import { useContratos } from "@/app/hooks/contratos/index.js"
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 
 // Componentes
@@ -32,7 +32,7 @@ export default function Contracts() {
     setShowCriarContrato, setShowEditarContrato, setContratoParaEditar,
     carregarContratos, buscarContrato, handleEditar, handleExcluir,
     handleContratoCriado, handleContratoEditado, recarregarTudo
-  } = useContratosPage();
+  } = useContratos();
 
   const totalPaginas = Math.max(1, Math.ceil(total / 10));
 

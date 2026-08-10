@@ -4,7 +4,7 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Plus, AlertTriangle } from "lucide-react";
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
-import { useAgendamentos } from "@/app/hooks/agendamentos";
+import { useAgendamentos } from "@/app/hooks/agendamentos/index.js";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 import styles from "./Appointments.module.css";
 
@@ -23,6 +23,7 @@ export default function AppointmentsPage() {
   const [abrirModal, setAbrirModal] = useState(false);
   const [confirm, setConfirm] = useState(null);
   const [inputBusca, setInputBusca] = useState("");
+  const [dataFiltro, setDataFiltro] = useState(null);
   const debounceRef = useRef(null);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -62,6 +63,11 @@ export default function AppointmentsPage() {
     setAgendamentoParaRealizar(agendamento);
     setShowModalRealizado(true);
   }, []);
+
+  const handleFiltroDataChange = useCallback((data) => {
+  setDataFiltro(data);
+  setPagina(1);
+}, [setPagina]);
 
   const handleConfirmarRealizado = useCallback(async (codigo) => {
     await confirmarRealizado(codigo);
@@ -155,18 +161,21 @@ export default function AppointmentsPage() {
             <MobileList tipo="agendamento" dados={agendamentos} loading={loadingTabela} total={total} pagina={pagina} totalPaginas={totalPaginas}
               onPageChange={setPagina} onCardClick={(ag) => abrirVisualizar(ag.codigo)} emptyMessage="Nenhum agendamento encontrado" />
           ) : (
-            <DataTable tipo="agendamento" 
-            dados={agendamentos} 
-            loading={loadingTabela} 
-            total={total}
-            pagina={pagina} 
-            totalPaginas={totalPaginas}
-             busca={inputBusca} 
-              onBuscaChange={onChangeBusca} 
-              onPageChange={setPagina}
-               onRowClick={(ag) => abrirVisualizar(ag.codigo)}
-              showExport={true} 
-              showSearch={true} />
+           <DataTable
+  tipo="agendamento"
+  dados={agendamentos}
+  loading={loadingTabela}
+  total={total}
+  pagina={pagina}
+  totalPaginas={totalPaginas}
+  busca={inputBusca}
+  onBuscaChange={onChangeBusca}
+  onPageChange={setPagina}
+  onRowClick={(ag) => abrirVisualizar(ag.codigo)}
+  onFiltroDataChange={handleFiltroDataChange}
+  showExport={true}
+  showSearch={true}
+/>
           )}
         </main>
       </div>

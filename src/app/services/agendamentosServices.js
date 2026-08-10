@@ -205,31 +205,47 @@ export async function listarAgendamentos({
       dependentes:agendamento_dependentes (id, nome, idade, cpf)
     `, { count: 'exact' });
 
-  // ============================================================
-  // 🔥 FILTRO POR PERÍODO
-  // ============================================================
+  // FILTRO POR PERÍODO
   if (dataInicio && dataFim) {
-    // Usa as datas passadas
     console.log(`📅 Filtrando por período: ${dataInicio} até ${dataFim}`);
-    query = query.gte(campoData, dataInicio).lte(campoData, dataFim);
+
+    query = query
+      .gte(campoData, dataInicio)
+      .lte(campoData, dataFim);
   } else {
-    // Usa o período padrão (3 meses)
     const dataAtual = new Date();
-    const dataInicioPadrao = new Date();
-    dataInicioPadrao.setMonth(dataAtual.getMonth() - periodoMeses);
 
-    const dataInicioStr = dataInicioPadrao.toISOString().split('T')[0];
-    const dataFimStr = dataAtual.toISOString().split('T')[0];
+    const dataInicioPadrao = new Date(dataAtual);
+    dataInicioPadrao.setMonth(
+      dataInicioPadrao.getMonth() - periodoMeses
+    );
 
-    console.log(`📅 Filtrando últimos ${periodoMeses} meses: ${dataInicioStr} até ${dataFimStr}`);
-    query = query.gte(campoData, dataInicioStr).lte(campoData, dataFimStr);
+    const dataFimPadrao = new Date(dataAtual);
+    dataFimPadrao.setMonth(
+      dataFimPadrao.getMonth() + periodoMeses
+    );
+
+    const dataInicioStr = dataInicioPadrao
+      .toISOString()
+      .split('T')[0];
+
+    const dataFimStr = dataFimPadrao
+      .toISOString()
+      .split('T')[0];
+
+    console.log(
+      `📅 Filtrando período: ${dataInicioStr} até ${dataFimStr}`
+    );
+
+    query = query
+      .gte(campoData, dataInicioStr)
+      .lte(campoData, dataFimStr);
   }
 
-  // ============================================================
-  // 🔥 BUSCA
-  // ============================================================
+  // BUSCA
   if (busca && busca.trim() !== '') {
     const buscaLimpa = busca.trim();
+
     query = query.or(
       `codigo.ilike.%${buscaLimpa}%,` +
       `cliente_id.in.(SELECT id FROM clientes WHERE nome.ilike.%${buscaLimpa}%),` +
@@ -237,59 +253,74 @@ export async function listarAgendamentos({
     );
   }
 
-  // ============================================================
-  // 🔥 STATUS
-  // ============================================================
+  // STATUS
   if (status) {
     if (Array.isArray(status) && status.length > 0) {
       query = query.in('status', status);
-    } else if (typeof status === 'string' && status.trim() !== '') {
+    } else if (
+      typeof status === 'string' &&
+      status.trim() !== ''
+    ) {
       query = query.eq('status', status);
     }
   }
 
-  // ============================================================
-  // 🔥 ORDENAÇÃO
-  // ============================================================
-  const colunasPermitidas = ['data_criacao', 'data_visita', 'status', 'codigo', 'quantidade_pessoas'];
-  const ordenarPorValido = colunasPermitidas.includes(ordenarPor) ? ordenarPor : 'data_criacao';
-  const ordemValida = ordem === 'desc' ? 'desc' : 'asc';
-  query = query.order(ordenarPorValido, { ascending: ordemValida === 'asc' });
+  // ORDENAÇÃO
+  const colunasPermitidas = [
+    'data_criacao',
+    'data_visita',
+    'status',
+    'codigo',
+    'quantidade_pessoas'
+  ];
 
-  // ============================================================
-  // 🔥 EXECUTA
-  // ============================================================
+  const ordenarPorValido = colunasPermitidas.includes(ordenarPor)
+    ? ordenarPor
+    : 'data_criacao';
+
+  const ordemValida = ordem === 'desc' ? 'desc' : 'asc';
+
+  query = query.order(ordenarPorValido, {
+    ascending: ordemValida === 'asc'
+  });
+
+  // EXECUTA
   const { data, count, error } = await query.range(inicio, fim);
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
+
+  const dataAtual = new Date();
+
+  const dataInicioPadrao = new Date(dataAtual);
+  dataInicioPadrao.setMonth(
+    dataInicioPadrao.getMonth() - periodoMeses
+  );
+
+  const dataFimPadrao = new Date(dataAtual);
+  dataFimPadrao.setMonth(
+    dataFimPadrao.getMonth() + periodoMeses
+  );
 
   return {
     agendamentos: data || [],
     total: count || 0,
     pagina,
     totalPaginas: Math.ceil((count || 0) / limite),
-  filtroPeriodo: {
-  dataInicio:
-    dataInicio ||
-    new Date(
-      new Date().setMonth(new Date().getMonth() - periodoMeses)
-    )
-      .toISOString()
-      .split('T')[0],
-
-  dataFim:
-    dataFim ||
-    new Date(
-      new Date().setMonth(new Date().getMonth() + periodoMeses)
-    )
-      .toISOString()
-      .split('T')[0],
-
-  periodoMeses,
-  campoData
+    filtroPeriodo: {
+      dataInicio:
+        dataInicio ||
+        dataInicioPadrao.toISOString().split('T')[0],
+      dataFim:
+        dataFim ||
+        dataFimPadrao.toISOString().split('T')[0],
+      periodoMeses,
+      campoData
     }
   };
 }
+
 
 
 export async function buscarDatasComAgendamentos({
