@@ -36,29 +36,29 @@ export async function totalClientesAtendidos() {
     .from('agendamentos')
     .select('quantidade_pessoas')
     .eq('resultado_visita', 'REALIZADO');
-    
+
   if (error) throw error;
-  
+
   return data?.reduce((acc, a) => acc + (a.quantidade_pessoas || 1), 0) ?? 0;
 }
 
 export async function agendamentosHoje() {
   const hoje = new Date().toISOString().split('T')[0];
-  
+
   const { count, error } = await supabase
     .from('agendamentos')
     .select('*', { count: 'exact', head: true })
     .eq('data_visita', hoje)
     .in('status', ['PENDENTE', 'CONFIRMADO']);
-    
+
   if (error) throw error;
-  
+
   return count ?? 0;
 }
 export async function agendamentosPorDiaSemana() {
   const hoje = new Date();
   console.log('📅 Hoje:', hoje);
-  
+
   const diaSemana = hoje.getDay();
   const inicioSemana = new Date(hoje);
   inicioSemana.setDate(hoje.getDate() - (diaSemana === 0 ? 6 : diaSemana - 1));
@@ -69,7 +69,7 @@ export async function agendamentosPorDiaSemana() {
 
   const dataInicio = inicioSemana.toISOString().split('T')[0];
   const dataFim = fimSemana.toISOString().split('T')[0];
-  
+
   console.log('📅 Buscando de', dataInicio, 'até', dataFim);
 
   const { data, error } = await supabase
@@ -93,7 +93,7 @@ export async function agendamentosPorDiaSemana() {
     const posicao = idx === 0 ? 6 : idx - 1;
     contagem[posicao] += 1;
   });
-  
+
   console.log('📊 Contagem:', contagem);
   return contagem;
 }
@@ -103,7 +103,7 @@ export async function proximosDiasComAgendamentos(quantidade = 2) {
   hoje.setHours(0, 0, 0, 0);
   const amanha = new Date(hoje);
   amanha.setDate(amanha.getDate() + 1);
-  
+
   const { data, error } = await supabase
     .from('agendamentos')
     .select('data_visita')
@@ -117,14 +117,14 @@ export async function proximosDiasComAgendamentos(quantidade = 2) {
   (data || []).forEach(a => {
     agrupado[a.data_visita] = (agrupado[a.data_visita] || 0) + 1;
   });
-  
+
   return Object.entries(agrupado)
     .slice(0, quantidade)
     .map(([data_visita, total]) => ({
       data_visita,
       total,
-      label: new Date(data_visita + 'T12:00:00').toLocaleDateString('pt-BR', { 
-        weekday: 'short', day: '2-digit', month: '2-digit' 
+      label: new Date(data_visita + 'T12:00:00').toLocaleDateString('pt-BR', {
+        weekday: 'short', day: '2-digit', month: '2-digit'
       })
     }));
 }
@@ -136,7 +136,7 @@ export async function taxaDeConversao({ inicio, fim } = {}) {
       const dataInicio = inicio || new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().split('T')[0];
       const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
       const dataFim = fim || `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(ultimoDiaMes).padStart(2, '0')}`;
-      
+
       const { count: vendasFiltrado } = await supabase
         .from('agendamentos')
         .select('*', { count: 'exact', head: true })
@@ -144,34 +144,34 @@ export async function taxaDeConversao({ inicio, fim } = {}) {
         .eq('resultado_venda', 'VENDA_REALIZADA')
         .gte('data_visita', dataInicio)
         .lte('data_visita', dataFim);
-      
+
       const { count: atendidosFiltrado } = await supabase
         .from('agendamentos')
         .select('*', { count: 'exact', head: true })
         .eq('resultado_visita', 'REALIZADO')
         .gte('data_visita', dataInicio)
         .lte('data_visita', dataFim);
-      
+
       if (atendidosFiltrado > 0) {
         return Number(((vendasFiltrado / atendidosFiltrado) * 100).toFixed(2));
       }
     }
-    
+
     const { count: vendasrealizada } = await supabase
       .from('agendamentos')
       .select('*', { count: 'exact', head: true })
       .eq('resultado_visita', 'REALIZADO')
       .eq('resultado_venda', 'VENDA_REALIZADA');
-    
+
     const { count: atendidos } = await supabase
       .from('agendamentos')
       .select('*', { count: 'exact', head: true })
       .eq('resultado_visita', 'REALIZADO');
-    
-    return atendidos > 0 
-      ? Number(((vendasrealizada / atendidos) * 100).toFixed(2)) 
+
+    return atendidos > 0
+      ? Number(((vendasrealizada / atendidos) * 100).toFixed(2))
       : 0;
-    
+
   } catch (error) {
     console.error('Erro geral na taxaDeConversao:', error);
     return 0;
@@ -182,12 +182,12 @@ export async function taxaDeConversao({ inicio, fim } = {}) {
 
 // src/app/services/agendamentosServices.js
 
-export async function listarAgendamentos({ 
-  pagina = 1, 
-  limite = 10, 
-  busca = '', 
-  status = null, 
-  ordenarPor = 'data_visita', 
+export async function listarAgendamentos({
+  pagina = 1,
+  limite = 10,
+  busca = '',
+  status = null,
+  ordenarPor = 'data_visita',
   ordem = 'desc',
   dataInicio = null,
   dataFim = null,
@@ -196,7 +196,7 @@ export async function listarAgendamentos({
 } = {}) {
   const inicio = (pagina - 1) * limite;
   const fim = inicio + limite - 1;
-  
+
   let query = supabase
     .from('agendamentos')
     .select(`
@@ -217,10 +217,10 @@ export async function listarAgendamentos({
     const dataAtual = new Date();
     const dataInicioPadrao = new Date();
     dataInicioPadrao.setMonth(dataAtual.getMonth() - periodoMeses);
-    
+
     const dataInicioStr = dataInicioPadrao.toISOString().split('T')[0];
     const dataFimStr = dataAtual.toISOString().split('T')[0];
-    
+
     console.log(`📅 Filtrando últimos ${periodoMeses} meses: ${dataInicioStr} até ${dataFimStr}`);
     query = query.gte(campoData, dataInicioStr).lte(campoData, dataFimStr);
   }
@@ -260,26 +260,40 @@ export async function listarAgendamentos({
   // 🔥 EXECUTA
   // ============================================================
   const { data, count, error } = await query.range(inicio, fim);
-  
+
   if (error) throw error;
-  
+
   return {
     agendamentos: data || [],
     total: count || 0,
     pagina,
     totalPaginas: Math.ceil((count || 0) / limite),
-    filtroPeriodo: {
-      dataInicio: dataInicio || new Date(new Date().setMonth(new Date().getMonth() - periodoMeses)).toISOString().split('T')[0],
-      dataFim: dataFim || new Date().toISOString().split('T')[0],
-      periodoMeses: periodoMeses,
-      campoData: campoData
+  filtroPeriodo: {
+  dataInicio:
+    dataInicio ||
+    new Date(
+      new Date().setMonth(new Date().getMonth() - periodoMeses)
+    )
+      .toISOString()
+      .split('T')[0],
+
+  dataFim:
+    dataFim ||
+    new Date(
+      new Date().setMonth(new Date().getMonth() + periodoMeses)
+    )
+      .toISOString()
+      .split('T')[0],
+
+  periodoMeses,
+  campoData
     }
   };
 }
 
 
-export async function buscarDatasComAgendamentos({ 
-  dataInicio = null, 
+export async function buscarDatasComAgendamentos({
+  dataInicio = null,
   dataFim = null,
   periodoMeses = 3,
   campoData = 'data_visita'
@@ -297,10 +311,10 @@ export async function buscarDatasComAgendamentos({
       const dataAtual = new Date();
       const dataInicioPadrao = new Date();
       dataInicioPadrao.setMonth(dataAtual.getMonth() - periodoMeses);
-      
+
       const dataInicioStr = dataInicioPadrao.toISOString().split('T')[0];
       const dataFimStr = dataAtual.toISOString().split('T')[0];
-      
+
       query = query.gte(campoData, dataInicioStr).lte(campoData, dataFimStr);
     }
 
@@ -310,7 +324,7 @@ export async function buscarDatasComAgendamentos({
 
     // Remove duplicatas e formata
     const datasUnicas = [...new Set(data.map(item => item[campoData]))];
-    
+
     return datasUnicas.map(dataStr => ({
       value: dataStr,
       label: new Date(dataStr + 'T00:00:00').toLocaleDateString('pt-BR', {
@@ -331,14 +345,14 @@ export async function buscarAgendamentoPorCodigo(codigo) {
     .select(`*, cliente:cliente_id (*)`)
     .eq('codigo', codigo)
     .single();
-    
+
   if (error) throw error;
-  
+
   const { data: dependentes } = await supabase
     .from('agendamento_dependentes')
     .select('*')
     .eq('agendamento_id', codigo);
-    
+
   return { ...agendamento, dependentes: dependentes || [] };
 }
 
@@ -352,7 +366,7 @@ export async function buscarAgendamentosPorNome(busca) {
     )
     .order('data_visita', { ascending: false })
     .limit(20);
-    
+
   if (error) throw error;
   return data || [];
 }
@@ -367,7 +381,7 @@ export async function criarAgendamento(dados) {
 
   if (dados.cliente?.cpf) {
     const existente = await buscarClientePorCpf(dados.cliente.cpf);
-    
+
     if (existente) {
       cliente_id = existente.id;
       origem = existente.origem || 'OUTRO';
@@ -429,11 +443,11 @@ export async function criarAgendamento(dados) {
 
 export async function atualizarAgendamento(codigo, dados) {
   console.log('🔍 [atualizarAgendamento] Dados recebidos:', JSON.stringify(dados, null, 2));
-  
+
   // Atualizar cliente
   if (dados.cliente && dados.cliente_id) {
     console.log('👤 Atualizando cliente:', dados.cliente_id, dados.cliente);
-    
+
     const { data: clienteData, error: clienteError } = await supabase
       .from('clientes')
       .update({
@@ -445,16 +459,16 @@ export async function atualizarAgendamento(codigo, dados) {
       .select();
 
     console.log('📊 Resultado update cliente:', { data: clienteData, error: clienteError });
-    
+
     if (clienteError) {
       console.error('❌ Erro ao atualizar cliente:', clienteError);
     }
   } else {
-    console.log('⚠️ Não atualizou cliente - faltando:', { 
-      temCliente: !!dados.cliente, 
+    console.log('⚠️ Não atualizou cliente - faltando:', {
+      temCliente: !!dados.cliente,
       temId: !!dados.cliente_id,
       cliente: dados.cliente,
-      cliente_id: dados.cliente_id 
+      cliente_id: dados.cliente_id
     });
   }
 
@@ -485,7 +499,7 @@ export async function atualizarAgendamento(codigo, dados) {
   if (error) throw error;
 
   // Atualizar dependentes...
-  
+
   return data;
 }
 // ============ STATUS / RESULTADO ============
@@ -497,7 +511,7 @@ export async function atualizarResultadoVenda(codigo, resultadoVenda) {
     .eq('codigo', codigo)
     .select()
     .single();
-    
+
   if (error) throw error;
   return data;
 }
@@ -505,14 +519,14 @@ export async function atualizarResultadoVenda(codigo, resultadoVenda) {
 export async function marcarComoRealizado(codigo) {
   const { data, error } = await supabase
     .from('agendamentos')
-    .update({ 
+    .update({
       resultado_visita: 'REALIZADO',
       resultado_venda: 'PENDENTE'
     })
     .eq('codigo', codigo)
     .select()
     .single();
-    
+
   if (error) throw error;
   return data;
 }
@@ -524,7 +538,7 @@ export async function marcarComoFaltou(codigo) {
     .eq('codigo', codigo)
     .select()
     .single();
-    
+
   if (error) throw error;
   return data;
 }
@@ -536,7 +550,7 @@ export async function cancelarAgendamento(codigo) {
     .eq('codigo', codigo)
     .select()
     .single();
-    
+
   if (error) throw error;
   return data;
 }
@@ -548,7 +562,7 @@ export async function excluirAgendamento(codigo) {
     .from('agendamentos')
     .delete()
     .eq('codigo', codigo);
-    
+
   if (error) throw error;
   return true;
 }
@@ -561,7 +575,7 @@ export async function excluirAgendamento(codigo) {
  */
 export async function verificarCPFDuplicado(cpf, codigoIgnorar = null) {
   const cpfLimpo = cpf.replace(/\D/g, '');
-  
+
   // Buscar cliente pelo CPF
   const { data: clientes } = await supabase
     .from('clientes')
@@ -573,7 +587,7 @@ export async function verificarCPFDuplicado(cpf, codigoIgnorar = null) {
   }
 
   const clienteIds = clientes.map(c => c.id);
-  
+
   let query = supabase
     .from('agendamentos')
     .select('codigo', { count: 'exact' })
@@ -585,8 +599,8 @@ export async function verificarCPFDuplicado(cpf, codigoIgnorar = null) {
   }
 
   const { count, error } = await query;
-  
+
   if (error) throw error;
-  
+
   return { duplicado: count > 0, count };
 }

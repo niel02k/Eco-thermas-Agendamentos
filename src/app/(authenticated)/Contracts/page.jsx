@@ -9,13 +9,13 @@ import { useContratosPage } from "@/app/hooks/contratos/useContratosPage";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 
 // Componentes
-import ContractsFilters from "@/app/Components/ModalContrato/ContractsFilters";
-import ContractsKPIs from "@/app/Components/ModalContrato/ContractsKPIs";
-import ContractsInsights from "@/app/Components/ModalContrato/ContractsInsights";
+import ContractsFilters from "@/app/Components/ModalContrato/ContractsFilters.jsx";
+import ContractsKPIs from "@/app/Components/ModalContrato/ContractsKPIs.jsx";
+import ContractsInsights from "@/app/Components/ModalContrato/ContractsInsights.jsx";
 import FormContrato from "@/app/Components/ModalContrato/Form/formcontrato.jsx";
-import VisualizarModal from "@/app/Components/Shared/VisualizarModal";
-import MobileList from "@/app/Components/Shared/MobileList";
-import DataTable from "@/app/Components/Shared/DataTable";
+import VisualizarModal from "@/app/Components/Shared/VisualizarModal.jsx";
+import MobileList from "@/app/Components/Shared/MobileList.jsx";
+import DataTable from "@/app/Components/Shared/DataTable.jsx";
 import ReceitaMensalChart from "@/app/Components/ReceitaMensal/ReceitaMensalChart.jsx";
 
 export default function Contracts() {

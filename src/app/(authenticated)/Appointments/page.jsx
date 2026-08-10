@@ -9,14 +9,14 @@ import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 import styles from "./Appointments.module.css";
 
 // Componentes
-import AppointmentsWeekStatus from "@/app/Components/ModalAgendamento/AppointmentsWeekStatus";
-import VisualizarModal from "@/app/Components/Shared/VisualizarModal";
-import ConfirmModal from "@/app/Components/ModalAgendamento/ConfirmModal";
-import ModalRealizado from "@/app/Components/ModalAgendamento/ModalRealizado";
+import AppointmentsWeekStatus from "@/app/Components/ModalAgendamento/AppointmentsWeekStatus.jsx";
+import VisualizarModal from "@/app/Components/Shared/VisualizarModal.jsx";
+import ConfirmModal from "@/app/Components/ModalAgendamento/ConfirmModal.jsx";
+import ModalRealizado from "@/app/Components/ModalAgendamento/ModalRealizado.jsx";
 import NewAppointment from "@/app/Components/modal/Newappointment.jsx";
 import ResultCard from "@/app/Components/Cards/ResultCard/ResultCard.jsx";
-import MobileList from "@/app/Components/Shared/MobileList";
-import DataTable from "@/app/Components/Shared/DataTable";
+import MobileList from "@/app/Components/Shared/MobileList.jsx";
+import DataTable from "@/app/Components/Shared/DataTable.jsx";
 
 export default function AppointmentsPage() {
   const [visible, setVisible] = useState(false);
@@ -40,7 +40,7 @@ export default function AppointmentsPage() {
     confirmarResultadoVenda, confirmarRealizado, confirmarAgendamento, marcarComoFaltou,
     cancelarAgendamento, excluir,
     erro, recarregar,
-  } = useAgendamentos();
+  } = useAgendamentos(); 
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 100);
