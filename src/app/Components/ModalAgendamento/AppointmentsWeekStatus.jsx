@@ -22,7 +22,7 @@ function getPeriodoSemana() {
 export default function AppointmentsWeekStatus({ semanaData, statusCount, statusCountVenda, loading }) {
   const totalSemana = (semanaData || []).reduce((acc, d) => acc + (d.total || 0), 0);
   const vendasRealizadas = statusCountVenda?.VENDA_REALIZADA || 0;
-  const vendasPerdidas = statusCountVenda?.VENDA_PERDIDA || 0;
+  const vendasPerdidas = statusCountVenda?.VENDA_PERDIDA || statusCountVenda?.VENDA_PERDIDA ;
   const faltas = statusCount?.FALTOU || 0;
   const periodo = useMemo(() => getPeriodoSemana(), []);
 

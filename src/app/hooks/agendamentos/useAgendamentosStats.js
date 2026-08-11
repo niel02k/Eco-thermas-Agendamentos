@@ -76,14 +76,17 @@ export function useAgendamentosStats() {
       const countsVenda = { VENDA_REALIZADA: 0, VENDA_PERDIDA: 0 };
 
       (todos.agendamentos ?? []).forEach((a) => {
-        if (counts[a.status] !== undefined) counts[a.status]++;
-        if (a.resultado_visita === 'FALTOU') counts.FALTOU++;
-
         const dataVisita = new Date(a.data_visita + 'T00:00:00');
         const naSemana = dataVisita >= inicioSemana && dataVisita <= fimSemana;
-        if (naSemana && countsVenda[a.resultado_venda] !== undefined) {
+
+        if (counts[a.status] !== undefined) counts[a.status]++;
+        if (naSemana &&  counts[a.resultado_visita ] === 'FALTOU') counts.FALTOU++;
+
+        
+        if (naSemana && countsVenda[a.resultado_venda] !== undefined ) {
           countsVenda[a.resultado_venda]++;
         }
+        console.log(fimSemana);
       });
 
       setStatusCount(counts);

@@ -40,9 +40,6 @@ const Login = () => {
       password: formData.password,
     });
  
-
-    console.log(process.env.NEXT_PUBLIC_SUPABASE_URL);
-    console.log(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
     if (error) {
       setError('E-mail ou senha incorretos.');
       setIsLoading(false);
