@@ -44,7 +44,7 @@ export function useAgendamentosStats() {
         proximosDiasComAgendamentos(2),
         taxaDeConversao({}),
         totalClientesAtendidos(),
-        listarAgendamentos({ pagina: 1, limite: 200 }), // Para contar status
+        listarAgendamentos({ pagina: 1, limite: 200 }),
       ]);
 
       setTotalHoje(hoje ?? 0);
@@ -70,23 +70,30 @@ export function useAgendamentosStats() {
       fimSemana.setDate(inicioSemana.getDate() + 6);
       fimSemana.setHours(23, 59, 59, 999);
 
-      // Contagem de status (operacional) + resultado_visita (FALTOU)
+      // Contagem de status
       const counts = { CONFIRMADO: 0, PENDENTE: 0, CANCELADO: 0, REALIZADO: 0, FALTOU: 0 };
-      // Contagem de resultado de venda, restrita à semana atual
       const countsVenda = { VENDA_REALIZADA: 0, VENDA_PERDIDA: 0 };
 
       (todos.agendamentos ?? []).forEach((a) => {
         const dataVisita = new Date(a.data_visita + 'T00:00:00');
         const naSemana = dataVisita >= inicioSemana && dataVisita <= fimSemana;
 
-        if (counts[a.status] !== undefined) counts[a.status]++;
-        if (naSemana &&  counts[a.resultado_visita ] === 'FALTOU') counts.FALTOU++;
-
-        
-        if (naSemana && countsVenda[a.resultado_venda] !== undefined ) {
-          countsVenda[a.resultado_venda]++;
+        // ✅ Contagem de status (todos os agendamentos)
+        if (counts[a.status] !== undefined) {
+          counts[a.status]++;
         }
-        console.log(fimSemana);
+
+        // ✅ Contagem de FALTOU (baseado no resultado_visita)
+        if (a.resultado_visita === 'FALTOU') {
+          counts.FALTOU++;
+        }
+
+        // ✅ Contagem de resultado de venda (apenas na semana)
+        if (naSemana && a.resultado_venda) {
+          if (countsVenda[a.resultado_venda] !== undefined) {
+            countsVenda[a.resultado_venda]++;
+          }
+        }
       });
 
       setStatusCount(counts);
