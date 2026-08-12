@@ -8,6 +8,8 @@ import { useAgendamentosForm } from "@/app/hooks/agendamentos/useAgendamentosFor
 import { useAgendamentoDetalhe } from "@/app/hooks/agendamentos/useAgendamentoDetalhe";
 import { useAgendamentosActions } from "@/app/hooks/agendamentos/useAgendamentosActions";
 
+
+
 export function useAgendamentos() {
   const [dataFiltro, setDataFiltro] = useState(null);
 
