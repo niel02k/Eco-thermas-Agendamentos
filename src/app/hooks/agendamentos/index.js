@@ -1,6 +1,7 @@
 // src/app/hooks/agendamentos/index.js
 "use client";
 
+<<<<<<< HEAD
 import { useEffect, useMemo, useCallback } from 'react';
 import { useAgendamentosList } from '@/app/hooks/agendamentos/useAgendamentosList';
 import { useAgendamentoDetalhe } from '@/app/hooks/agendamentos/useAgendamentoDetalhe';
@@ -31,11 +32,81 @@ export function useAgendamentos() {
 
   return {
     // ── Listagem ──────────────────────────────────────────
+=======
+import { useCallback, useEffect, useState } from "react";
+import { useAgendamentosList } from "./useAgendamentosList";
+import { useAgendamentosStats } from "./useAgendamentosStats";
+import { useAgendamentosForm } from "./useAgendamentosForm";
+import { useAgendamentoDetalhe } from "./useAgendamentoDetalhe";
+import { useAgendamentosActions } from "./useAgendamentosActions";
+
+export function useAgendamentos() {
+  const [dataFiltro, setDataFiltro] = useState(null);
+
+  // Listagem
+  const listagem = useAgendamentosList();
+
+  // Stats
+  const stats = useAgendamentosStats();
+
+  // Carrega a lista aplicando o filtro de data
+  const carregarLista = useCallback(
+    async (pagina, busca) => {
+      await listagem.carregar(pagina, busca, dataFiltro);
+    },
+    [listagem.carregar, dataFiltro]
+  );
+
+  // Callback executado após qualquer ação
+  const onActionComplete = useCallback(async () => {
+    await Promise.all([
+      carregarLista(listagem.pagina, listagem.busca),
+      stats.carregar(),
+    ]);
+  }, [
+    carregarLista,
+    listagem.pagina,
+    listagem.busca,
+    stats.carregar,
+  ]);
+
+  // Formulário
+  const form = useAgendamentosForm(onActionComplete);
+
+  // Detalhe
+  const detalhe = useAgendamentoDetalhe();
+
+  // Ações
+  const actions = useAgendamentosActions(onActionComplete);
+
+  // Carrega estatísticas uma vez
+  useEffect(() => {
+    stats.carregar();
+  }, [stats.carregar]);
+
+  // Carrega a lista ao iniciar e quando mudar página, busca ou filtro
+  useEffect(() => {
+    carregarLista(listagem.pagina, listagem.busca);
+  }, [
+    carregarLista,
+    listagem.pagina,
+    listagem.busca,
+  ]);
+
+  const handleFiltroDataChange = useCallback((data) => {
+    setDataFiltro(data);
+    listagem.setPagina(1);
+  }, [listagem.setPagina]);
+
+  return {
+    // Tabela
+>>>>>>> parent of ec0cc7f (Amém)
     agendamentos: listagem.agendamentos,
     total: listagem.total,
     pagina: listagem.pagina,
     totalPaginas: listagem.totalPaginas,
     busca: listagem.busca,
+<<<<<<< HEAD
     filtroStatus: listagem.filtroStatus,
     filtroData: listagem.filtroData,
     loading: listagem.loading,
@@ -46,6 +117,15 @@ export function useAgendamentos() {
     setFiltroData: listagem.setFiltroData,
     setErro: listagem.setErro,
     carregarAgendamentos: listagem.carregar,
+=======
+    loadingTabela: listagem.loading,
+    handleBusca: listagem.handleBusca,
+    setPagina: listagem.setPagina,
+
+    // Filtro
+    dataFiltro,
+    handleFiltroDataChange,
+>>>>>>> parent of ec0cc7f (Amém)
 
     // ── Stats ──────────────────────────────────────────────
     totalHoje: stats.totalHoje,
@@ -64,6 +144,7 @@ export function useAgendamentos() {
 
     // ── Detalhe ────────────────────────────────────────────
     agendamentoSelecionado: detalhe.agendamento,
+<<<<<<< HEAD
     modalAberto: detalhe.modalAberto,
     loadingDetalhe: detalhe.loading,
     buscarAgendamento: detalhe.abrirVisualizar,
@@ -77,5 +158,37 @@ export function useAgendamentos() {
 
     // ── Utilitários ──────────────────────────────────────
     recarregarTudo,
+=======
+    loadingDetalhe: detalhe.loading,
+    modoModal: detalhe.modoModal,
+    abrirVisualizar: detalhe.abrirVisualizar,
+    abrirEditar: detalhe.abrirEditar,
+    fecharModal: detalhe.fecharModal,
+    buscarDetalhe: detalhe.buscarDetalhe,
+
+    // Resultado de Venda
+    showResultadoVenda: actions.showResultadoVenda,
+    agendamentoParaResultado: actions.agendamentoParaResultado,
+    loadingResultado: actions.loadingResultado,
+    abrirResultadoVenda: actions.abrirResultadoVenda,
+    fecharResultadoVenda: actions.fecharResultadoVenda,
+    confirmarResultadoVenda: actions.confirmarResultadoVenda,
+    confirmarRealizado: actions.confirmarRealizado,
+
+    // Ações
+    cancelarAgendamento: actions.cancelar,
+    excluir: actions.excluir,
+
+    // Erro
+    erro:
+      listagem.erro ||
+      stats.erro ||
+      form.erro ||
+      detalhe.erro ||
+      actions.erro,
+
+    // Utilidades
+    recarregar: onActionComplete,
+>>>>>>> parent of ec0cc7f (Amém)
   };
 }
