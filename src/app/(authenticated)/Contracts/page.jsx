@@ -1,11 +1,11 @@
-// src/app/(sua-rota)/contratos/Contracts.jsx
+// src/app/Contracts/page.jsx
 "use client";
 
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Plus } from "lucide-react";
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
 import styles from "./Contracts.module.css";
-import { useContratos } from "@/app/hooks/contratos/index.js"
+import { useContratos } from "@/app/hooks/contratos/index.js";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 
 // Componentes
@@ -22,45 +22,101 @@ export default function Contracts() {
   const [visible, setVisible] = useState(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
+  // ── Estados locais ──
+  const [showCriarContrato, setShowCriarContrato] = useState(false);
+  const [showEditarContrato, setShowEditarContrato] = useState(false);
+  const [contratoParaEditar, setContratoParaEditar] = useState(null);
+
+  // ── Hook principal ──
   const {
-    contratos, total, pagina, busca, filtroStatus,
-    receita8m, ticketInfo, loading, error,
-    resumoGeral, rankingVendedores, statusContratos,
-    contratoSelecionado, modalAberto,
-    showCriarContrato, showEditarContrato, contratoParaEditar,
-    setPagina, setBusca, setFiltroStatus, setError, setModalAberto,
-    setShowCriarContrato, setShowEditarContrato, setContratoParaEditar,
-    carregarContratos, buscarContrato, handleEditar, handleExcluir,
-    handleContratoCriado, handleContratoEditado, recarregarTudo
+    contratos,
+    total,
+    pagina,
+    totalPaginas,
+    busca,
+    filtroStatus,
+    loading,
+    erro,
+    setErro,
+    setPagina,
+    setBusca,
+    setFiltroStatus,
+    carregarContratos,
+    contratoSelecionado,
+    modalAberto,
+    setModalAberto,
+    buscarContrato,
+    buscarContratoDetalhe,
+    excluirContrato,
+    resumoGeral,
+    rankingVendedores,
+    statusContratos,
+    rankingCidades,
+    ticketInfo,
+    receita8m,
+    recarregarTudo,
   } = useContratos();
 
-  const totalPaginas = Math.max(1, Math.ceil(total / 10));
-
+  // ── Effects ──
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80);
     return () => clearTimeout(t);
   }, []);
 
+  // ── Handlers ──
   const handleRowClick = useCallback((contrato) => {
     buscarContrato(contrato.id);
   }, [buscarContrato]);
 
+  const handleEditar = useCallback(async (id) => {
+    setModalAberto(); // fecha o modal de visualização
+    const contrato = await buscarContratoDetalhe(id);
+    if (contrato) {
+      setContratoParaEditar(contrato);
+      setShowEditarContrato(true);
+    }
+  }, [setModalAberto, buscarContratoDetalhe]);
+
+  const handleExcluir = useCallback(async (id) => {
+    if (!confirm("Tem certeza que deseja excluir este contrato?")) return;
+    await excluirContrato(id);
+    recarregarTudo();
+  }, [excluirContrato, recarregarTudo]);
+
+  const handleContratoCriado = useCallback(() => {
+    setShowCriarContrato(false);
+    recarregarTudo();
+  }, [recarregarTudo]);
+
+  const handleContratoEditado = useCallback(() => {
+    setShowEditarContrato(false);
+    setContratoParaEditar(null);
+    recarregarTudo();
+  }, [recarregarTudo]);
+
+  const handleBuscaChange = useCallback((novaBusca) => {
+    setBusca(novaBusca);
+    setPagina(1);
+  }, [setBusca, setPagina]);
+
+  const handleStatusChange = useCallback((novoStatus) => {
+    setFiltroStatus(novoStatus);
+    setPagina(1);
+  }, [setFiltroStatus, setPagina]);
+
   return (
     <>
-      {/* ═══════════ MODAIS (FORA DO CONTAINER) ═══════════ */}
-      
-      {/* Modal de Visualização */}
+      {/* ═══════════ MODAIS ═══════════ */}
       {modalAberto && contratoSelecionado && (
         <VisualizarModal
           tipo="contrato"
           contrato={contratoSelecionado}
-          onClose={() => setModalAberto(false)}
+          onClose={setModalAberto}
           onEditar={handleEditar}
           onExcluirContrato={handleExcluir}
         />
       )}
 
-      {/* Modal de Criar Contrato */}
       {showCriarContrato && (
         <FormContrato
           onClose={() => setShowCriarContrato(false)}
@@ -68,11 +124,13 @@ export default function Contracts() {
         />
       )}
 
-      {/* Modal de Editar Contrato */}
       {showEditarContrato && contratoParaEditar && (
         <FormContrato
           contrato={contratoParaEditar}
-          onClose={() => { setShowEditarContrato(false); setContratoParaEditar(null); }}
+          onClose={() => {
+            setShowEditarContrato(false);
+            setContratoParaEditar(null);
+          }}
           onSuccess={handleContratoEditado}
         />
       )}
@@ -92,16 +150,16 @@ export default function Contracts() {
             busca={busca}
             filtroStatus={filtroStatus}
             loading={loading}
-            onBuscaChange={(val) => { setBusca(val); if (!val) { setPagina(1); carregarContratos(); } }}
-            onBuscaSubmit={() => { setPagina(1); carregarContratos(); }}
-            onStatusChange={setFiltroStatus}
+            onBuscaChange={handleBuscaChange}
+            onBuscaSubmit={() => setPagina(1)}
+            onStatusChange={handleStatusChange}
             onRefresh={recarregarTudo}
           />
 
-          {error && (
+          {erro && (
             <div className={styles.errorBanner}>
-              <span>{error}</span>
-              <button onClick={() => setError(null)}>✕</button>
+              <span>{erro}</span>
+              <button onClick={() => setErro(null)}>✕</button>
             </div>
           )}
 
@@ -114,7 +172,7 @@ export default function Contracts() {
 
           <ContractsInsights
             rankingVendedores={rankingVendedores}
-            statusContratos={statusContratos}
+            rankingCidades={rankingCidades}
             total={total}
             resumoGeral={resumoGeral}
           />

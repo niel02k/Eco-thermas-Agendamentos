@@ -23,10 +23,8 @@ export default function ContractsKPIs({ contratos, total, resumoGeral, ticketInf
 
     return [
       { title: "Hoje", value: hojeCount, label: "Contratos hoje", icon: Activity, color: "blue" },
-      { title: "Ativos", value: ativos, label: "Contratos ativos", icon: BarChart3, color: "green" },
       { title: "Total", value: total, label: "Total de contratos", icon: TrendingUp, color: "blue" },
       { title: "Receita", value: formatCurrency(receitaTotal), label: "Receita total", icon: DollarSign, color: "green" },
-      { title: "Conversão", value: `${conversion}%`, label: "Taxa de ativos", icon: TrendingUp, color: conversion > 50 ? "green" : "yellow" },
       { title: "Ticket Médio", value: formatCurrency(ticketMedio), label: "Valor médio", icon: Award, color: "yellow" },
     ];
   }, [contratos, total, resumoGeral, ticketInfo]);

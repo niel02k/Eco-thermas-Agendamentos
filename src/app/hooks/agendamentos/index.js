@@ -1,82 +1,48 @@
-// src/app/hooks/agendamentos/index.js
-"use client";
+// src/app/hooks/contratos/index.js
 
-import { useCallback, useEffect, useState } from "react";
-import { useAgendamentosList } from "./useAgendamentosList";
-import { useAgendamentosStats } from "./useAgendamentosStats";
-import { useAgendamentosForm } from "./useAgendamentosForm";
-import { useAgendamentoDetalhe } from "./useAgendamentoDetalhe";
-import { useAgendamentosActions } from "./useAgendamentosActions";
+export function useContratos() {
+  const listagem = useContratosList();
+  const detalhe = useContratoDetalhe();
+  const analytics = useContratosAnalytics();
 
-export function useAgendamentos() {
-  const [dataFiltro, setDataFiltro] = useState(null);
+  const recarregarTudo = async () => {
+    await Promise.all([listagem.carregar(), analytics.recarregar()]);
+  };
 
-  // Listagem
-  const listagem = useAgendamentosList();
+  const actions = useContratosActions(recarregarTudo);
 
-  // Stats
-  const stats = useAgendamentosStats();
-
-  // Carrega a lista aplicando o filtro de data
-  const carregarLista = useCallback(
-    async (pagina, busca) => {
-      await listagem.carregar(pagina, busca, dataFiltro);
-    },
-    [listagem.carregar, dataFiltro]
-  );
-
-  // Callback executado após qualquer ação
-  const onActionComplete = useCallback(async () => {
-    await Promise.all([
-      carregarLista(listagem.pagina, listagem.busca),
-      stats.carregar(),
-    ]);
-  }, [
-    carregarLista,
-    listagem.pagina,
-    listagem.busca,
-    stats.carregar,
-  ]);
-
-  // Formulário
-  const form = useAgendamentosForm(onActionComplete);
-
-  // Detalhe
-  const detalhe = useAgendamentoDetalhe();
-
-  // Ações
-  const actions = useAgendamentosActions(onActionComplete);
-
-  // Carrega estatísticas uma vez
+  // ── Auto-load da listagem: dispara no mount e sempre que
+  // página, busca ou filtro de status mudarem. Sem isso a
+  // tabela nunca carrega sozinha. ──────────────────────────
   useEffect(() => {
-    stats.carregar();
-  }, [stats.carregar]);
+    listagem.carregar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listagem.pagina, listagem.busca, listagem.filtroStatus]);
 
-  // Carrega a lista ao iniciar e quando mudar página, busca ou filtro
-  useEffect(() => {
-    carregarLista(listagem.pagina, listagem.busca);
-  }, [
-    carregarLista,
-    listagem.pagina,
-    listagem.busca,
-  ]);
+  // ── ticketInfo: shape esperado pelo ContractsKPIs,
+  // derivado do resumoGeral (evita recomputar/refetchar) ───
+  const ticketInfo = useMemo(() => ({
+    ticket_medio: analytics.resumoGeral.ticket_medio,
+    valor_total: analytics.resumoGeral.receita_total,
+    total_contratos: analytics.resumoGeral.total_contratos,
+  }), [analytics.resumoGeral]);
 
-  const handleFiltroDataChange = useCallback((data) => {
-    setDataFiltro(data);
-    listagem.setPagina(1);
-  }, [listagem.setPagina]);
 
   return {
-    // Tabela
-    agendamentos: listagem.agendamentos,
+    // ── Listagem (tabela paginada) ──────────────────────────
+    contratos: listagem.contratos,
     total: listagem.total,
     pagina: listagem.pagina,
     totalPaginas: listagem.totalPaginas,
     busca: listagem.busca,
-    loadingTabela: listagem.loading,
-    handleBusca: listagem.handleBusca,
+    filtroStatus: listagem.filtroStatus,
+    loading: listagem.loading,       // loading da TABELA (não do analytics)
+    erro: listagem.erro,             // erro da TABELA
     setPagina: listagem.setPagina,
-
+    setBusca: listagem.setBusca,
+    setFiltroStatus: listagem.setFiltroStatus,
+    setErro: listagem.setErro,
+    carregarContratos: listagem.carregar,
     // Filtro
     dataFiltro,
     handleFiltroDataChange,
@@ -98,25 +64,30 @@ export function useAgendamentos() {
 
     // Visualizar/Editar
     agendamentoSelecionado: detalhe.agendamento,
+
+    // ── Detalhe (modal de visualização) ─────────────────────
+    contratoSelecionado: detalhe.contrato,
+    modalAberto: detalhe.modalAberto,
+
     loadingDetalhe: detalhe.loading,
-    modoModal: detalhe.modoModal,
-    abrirVisualizar: detalhe.abrirVisualizar,
-    abrirEditar: detalhe.abrirEditar,
-    fecharModal: detalhe.fecharModal,
-    buscarDetalhe: detalhe.buscarDetalhe,
+    buscarContrato: detalhe.abrirVisualizar,
+    buscarContratoDetalhe: detalhe.buscarDetalhe, // fetch puro, sem abrir modal de visualização (usado pra editar)
+    setModalAberto: detalhe.fecharModal,
 
-    // Resultado de Venda
-    showResultadoVenda: actions.showResultadoVenda,
-    agendamentoParaResultado: actions.agendamentoParaResultado,
-    loadingResultado: actions.loadingResultado,
-    abrirResultadoVenda: actions.abrirResultadoVenda,
-    fecharResultadoVenda: actions.fecharResultadoVenda,
-    confirmarResultadoVenda: actions.confirmarResultadoVenda,
-    confirmarRealizado: actions.confirmarRealizado,
+    // ── Ações (criar/editar/excluir) ────────────────────────
+    excluirContrato: actions.excluir,
+    loadingAcao: actions.loading,
+    erroAcao: actions.erro,
 
-    // Ações
-    cancelarAgendamento: actions.cancelar,
-    excluir: actions.excluir,
+    // ── Analytics (KPIs, ranking, receita mensal) ───────────
+    resumoGeral: analytics.resumoGeral,
+    rankingVendedores: analytics.rankingVendedores,
+    statusContratos: analytics.statusContratos,
+    top5Cidades: analytics.top5Cidades,
+    receita8m: analytics.receita8m,
+    ticketInfo,
+    loadingAnalytics: analytics.loading,
+
 
     // Erro
     erro:
@@ -128,5 +99,8 @@ export function useAgendamentos() {
 
     // Utilidades
     recarregar: onActionComplete,
+
+    recarregarTudo,
+
   };
 }

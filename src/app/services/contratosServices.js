@@ -14,7 +14,8 @@ export async function listarContratos({ pagina = 1, limite = 10, busca = '', sta
 
   let query = supabase
     .from('contratos')
-    .select(`*,
+    .select(`
+      *,
       vendedor:vendedor_id (nome),
       agendamento:agendamento_id (codigo, data_visita, horario_visita),
       dependentes:contrato_dependentes (nome, cpf, idade)
@@ -28,7 +29,6 @@ export async function listarContratos({ pagina = 1, limite = 10, busca = '', sta
     query = query.eq('status', status);
   }
 
-  // 👇 Ordenação dinâmica
   const ascending = ordem === 'asc';
   query = query.order(ordenarPor, { ascending });
 
@@ -43,6 +43,7 @@ export async function listarContratos({ pagina = 1, limite = 10, busca = '', sta
     totalPaginas: Math.ceil((count || 0) / limite)
   };
 }
+
 /**
  * Buscar contrato por ID
  */
@@ -91,7 +92,6 @@ export async function criarContrato(dados) {
   console.log("=== DADOS RECEBIDOS NO SERVIÇO ===");
   console.log("dados:", dados);
 
-  // Garantir que cidade não seja undefined ou null
   const cidade = dados.cidade?.trim() || "";
 
   if (!cidade) {
@@ -107,7 +107,7 @@ export async function criarContrato(dados) {
     titular_cpf: dados.titular_cpf?.replace(/\D/g, ''),
     titular_email: dados.titular_email || null,
     titular_telefone: dados.titular_telefone || null,
-    titular_idade: Number(dados.titular_idade) || 0,  // 👈 IDADE
+    titular_idade: Number(dados.titular_idade) || 0,
     valor_total: Number(dados.valor_total) || 0,
     forma_pagamento: dados.forma_pagamento,
     tipo_cobranca: dados.tipo_cobranca || null,
@@ -138,13 +138,12 @@ export async function criarContrato(dados) {
 
   console.log("Contrato criado com sucesso:", data);
 
-  // Inserir dependentes se existirem
   if (dados.dependentes && dados.dependentes.length > 0) {
     const deps = dados.dependentes.map(d => ({
       contrato_id: data.id,
       nome: d.nome,
       cpf: d.cpf?.replace(/\D/g, '') || null,
-      idade: Number(d.idade) || 0  // 👈 IDADE
+      idade: Number(d.idade) || 0
     }));
 
     const { error: depError } = await supabase
@@ -163,6 +162,133 @@ export async function criarContrato(dados) {
 }
 
 /**
+ * OBTER ANALYTICS - CORRIGIDO usando Supabase diretamente
+ */
+export async function obterAnalyticsContratos() {
+  try {
+    // Buscar todos os contratos para análise
+    const { data: contratos, error } = await supabase
+      .from('contratos')
+      .select(`
+        *,
+        vendedor:vendedor_id (nome),
+        dependentes:contrato_dependentes (id)
+      `);
+
+    if (error) throw error;
+
+    if (!contratos || contratos.length === 0) {
+      return {
+        total_contratos: 0,
+        receita_total: 0,
+        ticket_medio: 0,
+        contratos_ativos: 0,
+        total_dependentes: 0,
+        rankingVendedores: [],
+        statusContratos: [],
+        rankingCidades: [],
+        receitaMensal: []
+      };
+    }
+
+    // ========== Métricas Gerais ==========
+    const totalContratos = contratos.length;
+    const receitaTotal = contratos.reduce((acc, c) => acc + (Number(c.valor_total) || 0), 0);
+    const ticketMedio = totalContratos > 0 ? receitaTotal / totalContratos : 0;
+    const contratosAtivos = contratos.filter(c => c.status === 'ATIVO').length;
+    const totalDependentes = contratos.reduce((acc, c) => acc + (c.dependentes?.length || 0), 0);
+
+    // ========== Ranking Vendedores ==========
+    const vendedoresMap = new Map();
+    contratos.forEach(c => {
+      const vendedorNome = c.vendedor?.nome || 'Não atribuído';
+      if (!vendedoresMap.has(vendedorNome)) {
+        vendedoresMap.set(vendedorNome, { nome: vendedorNome, receita: 0, quantidade: 0 });
+      }
+      const v = vendedoresMap.get(vendedorNome);
+      v.receita += Number(c.valor_total) || 0;
+      v.quantidade += 1;
+    });
+
+    const rankingVendedores = Array.from(vendedoresMap.values())
+      .sort((a, b) => b.receita - a.receita);
+
+    // ========== Status Contratos ==========
+    const statusMap = new Map();
+    contratos.forEach(c => {
+      const status = c.status || 'PENDENTE';
+      if (!statusMap.has(status)) {
+        statusMap.set(status, { status, quantidade: 0 });
+      }
+      statusMap.get(status).quantidade += 1;
+    });
+
+    const statusContratos = Array.from(statusMap.values());
+
+    // ========== Ranking Cidades ========== 👈 NOVO
+    const cidadesMap = new Map();
+    contratos.forEach(c => {
+      const cidade = c.cidade?.trim() || 'Não informada';
+      if (!cidadesMap.has(cidade)) {
+        cidadesMap.set(cidade, { cidade, quantidade: 0, receita: 0 });
+      }
+      const cid = cidadesMap.get(cidade);
+      cid.quantidade += 1;
+      cid.receita += Number(c.valor_total) || 0;
+    });
+
+    const rankingCidades = Array.from(cidadesMap.values())
+      .sort((a, b) => b.quantidade - a.quantidade)
+      .slice(0, 10); // Top 10 cidades
+
+    // ========== Receita Mensal (últimos 8 meses) ==========
+    const hoje = new Date();
+    const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const receitaMensalMap = new Map();
+
+    // Inicializa últimos 8 meses com 0
+    for (let i = 7; i >= 0; i--) {
+      const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+      const chave = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const label = meses[d.getMonth()];
+      receitaMensalMap.set(chave, { mes: label, receita: 0, ano: d.getFullYear() });
+    }
+
+    // Preenche com dados reais
+    contratos.forEach(c => {
+      if (c.data_inicio) {
+        const data = new Date(c.data_inicio);
+        const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`;
+        if (receitaMensalMap.has(chave)) {
+          const item = receitaMensalMap.get(chave);
+          item.receita += Number(c.valor_total) || 0;
+        }
+      }
+    });
+
+    const receitaMensal = Array.from(receitaMensalMap.values())
+      .sort((a, b) => a.ano - b.ano || 0);
+
+    // ========== Retorno ==========
+    return {
+      total_contratos: totalContratos,
+      receita_total: Number(receitaTotal.toFixed(2)),
+      ticket_medio: Number(ticketMedio.toFixed(2)),
+      contratos_ativos: contratosAtivos,
+      total_dependentes: totalDependentes,
+      rankingVendedores,
+      statusContratos,
+      rankingCidades, // 👈 NOVO
+      receitaMensal
+    };
+
+  } catch (error) {
+    console.error('Erro em obterAnalyticsContratos:', error);
+    throw error;
+  }
+}
+
+/**
  * Atualizar contrato existente
  */
 export async function atualizarContrato(id, dados) {
@@ -174,7 +300,7 @@ export async function atualizarContrato(id, dados) {
     titular_cpf: dados.titular_cpf?.replace(/\D/g, ''),
     titular_email: dados.titular_email || null,
     titular_telefone: dados.titular_telefone || null,
-    titular_idade: Number(dados.titular_idade) || 0,  // 👈 IDADE
+    titular_idade: Number(dados.titular_idade) || 0,
     valor_total: Number(dados.valor_total) || 0,
     forma_pagamento: dados.forma_pagamento,
     tipo_cobranca: dados.tipo_cobranca || null,
@@ -214,7 +340,7 @@ export async function atualizarContrato(id, dados) {
         contrato_id: id,
         nome: d.nome,
         cpf: d.cpf?.replace(/\D/g, '') || null,
-        idade: Number(d.idade) || 0  // 👈 IDADE
+        idade: Number(d.idade) || 0
       }));
 
       const { error: depError } = await supabase
@@ -259,7 +385,6 @@ export async function receitaPorMes() {
   const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
   const agrupado = {};
 
-  // Inicializa os últimos 8 meses com 0
   for (let i = 7; i >= 0; i--) {
     const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
     const chave = meses[d.getMonth()];
@@ -318,7 +443,6 @@ export async function ticketMedio({
       return { data, error, count };
     };
 
-    // Primeira tentativa: COM filtro de data
     if (inicio || fim) {
       const { data, error } = await buscarContratos(true);
       
@@ -335,7 +459,6 @@ export async function ticketMedio({
       }
     }
     
-    // Segunda tentativa: SEM filtro de data
     const { data, error } = await buscarContratos(false);
     
     if (error) throw error;
