@@ -29,7 +29,9 @@ export default function AppointmentsPage() {
   const [showModalRealizado, setShowModalRealizado] = useState(false);
   const [agendamentoParaRealizar, setAgendamentoParaRealizar] = useState(null);
 
+  // 🔥 HOOK PRINCIPAL
   const {
+<<<<<<< Updated upstream
     agendamentos, total, pagina, totalPaginas,
     loadingTabela, handleBusca, setPagina,
     semanaData, statusCount, statusCountVenda, loadingStats,
@@ -41,6 +43,42 @@ export default function AppointmentsPage() {
     cancelarAgendamento, excluir,
     erro, recarregar,
   } = useAgendamentos(); 
+=======
+    agendamentos,
+    total,
+    pagina,
+    totalPaginas,
+    loadingTabela,
+    loadingStats,
+    erro,
+    busca,
+    filtroData,
+    setPagina,
+    handleBusca,
+    handleFiltroData,
+    limparFiltroData,
+    semanaData,
+    statusCount,
+    statusCountVenda,
+    agendamentoSelecionado,
+    modoModal,
+    abrirVisualizar,
+    abrirEditar,
+    fecharModal,
+    showResultadoVenda,
+    agendamentoParaResultado,
+    loadingResultado,
+    abrirResultadoVenda,
+    fecharResultadoVenda,
+    confirmarResultadoVenda,
+    confirmarRealizado,
+    confirmarAgendamento,
+    marcarComoFaltou,
+    cancelarAgendamento,
+    excluir,
+    recarregar,
+  } = useAgendamentos();
+>>>>>>> Stashed changes
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 100);
@@ -53,6 +91,10 @@ export default function AppointmentsPage() {
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => handleBusca(val), 350);
   }, [handleBusca]);
+
+  // ═══════════════════════════════════════════════════════════════
+  // HANDLERS
+  // ═══════════════════════════════════════════════════════════════
 
   const handleConfirmarAgendamento = useCallback(async (codigo) => {
     await confirmarAgendamento(codigo);
@@ -103,6 +145,10 @@ export default function AppointmentsPage() {
     setConfirm(null);
   }, [confirm, cancelarAgendamento, excluir]);
 
+  // ═══════════════════════════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════════════════════════
+
   return (
     <>
       {/* ═══════════ MODAIS ═══════════ */}
@@ -129,32 +175,65 @@ export default function AppointmentsPage() {
       )}
 
       {showResultadoVenda && agendamentoParaResultado && (
-        <ResultCard agendamento={agendamentoParaResultado} onConfirm={handleConfirmarResultado} onCancel={fecharResultadoVenda} loading={loadingResultado} />
+        <ResultCard 
+          agendamento={agendamentoParaResultado} 
+          onConfirm={handleConfirmarResultado} 
+          onCancel={fecharResultadoVenda} 
+          loading={loadingResultado} 
+        />
       )}
 
       {abrirModal && (
-        <NewAppointment onClose={handleCloseModal} dadosEdicao={modoModal === 'editar' ? agendamentoSelecionado : null} />
+        <NewAppointment 
+          onClose={handleCloseModal} 
+          dadosEdicao={modoModal === 'editar' ? agendamentoSelecionado : null} 
+        />
       )}
 
       {showModalRealizado && agendamentoParaRealizar && (
-        <ModalRealizado agendamento={agendamentoParaRealizar} onConfirm={handleConfirmarRealizado} onFaltou={handleFaltou} onClose={() => setShowModalRealizado(false)} />
+        <ModalRealizado 
+          agendamento={agendamentoParaRealizar} 
+          onConfirm={handleConfirmarRealizado} 
+          onFaltou={handleFaltou} 
+          onClose={() => setShowModalRealizado(false)} 
+        />
       )}
 
       {/* ═══════════ CONTEÚDO PRINCIPAL ═══════════ */}
       <div className={styles.container}>
         <main className={`${styles.main} ${visible ? styles.mainVisible : ""}`}>
-          <PageHeader title="Agendamentos" subtitle="Gestão operacional dos visitantes e reservas"
-            badge={{ text: "Sistema Ativo", type: "success" }} actionLabel="Novo Agendamento" actionIcon={Plus}
-            onAction={() => { fecharModal(); setAbrirModal(true); }} />
+          <PageHeader 
+            title="Agendamentos" 
+            subtitle="Gestão operacional dos visitantes e reservas"
+            badge={{ text: "Sistema Ativo", type: "success" }} 
+            actionLabel="Novo Agendamento" 
+            actionIcon={Plus}
+            onAction={() => { fecharModal(); setAbrirModal(true); }} 
+          />
 
           {erro && <div className={styles.errorBanner}><AlertTriangle size={16} /><span>{erro}</span></div>}
 
-          <AppointmentsWeekStatus semanaData={semanaData} statusCount={statusCount} statusCountVenda={statusCountVenda} loading={loadingStats} />
+          <AppointmentsWeekStatus 
+            semanaData={semanaData} 
+            statusCount={statusCount} 
+            statusCountVenda={statusCountVenda} 
+            loading={loadingStats} 
+          />
 
           {isMobile ? (
-            <MobileList tipo="agendamento" dados={agendamentos} loading={loadingTabela} total={total} pagina={pagina} totalPaginas={totalPaginas}
-              onPageChange={setPagina} onCardClick={(ag) => abrirVisualizar(ag.codigo)} emptyMessage="Nenhum agendamento encontrado" />
+            <MobileList 
+              tipo="agendamento" 
+              dados={agendamentos} 
+              loading={loadingTabela} 
+              total={total} 
+              pagina={pagina} 
+              totalPaginas={totalPaginas}
+              onPageChange={setPagina} 
+              onCardClick={(ag) => abrirVisualizar(ag.codigo)} 
+              emptyMessage="Nenhum agendamento encontrado" 
+            />
           ) : (
+<<<<<<< Updated upstream
             <DataTable tipo="agendamento" 
             dados={agendamentos} 
             loading={loadingTabela} 
@@ -167,6 +246,25 @@ export default function AppointmentsPage() {
                onRowClick={(ag) => abrirVisualizar(ag.codigo)}
               showExport={true} 
               showSearch={true} />
+=======
+            <DataTable
+              tipo="agendamento"
+              dados={agendamentos}
+              loading={loadingTabela}
+              total={total}
+              pagina={pagina}
+              totalPaginas={totalPaginas}
+              busca={inputBusca}
+              onBuscaChange={onChangeBusca}
+              onPageChange={setPagina}
+              onRowClick={(ag) => abrirVisualizar(ag.codigo)}
+              showExport={true}
+              showSearch={true}
+              onFiltroDataChange={handleFiltroData}
+              filtroDataAtivo={filtroData}
+              onLimparFiltroData={limparFiltroData}
+            />
+>>>>>>> Stashed changes
           )}
         </main>
       </div>

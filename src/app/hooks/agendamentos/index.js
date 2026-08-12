@@ -1,6 +1,7 @@
 // src/app/hooks/agendamentos/index.js
 "use client";
 
+<<<<<<< Updated upstream
 import { useCallback, useEffect } from 'react';
 import { useAgendamentosList } from './useAgendamentosList';
 import { useAgendamentosStats } from './useAgendamentosStats';
@@ -9,6 +10,14 @@ import { useAgendamentoDetalhe } from './useAgendamentoDetalhe';
 import { useAgendamentosActions } from './useAgendamentosActions';
 
 const DIAS_SEMANA = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+=======
+import { useCallback, useEffect, useState } from "react";
+import { useAgendamentosList } from "@/app/hooks/agendamentos/useAgendamentosList";
+import { useAgendamentosStats } from "@/app/hooks/agendamentos/useAgendamentosStats";
+import { useAgendamentosForm } from "@/app/hooks/agendamentos/useAgendamentosForm";
+import { useAgendamentoDetalhe } from "@/app/hooks/agendamentos/useAgendamentoDetalhe";
+import { useAgendamentosActions } from "@/app/hooks/agendamentos/useAgendamentosActions";
+>>>>>>> Stashed changes
 
 export function useAgendamentos() {
   // ── Listagem ──────────────────────────────────────────────

@@ -181,6 +181,7 @@ export async function taxaDeConversao({ inicio, fim } = {}) {
 // ============ CRUD ============
 
 // src/app/services/agendamentosServices.js
+// src/app/services/agendamentosServices.js
 
 export async function listarAgendamentos({
   pagina = 1,
@@ -206,15 +207,26 @@ export async function listarAgendamentos({
     `, { count: 'exact' });
 
   // ============================================================
+<<<<<<< Updated upstream
   // 🔥 FILTRO POR PERÍODO
   // ============================================================
   if (dataInicio && dataFim) {
     // Usa as datas passadas
     console.log(`📅 Filtrando por período: ${dataInicio} até ${dataFim}`);
     query = query.gte(campoData, dataInicio).lte(campoData, dataFim);
+=======
+  // FILTRO POR PERÍODO
+  // ============================================================
+  if (dataInicio && dataFim) {
+    console.log(`📅 Filtrando por período: ${dataInicio} até ${dataFim} (campo: ${campoData})`);
+    query = query
+      .gte(campoData, dataInicio)
+      .lte(campoData, dataFim);
+>>>>>>> Stashed changes
   } else {
     // Usa o período padrão (3 meses)
     const dataAtual = new Date();
+<<<<<<< Updated upstream
     const dataInicioPadrao = new Date();
     dataInicioPadrao.setMonth(dataAtual.getMonth() - periodoMeses);
 
@@ -230,6 +242,30 @@ export async function listarAgendamentos({
   // ============================================================
   if (busca && busca.trim() !== '') {
     const buscaLimpa = busca.trim();
+=======
+    const dataInicioPadrao = new Date(dataAtual);
+    dataInicioPadrao.setMonth(dataInicioPadrao.getMonth() - periodoMeses);
+    dataInicioPadrao.setHours(0, 0, 0, 0);
+
+    const dataFimPadrao = new Date(dataAtual);
+    dataFimPadrao.setHours(23, 59, 59, 999);
+
+    const dataInicioStr = dataInicioPadrao.toISOString().split('T')[0];
+    const dataFimStr = dataFimPadrao.toISOString().split('T')[0];
+
+    console.log(`📅 Filtrando últimos ${periodoMeses} meses: ${dataInicioStr} até ${dataFimStr}`);
+    query = query
+      .gte(campoData, dataInicioStr)
+      .lte(campoData, dataFimStr);
+  }
+
+  // ============================================================
+  // BUSCA
+  // ============================================================
+  if (busca && busca.trim() !== '') {
+    const buscaLimpa = busca.trim();
+    console.log(`🔍 Buscando por: "${buscaLimpa}"`);
+>>>>>>> Stashed changes
     query = query.or(
       `codigo.ilike.%${buscaLimpa}%,` +
       `cliente_id.in.(SELECT id FROM clientes WHERE nome.ilike.%${buscaLimpa}%),` +
@@ -238,17 +274,27 @@ export async function listarAgendamentos({
   }
 
   // ============================================================
+<<<<<<< Updated upstream
   // 🔥 STATUS
+=======
+  // STATUS
+>>>>>>> Stashed changes
   // ============================================================
   if (status) {
     if (Array.isArray(status) && status.length > 0) {
+      console.log(`📊 Filtrando por status: ${status.join(', ')}`);
       query = query.in('status', status);
     } else if (typeof status === 'string' && status.trim() !== '') {
+<<<<<<< Updated upstream
+=======
+      console.log(`📊 Filtrando por status: ${status}`);
+>>>>>>> Stashed changes
       query = query.eq('status', status);
     }
   }
 
   // ============================================================
+<<<<<<< Updated upstream
   // 🔥 ORDENAÇÃO
   // ============================================================
   const colunasPermitidas = ['data_criacao', 'data_visita', 'status', 'codigo', 'quantidade_pessoas'];
@@ -262,12 +308,60 @@ export async function listarAgendamentos({
   const { data, count, error } = await query.range(inicio, fim);
 
   if (error) throw error;
+=======
+  // ORDENAÇÃO
+  // ============================================================
+  const colunasPermitidas = [
+    'data_criacao',
+    'data_visita',
+    'status',
+    'codigo',
+    'quantidade_pessoas'
+  ];
 
+  const ordenarPorValido = colunasPermitidas.includes(ordenarPor)
+    ? ordenarPor
+    : 'data_visita';
+
+  const ordemValida = ordem === 'desc' ? 'desc' : 'asc';
+  query = query.order(ordenarPorValido, {
+    ascending: ordemValida === 'asc'
+  });
+
+  // ============================================================
+  // EXECUTA
+  // ============================================================
+  console.log('🚀 Executando query...');
+  const { data, count, error } = await query.range(inicio, fim);
+
+  if (error) {
+    console.error('❌ Erro no Supabase:', error);
+    throw new Error(`Erro ao listar agendamentos: ${error.message}`);
+  }
+
+  console.log(`✅ Encontrados ${count || 0} agendamentos`);
+
+  // ============================================================
+  // CALCULA DATAS DO FILTRO PARA RETORNO
+  // ============================================================
+  const dataAtual = new Date();
+  const dataInicioPadrao = new Date(dataAtual);
+  dataInicioPadrao.setMonth(dataInicioPadrao.getMonth() - periodoMeses);
+  dataInicioPadrao.setHours(0, 0, 0, 0);
+
+  const dataFimPadrao = new Date(dataAtual);
+  dataFimPadrao.setHours(23, 59, 59, 999);
+>>>>>>> Stashed changes
+
+  // ============================================================
+  // RETORNO
+  // ============================================================
   return {
     agendamentos: data || [],
     total: count || 0,
     pagina,
     totalPaginas: Math.ceil((count || 0) / limite),
+<<<<<<< Updated upstream
   filtroPeriodo: {
   dataInicio:
     dataInicio ||
@@ -287,6 +381,13 @@ export async function listarAgendamentos({
 
   periodoMeses,
   campoData
+=======
+    filtroPeriodo: {
+      dataInicio: dataInicio || dataInicioPadrao.toISOString().split('T')[0],
+      dataFim: dataFim || dataFimPadrao.toISOString().split('T')[0],
+      periodoMeses: periodoMeses,
+      campoData: campoData
+>>>>>>> Stashed changes
     }
   };
 }
