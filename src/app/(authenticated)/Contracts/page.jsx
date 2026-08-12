@@ -104,6 +104,11 @@ export default function Contracts() {
     setPagina(1);
   }, [setFiltroStatus, setPagina]);
 
+
+  const rankingCidadesMock = [
+  { cidade: 'Ecolândia', quantidade: 10, receita: 50000 },
+
+];
   return (
     <>
       {/* ═══════════ MODAIS ═══════════ */}
@@ -172,7 +177,7 @@ export default function Contracts() {
 
           <ContractsInsights
             rankingVendedores={rankingVendedores}
-            rankingCidades={rankingCidades}
+            rankingCidades={rankingCidades || rankingCidadesMock} // 👈 FALLBACK
             total={total}
             resumoGeral={resumoGeral}
           />

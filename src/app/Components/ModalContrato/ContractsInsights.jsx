@@ -9,10 +9,7 @@ export default function ContractsInsights({
   const vendedores = Array.isArray(rankingVendedores) ? rankingVendedores : [];
   const cidades = Array.isArray(rankingCidades) ? rankingCidades : [];
 
-  const rankingCidadesMock = [
-  { cidade: 'Ecolândia', quantidade: 10, receita: 50000 },
-
-];
+  
 
   return (
     <div className={styles.insightsGrid}>
