@@ -6,13 +6,13 @@ import { useAgendamentosList } from '@/app/hooks/agendamentos/useAgendamentosLis
 import { useAgendamentoDetalhe } from '@/app/hooks/agendamentos/useAgendamentoDetalhe';
 import { useAgendamentosActions } from '@/app/hooks/agendamentos/useAgendamentosActions';
 import { useAgendamentosStats } from '@/app/hooks/agendamentos/useAgendamentosStats';
-import { useAgendamentoForm } from '@/app/hooks/agendamentos/useAgendamentoForm';
+import { useAgendamentosForm } from '@/app/hooks/agendamentos/useAgendamentosForm';
 
 export function useAgendamentos() {
   const listagem = useAgendamentosList();
   const detalhe = useAgendamentoDetalhe();
   const stats = useAgendamentosStats();
-  const form = useAgendamentoForm();
+  const form = useAgendamentosForm();
   const actions = useAgendamentosActions();
 
   const recarregarTudo = useCallback(async () => {
