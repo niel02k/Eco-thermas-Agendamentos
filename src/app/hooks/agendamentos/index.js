@@ -2,11 +2,11 @@
 "use client";
 
 import { useEffect, useMemo, useCallback } from 'react';
-import { useAgendamentosList } from './useAgendamentosList';
-import { useAgendamentoDetalhe } from './useAgendamentoDetalhe';
-import { useAgendamentosActions } from './useAgendamentosActions';
-import { useAgendamentosStats } from './useAgendamentosStats';
-import { useAgendamentoForm } from './useAgendamentoForm';
+import { useAgendamentosList } from '@/app/hooks/agendamentos/useAgendamentosList';
+import { useAgendamentoDetalhe } from '@/app/hooks/agendamentos/useAgendamentoDetalhe';
+import { useAgendamentosActions } from '@/app/hooks/agendamentos/useAgendamentosActions';
+import { useAgendamentosStats } from '@/app/hooks/agendamentos/useAgendamentosStats';
+import { useAgendamentoForm } from '@/app/hooks/agendamentos/useAgendamentoForm';
 
 export function useAgendamentos() {
   const listagem = useAgendamentosList();
