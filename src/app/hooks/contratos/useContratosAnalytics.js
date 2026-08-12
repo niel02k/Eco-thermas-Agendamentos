@@ -1,62 +1,153 @@
 "use client";
 
-import { useState, useCallback, useEffect } from 'react';
-import { obterAnalyticsContratos } from '@/app/services/contratosServices';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { createClient } from '@/lib/supabase/client';
+
+const supabase = createClient();
 
 export function useContratosAnalytics() {
-  const [resumoGeral, setResumoGeral] = useState({
-    total_contratos: 0,
-    receita_total: 0,
-    ticket_medio: 0,
-    contratos_ativos: 0,
-    total_dependentes: 0,
-  });
-  const [rankingVendedores, setRankingVendedores] = useState([]);
-  const [statusContratos, setStatusContratos] = useState([]);
-  const [rankingCidades, setRankingCidades] = useState([]);
-  const [receita8m, setReceita8m] = useState([]);
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState(null);
+  const [contratos, setContratos] = useState([]);
 
-  const carregarAnalytics = useCallback(async () => {
+  // Carregar todos os contratos para análise
+  const carregar = useCallback(async () => {
     setLoading(true);
     setErro(null);
     try {
-      const dados = await obterAnalyticsContratos();
-      
-      setResumoGeral({
-        total_contratos: dados.total_contratos || 0,
-        receita_total: dados.receita_total || 0,
-        ticket_medio: dados.ticket_medio || 0,
-        contratos_ativos: dados.contratos_ativos || 0,
-        total_dependentes: dados.total_dependentes || 0,
-      });
-      
-      setRankingVendedores(dados.rankingVendedores || []);
-      setStatusContratos(dados.statusContratos || []);
-      setRankingCidades(dados.rankingCidades || []);
-      setReceita8m(dados.receitaMensal || []);
-      
+      const { data, error: err } = await supabase
+        .from('contratos')
+        .select('*, vendedor:vendedor_id(nome), dependentes:contrato_dependentes(id)');
+
+      if (err) throw err;
+      setContratos(data || []);
     } catch (e) {
-      setErro(e.message || 'Erro ao carregar analytics');
-      console.error(e);
+      console.error('Erro ao carregar analytics:', e);
+      setErro(e.message);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    carregarAnalytics();
-  }, [carregarAnalytics]);
+    carregar();
+  }, [carregar]);
+
+  // ─── Ranking de Vendedores ────────────────────────
+  const rankingVendedores = useMemo(() => {
+    const porVendedor = {};
+    const receitaTotal = contratos.reduce((acc, c) => acc + Number(c.valor_total || 0), 0);
+
+    contratos.forEach(c => {
+      const nome = c.vendedor?.nome || 'Sem consultor';
+      if (!porVendedor[nome]) {
+        porVendedor[nome] = { nome, quantidade: 0, receita: 0 };
+      }
+      porVendedor[nome].quantidade += 1;
+      porVendedor[nome].receita += Number(c.valor_total || 0);
+    });
+
+    return Object.values(porVendedor)
+      .map(item => ({
+        ...item,
+        ticket_medio: item.quantidade > 0 ? item.receita / item.quantidade : 0,
+        percentual: receitaTotal > 0 ? (item.receita / receitaTotal) * 100 : 0,
+      }))
+      .sort((a, b) => b.receita - a.receita);
+  }, [contratos]);
+
+  // ─── Status dos Contratos ─────────────────────────
+  const statusContratos = useMemo(() => {
+    const porStatus = {};
+    contratos.forEach(c => {
+      const status = c.status || 'PENDENTE';
+      porStatus[status] = (porStatus[status] || 0) + 1;
+    });
+
+    return Object.entries(porStatus).map(([status, quantidade]) => ({
+      status,
+      quantidade,
+      percentual: contratos.length > 0 ? (quantidade / contratos.length) * 100 : 0,
+    }));
+  }, [contratos]);
+
+  // ─── Resumo Geral ─────────────────────────────────
+  const resumoGeral = useMemo(() => {
+    const receitaTotal = contratos.reduce((acc, c) => acc + Number(c.valor_total || 0), 0);
+    const totalContratos = contratos.length;
+    const ativos = contratos.filter(c => c.status === 'ATIVO').length;
+    const pendentes = contratos.filter(c => c.status === 'PENDENTE').length;
+    const cancelados = contratos.filter(c => c.status === 'CANCELADO').length;
+    const totalDependentes = contratos.reduce((acc, c) => acc + (c.dependentes?.length || 0), 0);
+
+    return {
+      receita_total: receitaTotal,
+      ticket_medio: totalContratos > 0 ? receitaTotal / totalContratos : 0,
+      total_contratos: totalContratos,
+      contratos_ativos: ativos,
+      contratos_pendentes: pendentes,
+      contratos_cancelados: cancelados,
+      total_dependentes: totalDependentes,
+    };
+  }, [contratos]);
+
+  // ─── Ranking de Cidades ────────────────────────────
+  const rankingCidades = useMemo(() => {
+    const porCidade = {};
+
+    contratos.forEach(c => {
+      const cidade = c.cidade || 'Não informada';
+      if (!porCidade[cidade]) {
+        porCidade[cidade] = { cidade, quantidade: 0, receita: 0 };
+      }
+      porCidade[cidade].quantidade += 1;
+      porCidade[cidade].receita += Number(c.valor_total || 0);
+    });
+
+    return Object.values(porCidade)
+      .map(item => ({
+        ...item,
+        ticket_medio: item.quantidade > 0 ? item.receita / item.quantidade : 0,
+      }))
+      .sort((a, b) => b.quantidade - a.quantidade)
+      .slice(0, 10);
+  }, [contratos]);
+
+  // ─── Receita 8 meses ──────────────────────────────
+  const receita8m = useMemo(() => {
+    const hoje = new Date();
+    const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const resultado = [];
+
+    for (let i = 7; i >= 0; i--) {
+      const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+      const mes = meses[d.getMonth()];
+      const ano = d.getFullYear();
+      
+      let receita = 0;
+      contratos.forEach(c => {
+        if (c.data_inicio) {
+          const data = new Date(c.data_inicio);
+          if (data.getMonth() === d.getMonth() && data.getFullYear() === d.getFullYear()) {
+            receita += Number(c.valor_total || 0);
+          }
+        }
+      });
+
+      resultado.push({ mes, receita });
+    }
+
+    return resultado;
+  }, [contratos]);
 
   return {
-    resumoGeral,
+    loading,
+    erro,
+    recarregar: carregar,
     rankingVendedores,
     statusContratos,
     rankingCidades,
     receita8m,
-    loading,
-    erro,
-    recarregar: carregarAnalytics,
+    resumoGeral,
   };
 }

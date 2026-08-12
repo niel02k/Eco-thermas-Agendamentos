@@ -2,13 +2,11 @@
 // src/app/hooks/agendamentos/index.js
 
 import { useCallback, useEffect, useState } from "react";
-import { useAgendamentosList } from "@/app/hooks/agendamentos/useAgendamentosList";
-import { useAgendamentosStats } from "@/app/hooks/agendamentos/useAgendamentosStats";
-import { useAgendamentosForm } from "@/app/hooks/agendamentos/useAgendamentosForm";
-import { useAgendamentoDetalhe } from "@/app/hooks/agendamentos/useAgendamentoDetalhe";
-import { useAgendamentosActions } from "@/app/hooks/agendamentos/useAgendamentosActions";
-
-
+import { useAgendamentosList } from "./useAgendamentosList";
+import { useAgendamentosStats } from "./useAgendamentosStats";
+import { useAgendamentosForm } from "./useAgendamentosForm";
+import { useAgendamentoDetalhe } from "./useAgendamentoDetalhe";
+import { useAgendamentosActions } from "./useAgendamentosActions";
 
 export function useAgendamentos() {
   const [dataFiltro, setDataFiltro] = useState(null);

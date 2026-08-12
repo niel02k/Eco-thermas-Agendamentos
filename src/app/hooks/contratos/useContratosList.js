@@ -25,8 +25,8 @@ export function useContratosList() {
         limite: LIMITE,
         busca,
         status,
-        ordenarPor: 'data_criacao',
-        ordem: 'desc',
+        ordenarPor: 'data_criacao', // 👈 ADICIONAR
+        ordem: 'desc',               // 👈 ADICIONAR
       });
       setContratos(resultado.contratos || []);
       setTotal(resultado.total || 0);
@@ -37,17 +37,6 @@ export function useContratosList() {
       setLoading(false);
     }
   }, [pagina, busca, filtroStatus]);
-
-  // 🔧 Adicione esta função para resetar a página quando filtrar/buscar
-  const setBuscaComReset = useCallback((novaBusca) => {
-    setBusca(novaBusca);
-    setPagina(1); // Volta para primeira página ao buscar
-  }, []);
-
-  const setFiltroStatusComReset = useCallback((novoStatus) => {
-    setFiltroStatus(novoStatus);
-    setPagina(1); // Volta para primeira página ao filtrar
-  }, []);
 
   const totalPaginas = Math.max(1, Math.ceil(total / LIMITE));
 
@@ -61,8 +50,8 @@ export function useContratosList() {
     loading,
     erro,
     setPagina,
-    setBusca: setBuscaComReset,        // 👈 Versão com reset
-    setFiltroStatus: setFiltroStatusComReset, // 👈 Versão com reset
+    setBusca,
+    setFiltroStatus,
     setErro,
     carregar,
   };
