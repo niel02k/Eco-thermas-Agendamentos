@@ -172,7 +172,6 @@ export default function Contracts() {
 
           <ContractsInsights
             rankingVendedores={rankingVendedores}
-            rankingCidades={rankingCidades}
             total={total}
             resumoGeral={resumoGeral}
           />
