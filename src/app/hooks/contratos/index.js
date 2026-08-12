@@ -1,22 +1,20 @@
-// src/app/hooks/contratos/index.js
 "use client";
 
 import { useEffect, useMemo } from 'react';
-import { useContratosList } from '@/app/hooks/contratos/useContratosList';
-import { useContratoDetalhe } from '@/app/hooks/contratos/useContratoDetalhe';
-import { useContratosActions } from '@/app/hooks/contratos/useContratosActions';
-import { useContratosAnalytics } from '@/app/hooks/contratos/useContratosAnalytics';
+import { useContratosList } from './useContratosList';
+import { useContratoDetalhe } from './useContratoDetalhe';
+import { useContratosActions } from './useContratosActions';
+import { useContratosAnalytics } from './useContratosAnalytics';
 
 export function useContratos() {
   const listagem = useContratosList();
   const detalhe = useContratoDetalhe();
   const analytics = useContratosAnalytics();
+  const actions = useContratosActions(recarregarTudo);
 
   const recarregarTudo = async () => {
     await Promise.all([listagem.carregar(), analytics.recarregar()]);
   };
-
-  const actions = useContratosActions(recarregarTudo);
 
   // Auto-load da listagem
   useEffect(() => {
@@ -24,6 +22,7 @@ export function useContratos() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listagem.pagina, listagem.busca, listagem.filtroStatus]);
 
+  // ticketInfo
   const ticketInfo = useMemo(() => ({
     ticket_medio: analytics.resumoGeral.ticket_medio,
     valor_total: analytics.resumoGeral.receita_total,
@@ -46,7 +45,7 @@ export function useContratos() {
     setErro: listagem.setErro,
     carregarContratos: listagem.carregar,
 
-    // ── Detalhe ──────────────────────────────────────────
+    // ── Detalhe ────────────────────────────────────────────
     contratoSelecionado: detalhe.contrato,
     modalAberto: detalhe.modalAberto,
     loadingDetalhe: detalhe.loading,
@@ -54,20 +53,21 @@ export function useContratos() {
     buscarContratoDetalhe: detalhe.buscarDetalhe,
     setModalAberto: detalhe.fecharModal,
 
-    // ── Ações ────────────────────────────────────────────
+    // ── Ações ──────────────────────────────────────────────
     excluirContrato: actions.excluir,
     loadingAcao: actions.loading,
     erroAcao: actions.erro,
 
-    // ── Analytics ────────────────────────────────────────
+    // ── Analytics ──────────────────────────────────────────
     resumoGeral: analytics.resumoGeral,
     rankingVendedores: analytics.rankingVendedores,
     statusContratos: analytics.statusContratos,
-    rankingCidades: analytics.rankingCidades, // 👈 NOVO
+    rankingCidades: analytics.rankingCidades,
     receita8m: analytics.receita8m,
     ticketInfo,
     loadingAnalytics: analytics.loading,
 
+    // ── Utilitários ──────────────────────────────────────
     recarregarTudo,
   };
 }

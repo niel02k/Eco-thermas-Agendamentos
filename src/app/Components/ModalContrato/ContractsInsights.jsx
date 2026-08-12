@@ -1,4 +1,13 @@
-// src/app/Components/ModalContrato/ContractsInsights.jsx
+"use client";
+
+import React from "react";
+import styles from "@/app/Components/ModalContrato/Contracts.module.css";
+
+const formatCurrency = (v) =>
+  Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+const formatNumber = (v) => Number(v || 0).toLocaleString("pt-BR");
+
 export default function ContractsInsights({ 
   rankingVendedores = [], 
   rankingCidades = [], 
@@ -8,8 +17,6 @@ export default function ContractsInsights({
   // ✅ SEMPRE garanta que é um array
   const vendedores = Array.isArray(rankingVendedores) ? rankingVendedores : [];
   const cidades = Array.isArray(rankingCidades) ? rankingCidades : [];
-
-  
 
   return (
     <div className={styles.insightsGrid}>

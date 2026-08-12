@@ -1,60 +1,90 @@
-// src/app/hooks/agendamentos/index.js
 "use client";
+// src/app/hooks/agendamentos/index.js
 
-import { useEffect, useMemo, useCallback } from 'react';
-import { useAgendamentosList } from '@/app/hooks/agendamentos/useAgendamentosList';
-import { useAgendamentoDetalhe } from '@/app/hooks/agendamentos/useAgendamentoDetalhe';
-import { useAgendamentosActions } from '@/app/hooks/agendamentos/useAgendamentosActions';
-import { useAgendamentosStats } from '@/app/hooks/agendamentos/useAgendamentosStats';
-import { useAgendamentosForm } from '@/app/hooks/agendamentos/useAgendamentosForm';
+import { useCallback, useEffect, useState } from "react";
+import { useAgendamentosList } from "@/app/hooks/agendamentos/useAgendamentosList";
+import { useAgendamentosStats } from "@/app/hooks/agendamentos/useAgendamentosStats";
+import { useAgendamentosForm } from "@/app/hooks/agendamentos/useAgendamentosForm";
+import { useAgendamentoDetalhe } from "@/app/hooks/agendamentos/useAgendamentoDetalhe";
+import { useAgendamentosActions } from "@/app/hooks/agendamentos/useAgendamentosActions";
 
 export function useAgendamentos() {
+  const [dataFiltro, setDataFiltro] = useState(null);
+
+  // Listagem
   const listagem = useAgendamentosList();
-  const detalhe = useAgendamentoDetalhe();
+
+  // Stats
   const stats = useAgendamentosStats();
+
+  // Formulário
   const form = useAgendamentosForm();
+
+  // Detalhe
+  const detalhe = useAgendamentoDetalhe();
+
+  // Ações
   const actions = useAgendamentosActions();
 
-  const recarregarTudo = useCallback(async () => {
-    await Promise.all([
-      listagem.carregar(),
-      stats.carregarStats()
-    ]);
-  }, [listagem, stats]);
+  // Carrega a lista aplicando o filtro de data
+  const carregarLista = useCallback(
+    async (pagina, busca) => {
+      await listagem.carregar(pagina, busca, dataFiltro);
+    },
+    [listagem, dataFiltro]
+  );
 
-  // Auto-load da listagem
+  // Callback executado após qualquer ação
+  const onActionComplete = useCallback(async () => {
+    await Promise.all([
+      carregarLista(listagem.pagina, listagem.busca),
+      stats.carregar(),
+    ]);
+  }, [carregarLista, listagem.pagina, listagem.busca, stats]);
+
+  // Carrega estatísticas uma vez
   useEffect(() => {
-    listagem.carregar();
-    stats.carregarStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listagem.pagina, listagem.busca, listagem.filtroStatus, listagem.filtroData]);
+    stats.carregar();
+  }, [stats]);
+
+  // Carrega a lista ao iniciar e quando mudar página, busca ou filtro
+  useEffect(() => {
+    carregarLista(listagem.pagina, listagem.busca);
+  }, [carregarLista, listagem.pagina, listagem.busca]);
+
+  const handleFiltroDataChange = useCallback((data) => {
+    setDataFiltro(data);
+    listagem.setPagina(1);
+  }, [listagem]);
 
   return {
-    // ── Listagem ──────────────────────────────────────────
+    // ── Tabela ──────────────────────────────────────────
     agendamentos: listagem.agendamentos,
     total: listagem.total,
     pagina: listagem.pagina,
     totalPaginas: listagem.totalPaginas,
     busca: listagem.busca,
     filtroStatus: listagem.filtroStatus,
-    filtroData: listagem.filtroData,
-    loading: listagem.loading,
+    loadingTabela: listagem.loading,
     erro: listagem.erro,
     setPagina: listagem.setPagina,
     setBusca: listagem.setBusca,
     setFiltroStatus: listagem.setFiltroStatus,
-    setFiltroData: listagem.setFiltroData,
     setErro: listagem.setErro,
-    carregarAgendamentos: listagem.carregar,
+    handleBusca: listagem.handleBusca,
 
-    // ── Stats ──────────────────────────────────────────────
+    // ── Filtro de Data ──────────────────────────────────
+    dataFiltro,
+    handleFiltroDataChange,
+
+    // ── Stats ────────────────────────────────────────────
     totalHoje: stats.totalHoje,
     semanaData: stats.semanaData,
     statusCount: stats.statusCount,
     statusCountVenda: stats.statusCountVenda,
     loadingStats: stats.loading,
 
-    // ── Form (Criar/Editar) ──────────────────────────────
+    // ── Form (Criar/Editar) ─────────────────────────────
     criarAgendamento: form.salvar,
     loadingCriar: form.loading,
     erroCriar: form.erro,
@@ -62,20 +92,33 @@ export function useAgendamentos() {
     agendamentoCriado: form.agendamentoSalvo,
     resetarCriacao: form.resetar,
 
-    // ── Detalhe ────────────────────────────────────────────
+    // ── Detalhe (Visualizar) ────────────────────────────
     agendamentoSelecionado: detalhe.agendamento,
     modalAberto: detalhe.modalAberto,
     loadingDetalhe: detalhe.loading,
-    buscarAgendamento: detalhe.abrirVisualizar,
-    buscarAgendamentoDetalhe: detalhe.buscarDetalhe,
-    setModalAberto: detalhe.fecharModal,
+    modoModal: detalhe.modoModal,
+    abrirVisualizar: detalhe.abrirVisualizar,
+    abrirEditar: detalhe.abrirEditar,
+    fecharModal: detalhe.fecharModal,
+    buscarDetalhe: detalhe.buscarDetalhe,
 
-    // ── Ações ──────────────────────────────────────────────
-    excluirAgendamento: actions.excluir,
-    loadingAcao: actions.loading,
-    erroAcao: actions.erro,
+    // ── Resultado de Venda ──────────────────────────────
+    showResultadoVenda: actions.showResultadoVenda,
+    agendamentoParaResultado: actions.agendamentoParaResultado,
+    loadingResultado: actions.loadingResultado,
+    abrirResultadoVenda: actions.abrirResultadoVenda,
+    fecharResultadoVenda: actions.fecharResultadoVenda,
+    confirmarResultadoVenda: actions.confirmarResultadoVenda,
+    confirmarRealizado: actions.confirmarRealizado,
 
-    // ── Utilitários ──────────────────────────────────────
-    recarregarTudo,
+    // ── Ações ────────────────────────────────────────────
+    cancelarAgendamento: actions.cancelar,
+    excluir: actions.excluir,
+
+    // ── Erro ─────────────────────────────────────────────
+    erroGeral: listagem.erro || stats.erro || form.erro || detalhe.erro || actions.erro,
+
+    // ── Utilidades ──────────────────────────────────────
+    recarregar: onActionComplete,
   };
 }

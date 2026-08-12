@@ -1,4 +1,3 @@
-// src/app/hooks/contratos/useContratosAnalytics.js
 "use client";
 
 import { useState, useCallback, useEffect } from 'react';
@@ -14,7 +13,7 @@ export function useContratosAnalytics() {
   });
   const [rankingVendedores, setRankingVendedores] = useState([]);
   const [statusContratos, setStatusContratos] = useState([]);
-  const [rankingCidades, setRankingCidades] = useState([]); // 👈 NOVO
+  const [rankingCidades, setRankingCidades] = useState([]);
   const [receita8m, setReceita8m] = useState([]);
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState(null);
@@ -35,7 +34,7 @@ export function useContratosAnalytics() {
       
       setRankingVendedores(dados.rankingVendedores || []);
       setStatusContratos(dados.statusContratos || []);
-      setRankingCidades(dados.rankingCidades || []); // 👈 NOVO
+      setRankingCidades(dados.rankingCidades || []);
       setReceita8m(dados.receitaMensal || []);
       
     } catch (e) {
@@ -46,7 +45,6 @@ export function useContratosAnalytics() {
     }
   }, []);
 
-  // Carrega automaticamente no mount
   useEffect(() => {
     carregarAnalytics();
   }, [carregarAnalytics]);
@@ -55,7 +53,7 @@ export function useContratosAnalytics() {
     resumoGeral,
     rankingVendedores,
     statusContratos,
-    rankingCidades, // 👈 NOVO
+    rankingCidades,
     receita8m,
     loading,
     erro,
