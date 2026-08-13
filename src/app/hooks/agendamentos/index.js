@@ -1,11 +1,20 @@
 'use client';
 
+<<<<<<< HEAD
 import { useCallback, useEffect, useState } from 'react';
 import { useAgendamentosList } from '@/app/hooks/agendamentos/useAgendamentosList';
 import { useAgendamentosStats } from '@/app/hooks/agendamentos/useAgendamentosStats';
 import { useAgendamentosForm } from '@/app/hooks/agendamentos/useAgendamentosForm';
 import { useAgendamentoDetalhe } from '@/app/hooks/agendamentos/useAgendamentoDetalhe';
 import { useAgendamentosActions } from '@/app/hooks/agendamentos/useAgendamentosActions';
+=======
+import { useCallback, useEffect, useState } from "react";
+import { useAgendamentosList } from "@/app/hooks/agendamentos/useAgendamentosList.js";
+import { useAgendamentosStats } from "@/app/hooks/agendamentos/useAgendamentosStats";
+import { useAgendamentosForm } from "@/app/hooks/agendamentos/useAgendamentosForm";
+import { useAgendamentoDetalhe } from "@/app/hooks/agendamentos/useAgendamentoDetalhe";
+import { useAgendamentosActions } from "@/app/hooks/agendamentos/useAgendamentosActions";
+>>>>>>> 33955b4 (Teste)
 
 const FILTROS_PAI_VAZIOS = Object.freeze({
   dataInicio: null,
