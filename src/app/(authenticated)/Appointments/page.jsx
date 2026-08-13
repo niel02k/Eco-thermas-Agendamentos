@@ -1,26 +1,33 @@
-  // src/app/(authenticated)/Appointments/page.jsx
-  "use client";
+'use client';
 
-<<<<<<< HEAD
-import React, { useEffect, useState, useCallback, useRef } from "react";
-import { Plus, AlertTriangle, SlidersHorizontal } from "lucide-react";
-import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
-import { useAgendamentos } from "@/app/hooks/agendamentos/index.js";
-import { useMediaQuery } from "@/app/hooks/useMediaQuery";
-import styles from "./Appointments.module.css";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import {
+  AlertTriangle,
+  Plus,
+  SlidersHorizontal,
+} from 'lucide-react';
 
-// Filtro pai
-import FiltroPai, { FILTROS_INICIAIS, } from "@/app/Components/Shared/FiltroPai.jsx";
-import { Filter } from 'lucide-react';
-// Componentes
-import AppointmentsWeekStatus from "@/app/Components/ModalAgendamento/AppointmentsWeekStatus.jsx";
-import VisualizarModal from "@/app/Components/Shared/VisualizarModal.jsx";
-import ConfirmModal from "@/app/Components/ModalAgendamento/ConfirmModal.jsx";
-import ModalRealizado from "@/app/Components/ModalAgendamento/ModalRealizado.jsx";
-import NewAppointment from "@/app/Components/modal/Newappointment.jsx";
-import ResultCard from "@/app/Components/Cards/ResultCard/ResultCard.jsx";
-import MobileList from "@/app/Components/Shared/MobileList.jsx";
-import DataTable from "@/app/Components/Shared/DataTable.jsx";
+import PageHeader from '@/app/Components/PageHeader/PageHeader.jsx';
+import FiltroPai, {
+  FILTROS_INICIAIS,
+} from '@/app/Components/Shared/FiltroPai.jsx';
+import AppointmentsWeekStatus from '@/app/Components/ModalAgendamento/AppointmentsWeekStatus.jsx';
+import VisualizarModal from '@/app/Components/Shared/VisualizarModal.jsx';
+import ConfirmModal from '@/app/Components/ModalAgendamento/ConfirmModal.jsx';
+import ModalRealizado from '@/app/Components/ModalAgendamento/ModalRealizado.jsx';
+import NewAppointment from '@/app/Components/modal/Newappointment.jsx';
+import ResultCard from '@/app/Components/Cards/ResultCard/ResultCard.jsx';
+import MobileList from '@/app/Components/Shared/MobileList.jsx';
+import DataTable from '@/app/Components/Shared/DataTable.jsx';
+
+import { useAgendamentos } from '@/app/hooks/agendamentos/index.js';
+import { useMediaQuery } from '@/app/hooks/useMediaQuery';
+import styles from './Appointments.module.css';
 
 export default function AppointmentsPage() {
   const [visible, setVisible] = useState(false);
@@ -28,105 +35,85 @@ export default function AppointmentsPage() {
   const [abrirFiltroPai, setAbrirFiltroPai] = useState(false);
   const [filtrosPai, setFiltrosPai] = useState(FILTROS_INICIAIS);
   const [confirm, setConfirm] = useState(null);
-  const [inputBusca, setInputBusca] = useState("");
+  const [inputBusca, setInputBusca] = useState('');
+  const [showModalRealizado, setShowModalRealizado] = useState(false);
+  const [agendamentoParaRealizar, setAgendamentoParaRealizar] = useState(null);
+
   const debounceRef = useRef(null);
-  const isMobile = useMediaQuery("(max-width: 768px)");
-=======
-  import React, { useEffect, useState, useCallback, useRef } from "react";
-  import { Plus, AlertTriangle } from "lucide-react";
-  import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
-  import { useAgendamentos } from "@/app/hooks/agendamentos/index.js";
-  import { useMediaQuery } from "@/app/hooks/useMediaQuery";
-  import styles from "./Appointments.module.css";
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
-  // Componentes
-  import AppointmentsWeekStatus from "@/app/Components/ModalAgendamento/AppointmentsWeekStatus.jsx";
-  import VisualizarModal from "@/app/Components/Shared/VisualizarModal.jsx";
-  import ConfirmModal from "@/app/Components/ModalAgendamento/ConfirmModal.jsx";
-  import ModalRealizado from "@/app/Components/ModalAgendamento/ModalRealizado.jsx";
-  import NewAppointment from "@/app/Components/modal/Newappointment.jsx";
-  import ResultCard from "@/app/Components/Cards/ResultCard/ResultCard.jsx";
-  import MobileList from "@/app/Components/Shared/MobileList.jsx";
-  import DataTable from "@/app/Components/Shared/DataTable.jsx";
-
-  export default function AppointmentsPage() {
-    const [visible, setVisible] = useState(false);
-    const [abrirModal, setAbrirModal] = useState(false);
-    const [confirm, setConfirm] = useState(null);
-    const [inputBusca, setInputBusca] = useState("");
-    const debounceRef = useRef(null);
-    const isMobile = useMediaQuery("(max-width: 768px)");
->>>>>>> 33955b4 (Teste)
-
-    const [showModalRealizado, setShowModalRealizado] = useState(false);
-    const [agendamentoParaRealizar, setAgendamentoParaRealizar] = useState(null);
-
-<<<<<<< HEAD
   const {
     agendamentos,
     total,
     pagina,
     totalPaginas,
     loadingTabela,
+    erroGeral,
     handleBusca,
     setPagina,
+
     semanaData,
     statusCount,
     statusCountVenda,
     loadingStats,
+
     agendamentoSelecionado,
     modoModal,
     abrirVisualizar,
     abrirEditar,
     fecharModal,
+
     showResultadoVenda,
     agendamentoParaResultado,
     loadingResultado,
     abrirResultadoVenda,
     fecharResultadoVenda,
     confirmarResultadoVenda,
-    confirmarRealizado,
+
     confirmarAgendamento,
+    confirmarRealizado,
     marcarComoFaltou,
     cancelarAgendamento,
     excluir,
-    erroGeral,
     recarregar,
-    handleFiltroDataChange,
   } = useAgendamentos(filtrosPai);
-=======
-    const {
-      agendamentos, total, pagina, totalPaginas,
-      loadingTabela, handleBusca, setPagina,
-      semanaData, statusCount, statusCountVenda, loadingStats,
-      agendamentoSelecionado, modoModal,
-      abrirVisualizar, abrirEditar, fecharModal,
-      showResultadoVenda, agendamentoParaResultado, loadingResultado,
-      abrirResultadoVenda, fecharResultadoVenda,
-      confirmarResultadoVenda, confirmarRealizado, confirmarAgendamento, marcarComoFaltou,
-      cancelarAgendamento, excluir,
-      erro, recarregar,handleFiltroDataChange,
-    } = useAgendamentos(); 
->>>>>>> 33955b4 (Teste)
 
-    useEffect(() => {
-      const t = setTimeout(() => setVisible(true), 100);
-      return () => clearTimeout(t);
-    }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setVisible(true);
+    }, 100);
 
-    const onChangeBusca = useCallback((e) => {
-      const val = e.target.value;
-      setInputBusca(val);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
+
+  const onChangeBusca = useCallback((evento) => {
+    const valor = evento.target.value;
+
+    setInputBusca(valor);
+
+    if (debounceRef.current) {
       clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => handleBusca(val), 350);
-    }, [handleBusca]);
+    }
 
-<<<<<<< HEAD
+    debounceRef.current = setTimeout(() => {
+      handleBusca(valor);
+    }, 350);
+  }, [handleBusca]);
+
   const handleAplicarFiltroPai = useCallback((novosFiltros) => {
     setFiltrosPai({
       ...FILTROS_INICIAIS,
       ...novosFiltros,
     });
+
     setAbrirFiltroPai(false);
   }, []);
 
@@ -135,89 +122,98 @@ export default function AppointmentsPage() {
       ...FILTROS_INICIAIS,
       ...filtrosLimpos,
     });
+
     setAbrirFiltroPai(false);
   }, []);
 
   const handleConfirmarAgendamento = useCallback(async (codigo) => {
     await confirmarAgendamento(codigo);
   }, [confirmarAgendamento]);
-=======
-    const handleConfirmarAgendamento = useCallback(async (codigo) => {
-      await confirmarAgendamento(codigo);
-    }, [confirmarAgendamento]);
->>>>>>> 33955b4 (Teste)
 
-    const handleAbrirModalRealizado = useCallback((agendamento) => {
-      setAgendamentoParaRealizar(agendamento);
-      setShowModalRealizado(true);
-    }, []);
+  const handleAbrirModalRealizado = useCallback((agendamento) => {
+    setAgendamentoParaRealizar(agendamento);
+    setShowModalRealizado(true);
+  }, []);
 
-<<<<<<< HEAD
   const handleConfirmarRealizado = useCallback(async (codigo) => {
-    await confirmarRealizado(codigo);
+    const resposta = await confirmarRealizado(codigo);
+
+    if (resposta?.sucesso === false) {
+      return;
+    }
+
     setShowModalRealizado(false);
 
-    const ag = agendamentos.find((item) => item.codigo === codigo);
-    if (ag) {
+    const agendamento = agendamentos.find(
+      (item) => item.codigo === codigo,
+    );
+
+    if (agendamento) {
       abrirResultadoVenda({
-        ...ag,
-        resultado_visita: "REALIZADO",
-        resultado_venda: "PENDENTE",
+        ...agendamento,
+        resultado_visita: 'REALIZADO',
+        resultado_venda: 'PENDENTE',
       });
     }
-  }, [confirmarRealizado, agendamentos, abrirResultadoVenda]);
-=======
+  }, [
+    confirmarRealizado,
+    agendamentos,
+    abrirResultadoVenda,
+  ]);
 
-    const handleConfirmarRealizado = useCallback(async (codigo) => {
-      await confirmarRealizado(codigo);
-      setShowModalRealizado(false);
-      const ag = agendamentos.find(a => a.codigo === codigo);
-      if (ag) {
-        abrirResultadoVenda({ ...ag, resultado_visita: 'REALIZADO', resultado_venda: 'PENDENTE' });
-      }
-    }, [confirmarRealizado, agendamentos, abrirResultadoVenda]);
->>>>>>> 33955b4 (Teste)
+  const handleFaltou = useCallback(async (codigo) => {
+    const resposta = await marcarComoFaltou(codigo);
 
-    const handleFaltou = useCallback(async (codigo) => {
-      await marcarComoFaltou(codigo);
-      setShowModalRealizado(false);
-    }, [marcarComoFaltou]);
+    if (resposta?.sucesso === false) {
+      return;
+    }
 
-    const handleConfirmarResultado = useCallback(async (codigo, resultado) => {
-      await confirmarResultadoVenda(codigo, resultado);
-    }, [confirmarResultadoVenda]);
+    setShowModalRealizado(false);
+  }, [marcarComoFaltou]);
 
-    const handleEditar = useCallback(async (codigo) => {
-      fecharModal();
-      await abrirEditar(codigo);
-      setAbrirModal(true);
-    }, [fecharModal, abrirEditar]);
+  const handleConfirmarResultado = useCallback(async (
+    codigo,
+    resultado,
+  ) => {
+    await confirmarResultadoVenda(codigo, resultado);
+  }, [confirmarResultadoVenda]);
 
-    const handleCloseModal = useCallback(async () => {
-      setAbrirModal(false);
-      fecharModal();
-      await recarregar();
-    }, [fecharModal, recarregar]);
+  const handleEditar = useCallback(async (codigo) => {
+    fecharModal();
+    await abrirEditar(codigo);
+    setAbrirModal(true);
+  }, [fecharModal, abrirEditar]);
 
-<<<<<<< HEAD
-  const pedirCancelamento = useCallback(
-    (codigo) => setConfirm({ tipo: "cancelar", codigo }),
-    []
-  );
+  const handleCloseModal = useCallback(async () => {
+    setAbrirModal(false);
+    fecharModal();
+    await recarregar();
+  }, [fecharModal, recarregar]);
 
-  const pedirExclusao = useCallback(
-    (codigo) => setConfirm({ tipo: "excluir", codigo }),
-    []
-  );
+  const pedirCancelamento = useCallback((codigo) => {
+    setConfirm({
+      tipo: 'cancelar',
+      codigo,
+    });
+  }, []);
+
+  const pedirExclusao = useCallback((codigo) => {
+    setConfirm({
+      tipo: 'excluir',
+      codigo,
+    });
+  }, []);
 
   const confirmarAcao = useCallback(async () => {
-    if (!confirm) return;
+    if (!confirm) {
+      return;
+    }
 
-    if (confirm.tipo === "cancelar") {
+    if (confirm.tipo === 'cancelar') {
       await cancelarAgendamento(confirm.codigo);
     }
 
-    if (confirm.tipo === "excluir") {
+    if (confirm.tipo === 'excluir') {
       await excluir(confirm.codigo);
     }
 
@@ -226,21 +222,27 @@ export default function AppointmentsPage() {
 
   return (
     <>
-
+      <FiltroPai
+        aberto={abrirFiltroPai}
+        filtros={filtrosPai}
+        onAplicar={handleAplicarFiltroPai}
+        onLimpar={handleLimparFiltroPai}
+        onFechar={() => setAbrirFiltroPai(false)}
+      />
 
       {confirm && (
         <ConfirmModal
           mensagem={
-            confirm.tipo === "cancelar"
-              ? "Deseja cancelar este agendamento?"
-              : "Deseja excluir permanentemente este agendamento?"
+            confirm.tipo === 'cancelar'
+              ? 'Deseja cancelar este agendamento?'
+              : 'Deseja excluir permanentemente este agendamento?'
           }
           onConfirm={confirmarAcao}
           onCancel={() => setConfirm(null)}
         />
       )}
 
-      {modoModal === "visualizar" && agendamentoSelecionado && (
+      {modoModal === 'visualizar' && agendamentoSelecionado && (
         <VisualizarModal
           tipo="agendamento"
           agendamento={agendamentoSelecionado}
@@ -266,7 +268,11 @@ export default function AppointmentsPage() {
       {abrirModal && (
         <NewAppointment
           onClose={handleCloseModal}
-          dadosEdicao={modoModal === "editar" ? agendamentoSelecionado : null}
+          dadosEdicao={
+            modoModal === 'editar'
+              ? agendamentoSelecionado
+              : null
+          }
         />
       )}
 
@@ -280,13 +286,20 @@ export default function AppointmentsPage() {
       )}
 
       <div className={styles.container}>
-
-        <main className={`${styles.main} ${visible ? styles.mainVisible : ""}`}>
+        <main
+          className={`${styles.main} ${
+            visible ? styles.mainVisible : ''
+          }`}
+        >
           <div className={styles.containerheader}>
             <div className={styles.pageHeaderWrapper}>
               <PageHeader
                 title="Agendamentos"
                 subtitle="Gestão operacional dos visitantes e reservas"
+                badge={{
+                  text: 'Sistema Ativo',
+                  type: 'success',
+                }}
                 actionLabel="Novo Agendamento"
                 actionIcon={Plus}
                 onAction={() => {
@@ -300,26 +313,15 @@ export default function AppointmentsPage() {
               type="button"
               className={styles.filterTrigger}
               onClick={() => setAbrirFiltroPai(true)}
-              aria-label="Abrir filtros dos indicadores"
+              aria-label="Abrir filtro pai dos indicadores"
             >
-              <Filter size={18} strokeWidth={2} />
+              <SlidersHorizontal size={17} />
               <span>Filtros</span>
             </button>
           </div>
 
-          <FiltroPai
-            aberto={abrirFiltroPai}
-            filtros={filtrosPai}
-            onAplicar={handleAplicarFiltroPai}
-            onLimpar={handleLimparFiltroPai}
-            onFechar={() => setAbrirFiltroPai(false)}
-          />
-
-
-
-
           {erroGeral && (
-            <div className={styles.errorBanner}>
+            <div className={styles.errorBanner} role="alert">
               <AlertTriangle size={16} />
               <span>{erroGeral}</span>
             </div>
@@ -341,7 +343,9 @@ export default function AppointmentsPage() {
               pagina={pagina}
               totalPaginas={totalPaginas}
               onPageChange={setPagina}
-              onCardClick={(ag) => abrirVisualizar(ag.codigo)}
+              onCardClick={(agendamento) => {
+                abrirVisualizar(agendamento.codigo);
+              }}
               emptyMessage="Nenhum agendamento encontrado"
             />
           ) : (
@@ -355,8 +359,9 @@ export default function AppointmentsPage() {
               busca={inputBusca}
               onBuscaChange={onChangeBusca}
               onPageChange={setPagina}
-              onRowClick={(agendamento) => abrirVisualizar(agendamento.codigo)}
-              onFiltroDataChange={handleFiltroDataChange}
+              onRowClick={(agendamento) => {
+                abrirVisualizar(agendamento.codigo);
+              }}
               showExport={true}
               showSearch={true}
             />
@@ -366,88 +371,3 @@ export default function AppointmentsPage() {
     </>
   );
 }
-=======
-    const pedirCancelamento = useCallback((codigo) => setConfirm({ tipo: "cancelar", codigo }), []);
-    const pedirExclusao = useCallback((codigo) => setConfirm({ tipo: "excluir", codigo }), []);
-
-    const confirmarAcao = useCallback(async () => {
-      if (!confirm) return;
-      if (confirm.tipo === "cancelar") await cancelarAgendamento(confirm.codigo);
-      if (confirm.tipo === "excluir") await excluir(confirm.codigo);
-      setConfirm(null);
-    }, [confirm, cancelarAgendamento, excluir]);
-
-    return (
-      <>
-        {/* ═══════════ MODAIS ═══════════ */}
-        {confirm && (
-          <ConfirmModal
-            mensagem={confirm.tipo === "cancelar" ? "Deseja cancelar este agendamento?" : "Deseja excluir permanentemente este agendamento?"}
-            onConfirm={confirmarAcao}
-            onCancel={() => setConfirm(null)}
-          />
-        )}
-
-        {modoModal === 'visualizar' && agendamentoSelecionado && (
-          <VisualizarModal
-            tipo="agendamento"
-            agendamento={agendamentoSelecionado}
-            onClose={fecharModal}
-            onEditar={handleEditar}
-            onConfirmarAgendamento={handleConfirmarAgendamento}
-            onConfirmarRealizado={handleAbrirModalRealizado}
-            onResultadoVenda={abrirResultadoVenda}
-            onCancelar={pedirCancelamento}
-            onExcluir={pedirExclusao}
-          />
-        )}
-
-        {showResultadoVenda && agendamentoParaResultado && (
-          <ResultCard agendamento={agendamentoParaResultado} onConfirm={handleConfirmarResultado} onCancel={fecharResultadoVenda} loading={loadingResultado} />
-        )}
-
-        {abrirModal && (
-          <NewAppointment onClose={handleCloseModal} dadosEdicao={modoModal === 'editar' ? agendamentoSelecionado : null} />
-        )}
-
-        {showModalRealizado && agendamentoParaRealizar && (
-          <ModalRealizado agendamento={agendamentoParaRealizar} onConfirm={handleConfirmarRealizado} onFaltou={handleFaltou} onClose={() => setShowModalRealizado(false)} />
-        )}
-
-        {/* ═══════════ CONTEÚDO PRINCIPAL ═══════════ */}
-        <div className={styles.container}>
-          <main className={`${styles.main} ${visible ? styles.mainVisible : ""}`}>
-            <PageHeader title="Agendamentos" subtitle="Gestão operacional dos visitantes e reservas"
-              badge={{ text: "Sistema Ativo", type: "success" }} actionLabel="Novo Agendamento" actionIcon={Plus}
-              onAction={() => { fecharModal(); setAbrirModal(true); }} />
-
-            {erro && <div className={styles.errorBanner}><AlertTriangle size={16} /><span>{erro}</span></div>}
-
-            <AppointmentsWeekStatus semanaData={semanaData} statusCount={statusCount} statusCountVenda={statusCountVenda} loading={loadingStats} />
-
-            {isMobile ? (
-              <MobileList tipo="agendamento" dados={agendamentos} loading={loadingTabela} total={total} pagina={pagina} totalPaginas={totalPaginas}
-                onPageChange={setPagina} onCardClick={(ag) => abrirVisualizar(ag.codigo)} emptyMessage="Nenhum agendamento encontrado" />
-            ) : (
-            <DataTable
-    tipo="agendamento"
-    dados={agendamentos}
-    loading={loadingTabela}
-    total={total}
-    pagina={pagina}
-    totalPaginas={totalPaginas}
-    busca={inputBusca}
-    onBuscaChange={onChangeBusca}
-    onPageChange={setPagina}
-    onRowClick={(ag) => abrirVisualizar(ag.codigo)}
-    onFiltroDataChange={handleFiltroDataChange}
-    showExport={true}
-    showSearch={true}
-  />
-            )}
-          </main>
-        </div>
-      </>
-    );
-  }
->>>>>>> 33955b4 (Teste)
