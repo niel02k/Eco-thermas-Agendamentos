@@ -287,9 +287,8 @@ export default function AppointmentsPage() {
 
       <div className={styles.container}>
         <main
-          className={`${styles.main} ${
-            visible ? styles.mainVisible : ''
-          }`}
+          className={`${styles.main} ${visible ? styles.mainVisible : ''
+            }`}
         >
           <div className={styles.containerheader}>
             <div className={styles.pageHeaderWrapper}>
