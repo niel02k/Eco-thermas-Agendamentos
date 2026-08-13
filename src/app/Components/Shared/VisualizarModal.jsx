@@ -5,9 +5,9 @@ import React from "react";
 import { X, Pencil, CheckCircle2, CircleDollarSign, Trash2, User, Users, MapPin, CalendarDays, CreditCard } from "lucide-react";
 import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
 import VoucherPDFButton from "@/app/Components/ModalAgendamento/VoucherPDFButton";
-import { 
-  STATUS_AGENDAMENTO, 
-  STATUS_AGENDAMENTO_LABELS, 
+import {
+  STATUS_AGENDAMENTO,
+  STATUS_AGENDAMENTO_LABELS,
   STATUS_AGENDAMENTO_COLORS,
   RESULTADO_VISITA,
   RESULTADO_VISITA_LABELS,
@@ -34,22 +34,22 @@ function formatarMoeda(valor) {
   return Number(valor || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-export default function VisualizarModal({ 
+export default function VisualizarModal({
   tipo = 'agendamento',
   agendamento,
   contrato,
-  onClose, 
+  onClose,
   onEditar,
-  onConfirmarAgendamento, 
-  onConfirmarRealizado, 
-  onResultadoVenda, 
-  onCancelar, 
+  onConfirmarAgendamento,
+  onConfirmarRealizado,
+  onResultadoVenda,
+  onCancelar,
   onExcluir,
   onExcluirContrato,
 }) {
   // ═══════════ VERIFICAÇÃO ANTES DE TUDO ═══════════
   const dados = tipo === 'contrato' ? contrato : agendamento;
-  
+
   if (!dados) return null;
   if (tipo === 'agendamento' && !dados.codigo) return null;
   if (tipo === 'contrato' && !dados.id) return null;
@@ -68,7 +68,7 @@ export default function VisualizarModal({
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalDetalhe} onClick={e => e.stopPropagation()}>
-        
+
         {/* Header */}
         <div className={styles.modalDetalheHeader}>
           <div>
@@ -91,16 +91,41 @@ export default function VisualizarModal({
               )}
             </div>
           </div>
-          
+
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             {isAgendamento && <VoucherPDFButton agendamento={dados} />}
-            
-            {isAgendamento && !isFinalizado && dados.status === STATUS_AGENDAMENTO.PENDENTE && (
-              <button className={styles.actionButton} title="Confirmar Agendamento"
-                onClick={() => { onClose(); onConfirmarAgendamento(dados.codigo); }}>
-                <CheckCircle2 size={16} color="#15803D" />
-              </button>
-            )}
+
+            {isAgendamento &&
+              !isFinalizado &&
+              dados.status === STATUS_AGENDAMENTO.PENDENTE && (
+                <button
+                  type="button"
+                  className={styles.actionButton}
+                  title="Confirmar Agendamento"
+                  onClick={async (evento) => {
+                    evento.stopPropagation();
+
+                    if (typeof onConfirmarAgendamento !== 'function') {
+                      console.error(
+                        'onConfirmarAgendamento não foi recebido pelo VisualizarModal.',
+                      );
+                      return;
+                    }
+
+                    const resposta = await onConfirmarAgendamento(
+                      dados.codigo,
+                    );
+
+                    if (resposta?.sucesso === false) {
+                      return;
+                    }
+
+                    onClose?.();
+                  }}
+                >
+                  <CheckCircle2 size={16} color="#15803D" />
+                </button>
+              )}
             {isAgendamento && !isFinalizado && dados.status === STATUS_AGENDAMENTO.CONFIRMADO && (
               <button className={styles.actionButton} title="Realizar Agendamento"
                 onClick={() => { onClose(); onConfirmarRealizado(dados); }}>
@@ -113,12 +138,12 @@ export default function VisualizarModal({
                 <CircleDollarSign size={16} color="#A16207" />
               </button>
             )}
-            
-            <button className={styles.actionButton} 
+
+            <button className={styles.actionButton}
               onClick={() => { onClose(); onEditar(isContrato ? dados.id : dados.codigo); }}>
               <Pencil size={16} />
             </button>
-            
+
             <button className={styles.closeBtn} onClick={onClose}>
               <X size={20} />
             </button>
@@ -213,7 +238,7 @@ export default function VisualizarModal({
 
         {/* Footer */}
         <div className={styles.modalDetalheFooter}>
-          
+
           <button className={styles.btnFechar}
             onClick={() => { onClose(); isContrato ? onExcluirContrato(dados.id) : onExcluir(dados.codigo); }}>
             <Trash2 size={16} /> Excluir

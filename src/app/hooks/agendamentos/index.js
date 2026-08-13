@@ -1,11 +1,11 @@
 'use client';
-import { useCallback, useEffect, useState } from "react";
-import { useAgendamentosList } from "@/app/hooks/agendamentos/useAgendamentosList.js";
-import { useAgendamentosStats } from "@/app/hooks/agendamentos/useAgendamentosStats";
-import { useAgendamentosForm } from "@/app/hooks/agendamentos/useAgendamentosForm";
-import { useAgendamentoDetalhe } from "@/app/hooks/agendamentos/useAgendamentoDetalhe";
-import { useAgendamentosActions } from "@/app/hooks/agendamentos/useAgendamentosActions";
 
+import { useCallback, useEffect, useState } from 'react';
+import { useAgendamentosList } from '@/app/hooks/agendamentos/useAgendamentosList.js';
+import { useAgendamentosStats } from '@/app/hooks/agendamentos/useAgendamentosStats';
+import { useAgendamentosForm } from '@/app/hooks/agendamentos/useAgendamentosForm';
+import { useAgendamentoDetalhe } from '@/app/hooks/agendamentos/useAgendamentoDetalhe';
+import { useAgendamentosActions } from '@/app/hooks/agendamentos/useAgendamentosActions';
 
 const FILTROS_PAI_VAZIOS = Object.freeze({
   dataInicio: null,
@@ -15,16 +15,11 @@ const FILTROS_PAI_VAZIOS = Object.freeze({
   resultadoVenda: '',
 });
 
-export function useAgendamentos(
-  filtrosPai = FILTROS_PAI_VAZIOS,
-) {
-  // Filtro diário adicional da tabela.
+export function useAgendamentos(filtrosPai = FILTROS_PAI_VAZIOS) {
   const [dataFiltro, setDataFiltro] = useState(null);
 
-  // O filtro pai é enviado para a tabela e para os indicadores.
   const listagem = useAgendamentosList(filtrosPai);
   const stats = useAgendamentosStats(filtrosPai);
-
   const form = useAgendamentosForm();
   const detalhe = useAgendamentoDetalhe();
 
@@ -82,8 +77,6 @@ export function useAgendamentos(
   const actions = useAgendamentosActions(onActionComplete);
 
   return {
-    filtrosPai,
-
     agendamentos,
     total,
     pagina,
@@ -107,13 +100,6 @@ export function useAgendamentos(
     statusCountVenda,
     loadingStats,
 
-    criarAgendamento: form.salvar,
-    loadingCriar: form.loading,
-    erroCriar: form.erro,
-    sucessoCriar: form.sucesso,
-    agendamentoCriado: form.agendamentoSalvo,
-    resetarCriacao: form.resetar,
-
     agendamentoSelecionado: detalhe.agendamento,
     modalAberto: detalhe.modalAberto,
     loadingDetalhe: detalhe.loading,
@@ -123,17 +109,18 @@ export function useAgendamentos(
     fecharModal: detalhe.fecharModal,
     buscarDetalhe: detalhe.buscarDetalhe,
 
+    confirmarAgendamento: actions.confirmarAgendamento,
+    confirmarRealizado: actions.confirmarRealizado,
+    marcarComoFaltou: actions.marcarComoFaltou,
+    cancelarAgendamento: actions.cancelar,
+    excluir: actions.excluir,
+
     showResultadoVenda: actions.showResultadoVenda,
     agendamentoParaResultado: actions.agendamentoParaResultado,
     loadingResultado: actions.loadingResultado,
     abrirResultadoVenda: actions.abrirResultadoVenda,
     fecharResultadoVenda: actions.fecharResultadoVenda,
     confirmarResultadoVenda: actions.confirmarResultadoVenda,
-    confirmarRealizado: actions.confirmarRealizado,
-    marcarComoFaltou: actions.marcarComoFaltou,
-
-    cancelarAgendamento: actions.cancelar,
-    excluir: actions.excluir,
 
     erroGeral:
       erroLista ||
