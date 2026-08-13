@@ -1,0 +1,345 @@
+.filterOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background: rgba(15, 23, 42, 0.56);
+  backdrop-filter: blur(4px);
+  animation: filterOverlayIn 0.2s ease-out;
+}
+
+.filterModal {
+  width: min(920px, 100%);
+  max-height: min(760px, calc(100vh - 64px));
+  overflow-y: auto;
+  padding: 32px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow:
+    0 24px 64px rgba(15, 23, 42, 0.22),
+    0 8px 24px rgba(15, 23, 42, 0.08);
+  animation: filterModalIn 0.24s ease-out;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.filterModal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.filterModal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.filterModal::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #cbd5e1;
+}
+
+.filterModalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.filterModalHeader h4 {
+  margin: 0 0 8px;
+  color: #0f172a;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.filterModalHeader span {
+  display: block;
+  max-width: 620px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.filterCloseButton {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 25px;
+  line-height: 1;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.filterCloseButton:hover {
+  border-color: #fed7aa;
+  background: #fff7ed;
+  color: #c2410c;
+  transform: rotate(3deg);
+}
+
+.filterCloseButton:focus-visible,
+.filterClearButton:focus-visible,
+.filterApplyButton:focus-visible,
+.filterDateInput:focus-visible,
+.filterSelect:focus-visible {
+  outline: 3px solid rgba(249, 115, 22, 0.22);
+  outline-offset: 2px;
+}
+
+.filterRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 20px;
+  margin-bottom: 28px;
+}
+
+.filterField {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filterLabel {
+  display: block;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.055em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.filterDateInput,
+.filterSelect {
+  box-sizing: border-box;
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #0f172a;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.filterDateInput:hover,
+.filterSelect:hover {
+  border-color: #94a3b8;
+}
+
+.filterDateInput:focus,
+.filterSelect:focus {
+  border-color: #f97316;
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.12);
+}
+
+.filterDateInput {
+  min-width: 0;
+  color-scheme: light;
+}
+
+.filterSelect {
+  cursor: pointer;
+}
+
+.filterModalActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 22px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.filterClearButton,
+.filterApplyButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 128px;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.filterClearButton {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+}
+
+.filterClearButton:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+.filterApplyButton {
+  border: 1px solid #ea580c;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #ffffff;
+  box-shadow: 0 6px 14px rgba(234, 88, 12, 0.2);
+}
+
+.filterApplyButton:hover {
+  border-color: #c2410c;
+  background: linear-gradient(135deg, #ea580c, #c2410c);
+  box-shadow: 0 8px 18px rgba(194, 65, 12, 0.26);
+  transform: translateY(-1px);
+}
+
+.filterClearButton:active,
+.filterApplyButton:active {
+  transform: translateY(0);
+}
+
+.filterError {
+  margin: -8px 0 20px;
+  padding: 10px 12px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+@keyframes filterOverlayIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes filterModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (min-width: 900px) {
+  .filterModal {
+    width: min(980px, 100%);
+    padding: 36px;
+  }
+
+  .filterRow {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .filterField:nth-child(-n + 2) {
+    grid-column: span 1;
+  }
+}
+
+@media (min-width: 1200px) {
+  .filterModal {
+    width: min(1080px, 100%);
+  }
+
+  .filterRow {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .filterOverlay {
+    align-items: flex-start;
+    padding: 16px;
+    overflow-y: auto;
+  }
+
+  .filterModal {
+    width: 100%;
+    max-height: calc(100vh - 32px);
+    padding: 22px;
+    border-radius: 16px;
+  }
+
+  .filterModalHeader {
+    margin-bottom: 22px;
+    padding-bottom: 16px;
+  }
+
+  .filterModalHeader h4 {
+    font-size: 18px;
+  }
+
+  .filterModalHeader span {
+    font-size: 13px;
+  }
+
+  .filterRow {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+
+  .filterModalActions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .filterClearButton,
+  .filterApplyButton {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filterOverlay,
+  .filterModal,
+  .filterCloseButton,
+  .filterDateInput,
+  .filterSelect,
+  .filterClearButton,
+  .filterApplyButton {
+    animation: none;
+    transition: none;
+  }
+}

@@ -1,111 +1,103 @@
-// src/app/hooks/agendamentos/useAgendamentosStats.js
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { 
-  agendamentosHoje, 
-  agendamentosPorDiaSemana,
-  proximosDiasComAgendamentos,
-  taxaDeConversao,
-  totalClientesAtendidos,
-  listarAgendamentos 
-} from '@/app/services/agendamentosServices';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { buscarAgendamentosStats } from '@/app/services/agendamentosServices';
 
-const DIAS_SEMANA = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+const FILTROS_INICIAIS = {
+  statusAgendamento: '',
+  resultadoVisita: '',
+  resultadoVenda: '',
+};
 
-export function useAgendamentosStats() {
+const STATUS_INICIAIS = {
+  PENDENTE: 0,
+  CONFIRMADO: 0,
+  CANCELADO: 0,
+};
+
+const RESULTADOS_VISITA_INICIAIS = {
+  PENDENTE: 0,
+  REALIZADO: 0,
+  FALTOU: 0,
+};
+
+const RESULTADOS_VENDA_INICIAIS = {
+  PENDENTE: 0,
+  VENDA_REALIZADA: 0,
+  VENDA_PERDIDA: 0,
+  NAO_APLICAVEL: 0,
+};
+
+export function useAgendamentosStats(filtrosPai = FILTROS_INICIAIS) {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(null);
-
   const [totalHoje, setTotalHoje] = useState(0);
   const [semanaData, setSemanaData] = useState([]);
   const [proximosDias, setProximosDias] = useState([]);
   const [taxaConversao, setTaxaConversao] = useState(0);
   const [totalClientes, setTotalClientes] = useState(0);
-  const [statusCount, setStatusCount] = useState({
-    CONFIRMADO: 0,
-    PENDENTE: 0,
-    CANCELADO: 0,
-    REALIZADO: 0,
-    FALTOU: 0,
-  });
-  const [statusCountVenda, setStatusCountVenda] = useState({
-    VENDA_REALIZADA: 0,
-    VENDA_PERDIDA: 0,
-  });
+  const [statusCount, setStatusCount] = useState(STATUS_INICIAIS);
+  const [resultadoVisitaCount, setResultadoVisitaCount] = useState(
+    RESULTADOS_VISITA_INICIAIS,
+  );
+  const [statusCountVenda, setStatusCountVenda] = useState(
+    RESULTADOS_VENDA_INICIAIS,
+  );
+
+  const requisicaoAtual = useRef(0);
 
   const carregar = useCallback(async () => {
+    const idRequisicao = ++requisicaoAtual.current;
+
     setLoading(true);
     setErro(null);
+
     try {
-      const [hoje, semana, proximos, taxa, clientes, todos] = await Promise.all([
-        agendamentosHoje(),
-        agendamentosPorDiaSemana(),
-        proximosDiasComAgendamentos(2),
-        taxaDeConversao({}),
-        totalClientesAtendidos(),
-        listarAgendamentos({ pagina: 1, limite: 200 }),
-      ]);
+      // O serviço ignora datas externas e calcula a semana atual:
+      // segunda-feira até domingo.
+      const resultado = await buscarAgendamentosStats(filtrosPai);
 
-      setTotalHoje(hoje ?? 0);
+      if (idRequisicao !== requisicaoAtual.current) return;
 
-      // Semana formatada
-      const semanaFormatada = DIAS_SEMANA.map((dia, i) => ({
-        day: dia,
-        total: semana[i] ?? 0,
-      }));
-      setSemanaData(semanaFormatada);
+      setTotalHoje(Number(resultado?.totalHoje || 0));
+      setSemanaData(resultado?.semanaData || []);
+      setProximosDias(resultado?.proximosDias || []);
+      setTaxaConversao(Number(resultado?.taxaConversao || 0));
+      setTotalClientes(Number(resultado?.totalClientes || 0));
 
-      setProximosDias(proximos || []);
-      setTaxaConversao(taxa ?? 0);
-      setTotalClientes(clientes ?? 0);
-
-      // ── Janela da semana atual (Seg 00:00 → Dom 23:59) ──────────
-      const agora = new Date();
-      const diaSemana = agora.getDay();
-      const inicioSemana = new Date(agora);
-      inicioSemana.setDate(agora.getDate() - (diaSemana === 0 ? 6 : diaSemana - 1));
-      inicioSemana.setHours(0, 0, 0, 0);
-      const fimSemana = new Date(inicioSemana);
-      fimSemana.setDate(inicioSemana.getDate() + 6);
-      fimSemana.setHours(23, 59, 59, 999);
-
-      // Contagem de status
-      const counts = { CONFIRMADO: 0, PENDENTE: 0, CANCELADO: 0, REALIZADO: 0, FALTOU: 0 };
-      const countsVenda = { VENDA_REALIZADA: 0, VENDA_PERDIDA: 0 };
-
-      (todos.agendamentos ?? []).forEach((a) => {
-        const dataVisita = new Date(a.data_visita + 'T00:00:00');
-        const naSemana = dataVisita >= inicioSemana && dataVisita <= fimSemana;
-
-        // ✅ Contagem de status (todos os agendamentos)
-        if (counts[a.status] !== undefined) {
-          counts[a.status]++;
-        }
-
-        // ✅ Contagem de FALTOU (baseado no resultado_visita)
-        if (a.resultado_visita === 'FALTOU') {
-          counts.FALTOU++;
-        }
-
-        // ✅ Contagem de resultado de venda (apenas na semana)
-        if (naSemana && a.resultado_venda) {
-          if (countsVenda[a.resultado_venda] !== undefined) {
-            countsVenda[a.resultado_venda]++;
-          }
-        }
+      setStatusCount({
+        ...STATUS_INICIAIS,
+        ...(resultado?.statusCount || {}),
       });
 
-      setStatusCount(counts);
-      setStatusCountVenda(countsVenda);
+      setResultadoVisitaCount({
+        ...RESULTADOS_VISITA_INICIAIS,
+        ...(resultado?.resultadoVisitaCount || {}),
+      });
 
-    } catch (e) {
-      console.error('Erro ao carregar estatísticas:', e);
-      setErro('Erro ao carregar estatísticas.');
+      setStatusCountVenda({
+        ...RESULTADOS_VENDA_INICIAIS,
+        ...(resultado?.statusCountVenda || {}),
+      });
+    } catch (error) {
+      if (idRequisicao !== requisicaoAtual.current) return;
+
+      console.error('Erro ao carregar estatísticas:', error);
+      setErro(error?.message || 'Erro ao carregar estatísticas.');
+      setTotalHoje(0);
+      setSemanaData([]);
+      setProximosDias([]);
+      setTaxaConversao(0);
+      setTotalClientes(0);
+      setStatusCount(STATUS_INICIAIS);
+      setResultadoVisitaCount(RESULTADOS_VISITA_INICIAIS);
+      setStatusCountVenda(RESULTADOS_VENDA_INICIAIS);
     } finally {
-      setLoading(false);
+      if (idRequisicao === requisicaoAtual.current) {
+        setLoading(false);
+      }
     }
-  }, []);
+  }, [filtrosPai]);
 
   useEffect(() => {
     carregar();
@@ -120,6 +112,7 @@ export function useAgendamentosStats() {
     taxaConversao,
     totalClientes,
     statusCount,
+    resultadoVisitaCount,
     statusCountVenda,
     carregar,
   };

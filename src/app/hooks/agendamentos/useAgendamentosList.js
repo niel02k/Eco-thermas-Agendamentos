@@ -1,12 +1,22 @@
-// src/app/hooks/agendamentos/useAgendamentosList.js
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { listarAgendamentos } from '@/app/services/agendamentosServices';
 
 const LIMITE = 10;
 
-export function useAgendamentosList() {
+// Objeto estável para evitar recriação a cada render.
+const FILTROS_PAI_VAZIOS = Object.freeze({
+  dataInicio: null,
+  dataFim: null,
+  statusAgendamento: '',
+  resultadoVisita: '',
+  resultadoVenda: '',
+});
+
+export function useAgendamentosList(
+  filtrosPai = FILTROS_PAI_VAZIOS,
+) {
   const [agendamentos, setAgendamentos] = useState([]);
   const [total, setTotal] = useState(0);
   const [pagina, setPagina] = useState(1);
@@ -14,39 +24,104 @@ export function useAgendamentosList() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(null);
 
-const carregar = useCallback(async (
-  pag = pagina,
-  termoBusca = busca,
-  filtroData = null
-) => {
-  setLoading(true);
-  setErro(null);
+  const requisicaoAtual = useRef(0);
 
-  try {
-    const resultado = await listarAgendamentos({
-      pagina: pag,
-      limite: LIMITE,
-      busca: termoBusca,
-      dataInicio: filtroData,
-      dataFim: filtroData,
-    });
+  const carregar = useCallback(async (
+    paginaAtual,
+    buscaAtual,
+    dataFiltroTabela,
+  ) => {
+    const idRequisicao = ++requisicaoAtual.current;
 
-    setAgendamentos(resultado.agendamentos ?? []);
-    setTotal(resultado.total ?? 0);
-  } catch (e) {
-    setErro("Erro ao carregar agendamentos.");
-    console.error(e);
-  } finally {
-    setLoading(false);
-  }
-}, [pagina, busca]);
+    setLoading(true);
+    setErro(null);
+
+    try {
+      const parametros = {
+        pagina: paginaAtual,
+        limite: LIMITE,
+        busca: String(buscaAtual || '').trim(),
+      };
+
+      // Filtros gerais vindos do FiltroPai.
+      const filtrosAtivos = Object.fromEntries(
+        Object.entries(filtrosPai).filter(([, valor]) => {
+          return valor !== '' && valor !== null && valor !== undefined;
+        }),
+      );
+
+      Object.assign(parametros, filtrosAtivos);
+
+      // O filtro da tabela tem prioridade apenas sobre as datas.
+      if (dataFiltroTabela) {
+        parametros.dataInicio = dataFiltroTabela;
+        parametros.dataFim = dataFiltroTabela;
+      }
+
+      const resultado = await listarAgendamentos(parametros);
+
+      if (idRequisicao !== requisicaoAtual.current) {
+        return;
+      }
+
+      setAgendamentos(resultado?.agendamentos || []);
+      setTotal(Number(resultado?.total || 0));
+    } catch (error) {
+      if (idRequisicao !== requisicaoAtual.current) {
+        return;
+      }
+
+      const mensagem =
+        error?.message ||
+        error?.details ||
+        'Erro ao carregar agendamentos.';
+
+      console.error('Erro ao carregar agendamentos:', error);
+      setErro(mensagem);
+      setAgendamentos([]);
+      setTotal(0);
+    } finally {
+      if (idRequisicao === requisicaoAtual.current) {
+        setLoading(false);
+      }
+    }
+  }, [filtrosPai]);
 
   const handleBusca = useCallback((termo) => {
-    setBusca(termo);
-    setPagina(1);
+    const novoTermo = String(termo || '');
+
+    setBusca((valorAtual) => {
+      if (valorAtual === novoTermo) {
+        return valorAtual;
+      }
+
+      return novoTermo;
+    });
+
+    setPagina((paginaAtual) => {
+      return paginaAtual === 1 ? paginaAtual : 1;
+    });
   }, []);
 
-  const totalPaginas = Math.max(1, Math.ceil(total / LIMITE));
+  const alterarPagina = useCallback((novaPagina) => {
+    setPagina((valorAtual) => {
+      const paginaSolicitada = Number(novaPagina);
+
+      if (
+        !Number.isInteger(paginaSolicitada) ||
+        paginaSolicitada < 1
+      ) {
+        return valorAtual;
+      }
+
+      return paginaSolicitada;
+    });
+  }, []);
+
+  const totalPaginas = Math.max(
+    1,
+    Math.ceil(total / LIMITE),
+  );
 
   return {
     agendamentos,
@@ -56,7 +131,7 @@ const carregar = useCallback(async (
     busca,
     loading,
     erro,
-    setPagina,
+    setPagina: alterarPagina,
     handleBusca,
     carregar,
   };
