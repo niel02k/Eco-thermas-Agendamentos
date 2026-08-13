@@ -45,6 +45,10 @@ export default function Contracts() {
     buscarContrato,
     buscarContratoDetalhe,
     excluirContrato,
+    criarContrato,
+    editarContrato,
+    loadingAcao,
+    erroAcao,
     resumoGeral,
     rankingVendedores,
     statusContratos,
@@ -78,16 +82,6 @@ export default function Contracts() {
     recarregarTudo();
   }, [excluirContrato, recarregarTudo]);
 
-  const handleContratoCriado = useCallback(() => {
-    setShowCriarContrato(false);
-    recarregarTudo();
-  }, [recarregarTudo]);
-
-  const handleContratoEditado = useCallback(() => {
-    setShowEditarContrato(false);
-    setContratoParaEditar(null);
-    recarregarTudo();
-  }, [recarregarTudo]);
 
   const handleBuscaChange = useCallback((novaBusca) => {
     setBusca(novaBusca);
@@ -115,7 +109,11 @@ export default function Contracts() {
       {showCriarContrato && (
         <FormContrato
           onClose={() => setShowCriarContrato(false)}
-          onSuccess={handleContratoCriado}
+          onSuccess={() => setShowCriarContrato(false)}
+          criarContrato={criarContrato}
+          editarContrato={editarContrato}
+          loading={loadingAcao}
+          erro={erroAcao}
         />
       )}
 
@@ -126,7 +124,14 @@ export default function Contracts() {
             setShowEditarContrato(false);
             setContratoParaEditar(null);
           }}
-          onSuccess={handleContratoEditado}
+          onSuccess={() => {
+            setShowEditarContrato(false);
+            setContratoParaEditar(null);
+          }}
+          criarContrato={criarContrato}
+          editarContrato={editarContrato}
+          loading={loadingAcao}
+          erro={erroAcao}
         />
       )}
 

@@ -1,13 +1,20 @@
-// src/app/hooks/contratos/useContratosActions.js
-"use client";
+'use client';
 
-import { useState, useCallback } from 'react';
-import { 
-  criarContrato, 
-  atualizarContrato, 
-  excluirContrato,
+import { useCallback, useState } from 'react';
+import {
+  criarContrato as criarContratoService,
+  atualizarContrato as atualizarContratoService,
+  excluirContrato as excluirContratoService,
   buscarContratoPorId,
 } from '@/app/services/contratosServices';
+
+function obterMensagemErro(error, mensagemPadrao) {
+  if (typeof error === 'string' && error.trim()) return error;
+  if (error?.message && String(error.message).trim()) {
+    return String(error.message);
+  }
+  return mensagemPadrao;
+}
 
 export function useContratosActions(onSuccess) {
   const [loading, setLoading] = useState(false);
@@ -15,43 +22,34 @@ export function useContratosActions(onSuccess) {
   const [sucesso, setSucesso] = useState(false);
   const [contratoSelecionado, setContratoSelecionado] = useState(null);
   const [contratoCriado, setContratoCriado] = useState(null);
-  const [modoModal, setModoModal] = useState(null); // 'visualizar', 'editar', 'criar'
+  const [modoModal, setModoModal] = useState(null);
   const [loadingDetalhe, setLoadingDetalhe] = useState(false);
 
-  // ============================================================
-  // RECARREGAR
-  // ============================================================
-
   const recarregar = useCallback(async () => {
-    if (onSuccess) {
+    if (typeof onSuccess === 'function') {
       await onSuccess();
     }
   }, [onSuccess]);
-
-  const recarregarTudo = useCallback(async () => {
-    // Reseta estados
-    setErro(null);
-    setSucesso(false);
-    setContratoCriado(null);
-    
-    // Recarrega a lista
-    if (onSuccess) {
-      await onSuccess();
-    }
-  }, [onSuccess]);
-
-  // ============================================================
-  // VISUALIZAR / EDITAR
-  // ============================================================
 
   const buscarDetalhe = useCallback(async (id) => {
+    if (!id) {
+      const mensagem = 'ID do contrato não informado.';
+      setErro(mensagem);
+      return { contrato: null, erro: mensagem };
+    }
+
     setLoadingDetalhe(true);
+    setErro(null);
+
     try {
       const contrato = await buscarContratoPorId(id);
-      setContratoSelecionado(contrato);
-      return { contrato, erro: null };
-    } catch (e) {
-      const mensagem = e.message || 'Erro ao carregar detalhes do contrato';
+      setContratoSelecionado(contrato || null);
+      return { contrato: contrato || null, erro: null };
+    } catch (error) {
+      const mensagem = obterMensagemErro(
+        error,
+        'Erro ao carregar detalhes do contrato.',
+      );
       setErro(mensagem);
       return { contrato: null, erro: mensagem };
     } finally {
@@ -61,17 +59,20 @@ export function useContratosActions(onSuccess) {
 
   const abrirVisualizar = useCallback(async (id) => {
     setModoModal('visualizar');
-    await buscarDetalhe(id);
+    return buscarDetalhe(id);
   }, [buscarDetalhe]);
 
   const abrirEditar = useCallback(async (id) => {
     setModoModal('editar');
-    await buscarDetalhe(id);
+    return buscarDetalhe(id);
   }, [buscarDetalhe]);
 
   const abrirCriar = useCallback(() => {
-    setModoModal('criar');
+    setErro(null);
+    setSucesso(false);
+    setContratoCriado(null);
     setContratoSelecionado(null);
+    setModoModal('criar');
   }, []);
 
   const fecharModal = useCallback(() => {
@@ -79,24 +80,31 @@ export function useContratosActions(onSuccess) {
     setContratoSelecionado(null);
   }, []);
 
-  // ============================================================
-  // CRUD
-  // ============================================================
-
   const criar = useCallback(async (dados) => {
     setLoading(true);
     setErro(null);
     setSucesso(false);
     setContratoCriado(null);
+
     try {
-      const contrato = await criarContrato(dados);
-      setContratoCriado(contrato);
+      if (!dados || typeof dados !== 'object') {
+        throw new Error('Os dados do contrato não foram informados.');
+      }
+
+      const contrato = await criarContratoService(dados);
+
+      setContratoCriado(contrato || null);
       setSucesso(true);
       await recarregar();
-      return { contrato, erro: null };
-    } catch (e) {
-      const mensagem = e.message || 'Erro ao criar contrato';
+
+      return { contrato: contrato || null, erro: null };
+    } catch (error) {
+      const mensagem = obterMensagemErro(
+        error,
+        'Erro ao criar contrato.',
+      );
       setErro(mensagem);
+      setSucesso(false);
       return { contrato: null, erro: mensagem };
     } finally {
       setLoading(false);
@@ -107,14 +115,24 @@ export function useContratosActions(onSuccess) {
     setLoading(true);
     setErro(null);
     setSucesso(false);
+
     try {
-      const contrato = await atualizarContrato(id, dados);
+      if (!id) throw new Error('ID do contrato não informado.');
+      if (!dados || typeof dados !== 'object') {
+        throw new Error('Os dados do contrato não foram informados.');
+      }
+
+      const contrato = await atualizarContratoService(id, dados);
       setSucesso(true);
       await recarregar();
-      return { contrato, erro: null };
-    } catch (e) {
-      const mensagem = e.message || 'Erro ao editar contrato';
+      return { contrato: contrato || null, erro: null };
+    } catch (error) {
+      const mensagem = obterMensagemErro(
+        error,
+        'Erro ao editar contrato.',
+      );
       setErro(mensagem);
+      setSucesso(false);
       return { contrato: null, erro: mensagem };
     } finally {
       setLoading(false);
@@ -124,12 +142,19 @@ export function useContratosActions(onSuccess) {
   const excluir = useCallback(async (id) => {
     setLoading(true);
     setErro(null);
+    setSucesso(false);
+
     try {
-      await excluirContrato(id);
+      if (!id) throw new Error('ID do contrato não informado.');
+      await excluirContratoService(id);
       await recarregar();
+      setSucesso(true);
       return { sucesso: true, erro: null };
-    } catch (e) {
-      const mensagem = e.message || 'Erro ao excluir contrato';
+    } catch (error) {
+      const mensagem = obterMensagemErro(
+        error,
+        'Erro ao excluir contrato.',
+      );
       setErro(mensagem);
       return { sucesso: false, erro: mensagem };
     } finally {
@@ -147,12 +172,7 @@ export function useContratosActions(onSuccess) {
     setLoadingDetalhe(false);
   }, []);
 
-  // ============================================================
-  // RETORNO
-  // ============================================================
-
   return {
-    // Estados
     loading,
     erro,
     sucesso,
@@ -160,25 +180,16 @@ export function useContratosActions(onSuccess) {
     contratoCriado,
     modoModal,
     loadingDetalhe,
-
-    // Ações CRUD
     criar,
     editar,
     excluir,
     resetar,
-
-    // Modal
     abrirVisualizar,
     abrirEditar,
     abrirCriar,
     fecharModal,
     buscarDetalhe,
-
-    // Recarregar
     recarregar,
-    recarregarTudo,
-
-    // Utilitários
     setErro,
   };
 }

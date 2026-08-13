@@ -2,13 +2,8 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  Save, X, Plus, Trash2, UserPlus, CreditCard,
-  FileText, AlertCircle, ArrowRight, ArrowLeft, Pencil
-} from "lucide-react";
 import styles from "./FormContrato.module.css";
 import { useConsultores } from "@/app/hooks/useConsultores";
-import { useContratosActions } from "@/app/hooks/contratos/useContratosActions";
 import { 
   PAGAMENTO, PAGAMENTO_LABELS, 
   COBRANCA, COBRANCA_LABELS, 
@@ -44,19 +39,23 @@ const formatCurrency = (value) => {
 /* COMPONENTE                                                                  */
 /* -------------------------------------------------------------------------- */
 
-export default function FormContrato({ 
+export default function FormContrato({
   contrato = null,
-  onClose, 
-  onSuccess 
+  onClose,
+  onSuccess,
+  criarContrato,
+  editarContrato,
+  loading = false,
+  erro = null,
+  setErro,
 }) {
   const isEdicao = !!contrato;
   const [step, setStep] = useState(1);
   const { consultores, loading: carregandoConsultores } = useConsultores();
-  const { criar, editar, loading, erro, setErro } = useContratosActions();
-  
+
   const [formData, setFormData] = useState({
     vendedor_id: "",
-    tipo_contrato: "PADRAO",
+    tipo_contrato: "EFV",
     titular_nome: "",
     titular_cpf: "",
     titular_email: "",
@@ -87,7 +86,7 @@ export default function FormContrato({
     if (isEdicao && contrato) {
       setFormData({
         vendedor_id: contrato.vendedor_id || "",
-        tipo_contrato: contrato.tipo_contrato || "PADRAO",
+        tipo_contrato: contrato.tipo_contrato || "EFV",
         titular_nome: contrato.titular_nome || "",
         titular_cpf: formatCPF(contrato.titular_cpf || ""),
         titular_email: contrato.titular_email || "",
@@ -177,7 +176,7 @@ export default function FormContrato({
 
   // ── Submit ───────────────────────────────────────────────────
   const handleFinalizar = useCallback(async () => {
-    setErro(null);
+    setErro?.(null);
     setSucesso(null);
 
     try {
@@ -186,42 +185,70 @@ export default function FormContrato({
         tipo_contrato: formData.tipo_contrato,
         titular_nome: formData.titular_nome.trim(),
         titular_cpf: formData.titular_cpf.replace(/\D/g, ""),
-        titular_email: formData.titular_email || null,
-        titular_telefone: formData.titular_telefone || null,
-        titular_idade: Number(formData.titular_idade) || 0,
+        titular_email: formData.titular_email?.trim() || null,
+        titular_telefone: formData.titular_telefone?.replace(/\D/g, "") || null,
+        titular_idade: Number(formData.titular_idade),
         cidade: formData.cidade.trim(),
-        valor_total: parseFloat(String(formData.valor_total).replace(/[^\d,]/g, '').replace(',', '.')) || 0,
+        valor_total: parseFloat(
+          String(formData.valor_total)
+            .replace(/[^\d,]/g, "")
+            .replace(",", "."),
+        ) || 0,
         forma_pagamento: formData.forma_pagamento,
         tipo_cobranca: formData.tipo_cobranca || null,
-        parcelas: parseInt(formData.parcelas) || 1,
+        parcelas: parseInt(formData.parcelas, 10) || 1,
         status: formData.status,
         data_inicio: formData.data_inicio,
         data_fim: formData.data_fim || null,
-        observacoes: formData.observacoes || null,
-        dependentes: dependentes.map(d => ({
-          nome: d.nome,
-          cpf: d.cpf?.replace(/\D/g, '') || null,
-          idade: Number(d.idade) || 0
-        }))
+        observacoes: formData.observacoes?.trim() || null,
+        dependentes: dependentes.map((dependente) => ({
+          nome: dependente.nome.trim(),
+          cpf: dependente.cpf?.replace(/\D/g, "") || null,
+          idade: Number(dependente.idade) || 0,
+        })),
       };
 
-      if (isEdicao && contrato?.id) {
-        await editar(contrato.id, dadosContrato);
-        setSucesso("Contrato atualizado com sucesso!");
-      } else {
-        await criar(dadosContrato);
-        setSucesso("Contrato criado com sucesso!");
-      }
-      
-      setTimeout(() => {
-        if (onSuccess) onSuccess();
-        if (onClose) onClose();
-      }, 1500);
+      const resultado = isEdicao
+        ? await editarContrato?.(contrato.id, dadosContrato)
+        : await criarContrato?.(dadosContrato);
 
+      if (!resultado || resultado.erro) {
+        const mensagem = resultado?.erro || "Não foi possível salvar o contrato.";
+        setErro?.(mensagem);
+        setSucesso(null);
+        return;
+      }
+
+      setSucesso(
+        isEdicao
+          ? "Contrato atualizado com sucesso!"
+          : "Contrato criado com sucesso!",
+      );
+
+      onSuccess?.(resultado.contrato);
+
+      setTimeout(() => {
+        onClose?.();
+      }, 1500);
     } catch (error) {
-      setErro(error.message || `Erro ao ${isEdicao ? 'atualizar' : 'criar'} contrato`);
+      const mensagem =
+        error?.message ||
+        `Erro ao ${isEdicao ? "atualizar" : "criar"} contrato.`;
+
+      setErro?.(mensagem);
+      setSucesso(null);
     }
-  }, [formData, dependentes, isEdicao, contrato, criar, editar, setErro, onSuccess, onClose]);
+  }, [
+    formData,
+    dependentes,
+    isEdicao,
+    contrato,
+    criarContrato,
+    editarContrato,
+    setErro,
+    onSuccess,
+    onClose,
+  ]);
 
   // ── Tela de Sucesso ──────────────────────────────────────────
   if (sucesso) {
@@ -301,7 +328,6 @@ export default function FormContrato({
                     onChange={handleChange}
                     className={styles.select}
                   >
-                    <option value="PADRAO">Padrão</option>
                     <option value="EFV">EFV</option>
                     <option value="PM">PM</option>
                     <option value="GD">GD</option>
