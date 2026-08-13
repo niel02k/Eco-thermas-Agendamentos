@@ -22,12 +22,11 @@ export default function ContractsKPIs({ contratos, total, resumoGeral, ticketInf
     const conversion = total > 0 ? Math.round((ativos / total) * 100) : 0;
 
     return [
-      { title: "Hoje", value: hojeCount, label: "Contratos hoje", icon: Activity, color: "blue" },
-      { title: "Ativos", value: ativos, label: "Contratos ativos", icon: BarChart3, color: "green" },
-      { title: "Total", value: total, label: "Total de contratos", icon: TrendingUp, color: "blue" },
       { title: "Receita", value: formatCurrency(receitaTotal), label: "Receita total", icon: DollarSign, color: "green" },
-      { title: "Conversão", value: `${conversion}%`, label: "Taxa de ativos", icon: TrendingUp, color: conversion > 50 ? "green" : "yellow" },
-      { title: "Ticket Médio", value: formatCurrency(ticketMedio), label: "Valor médio", icon: Award, color: "yellow" },
+      { title: "Total", value: total, label: "Total de contratos", icon: TrendingUp, color: "blue" },
+      { title: "Hoje", value: hojeCount, label: "Contratos hoje", icon: Activity, color: "blue" },
+     
+
     ];
   }, [contratos, total, resumoGeral, ticketInfo]);
 

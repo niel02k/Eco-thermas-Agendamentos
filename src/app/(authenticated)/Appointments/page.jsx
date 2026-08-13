@@ -2,12 +2,15 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { Plus, AlertTriangle } from "lucide-react";
+import { Plus, AlertTriangle, SlidersHorizontal } from "lucide-react";
 import PageHeader from "@/app/Components/PageHeader/PageHeader.jsx";
 import { useAgendamentos } from "@/app/hooks/agendamentos/index.js";
 import { useMediaQuery } from "@/app/hooks/useMediaQuery";
 import styles from "./Appointments.module.css";
 
+// Filtro pai
+import FiltroPai, { FILTROS_INICIAIS, } from "@/app/Components/Shared/FiltroPai.jsx";
+import { Filter } from 'lucide-react';
 // Componentes
 import AppointmentsWeekStatus from "@/app/Components/ModalAgendamento/AppointmentsWeekStatus.jsx";
 import VisualizarModal from "@/app/Components/Shared/VisualizarModal.jsx";
@@ -21,6 +24,8 @@ import DataTable from "@/app/Components/Shared/DataTable.jsx";
 export default function AppointmentsPage() {
   const [visible, setVisible] = useState(false);
   const [abrirModal, setAbrirModal] = useState(false);
+  const [abrirFiltroPai, setAbrirFiltroPai] = useState(false);
+  const [filtrosPai, setFiltrosPai] = useState(FILTROS_INICIAIS);
   const [confirm, setConfirm] = useState(null);
   const [inputBusca, setInputBusca] = useState("");
   const debounceRef = useRef(null);
@@ -30,17 +35,37 @@ export default function AppointmentsPage() {
   const [agendamentoParaRealizar, setAgendamentoParaRealizar] = useState(null);
 
   const {
-    agendamentos, total, pagina, totalPaginas,
-    loadingTabela, handleBusca, setPagina,
-    semanaData, statusCount, statusCountVenda, loadingStats,
-    agendamentoSelecionado, modoModal,
-    abrirVisualizar, abrirEditar, fecharModal,
-    showResultadoVenda, agendamentoParaResultado, loadingResultado,
-    abrirResultadoVenda, fecharResultadoVenda,
-    confirmarResultadoVenda, confirmarRealizado, confirmarAgendamento, marcarComoFaltou,
-    cancelarAgendamento, excluir,
-    erro, recarregar,handleFiltroDataChange,
-  } = useAgendamentos(); 
+    agendamentos,
+    total,
+    pagina,
+    totalPaginas,
+    loadingTabela,
+    handleBusca,
+    setPagina,
+    semanaData,
+    statusCount,
+    statusCountVenda,
+    loadingStats,
+    agendamentoSelecionado,
+    modoModal,
+    abrirVisualizar,
+    abrirEditar,
+    fecharModal,
+    showResultadoVenda,
+    agendamentoParaResultado,
+    loadingResultado,
+    abrirResultadoVenda,
+    fecharResultadoVenda,
+    confirmarResultadoVenda,
+    confirmarRealizado,
+    confirmarAgendamento,
+    marcarComoFaltou,
+    cancelarAgendamento,
+    excluir,
+    erroGeral,
+    recarregar,
+    handleFiltroDataChange,
+  } = useAgendamentos(filtrosPai);
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 100);
@@ -54,6 +79,22 @@ export default function AppointmentsPage() {
     debounceRef.current = setTimeout(() => handleBusca(val), 350);
   }, [handleBusca]);
 
+  const handleAplicarFiltroPai = useCallback((novosFiltros) => {
+    setFiltrosPai({
+      ...FILTROS_INICIAIS,
+      ...novosFiltros,
+    });
+    setAbrirFiltroPai(false);
+  }, []);
+
+  const handleLimparFiltroPai = useCallback((filtrosLimpos) => {
+    setFiltrosPai({
+      ...FILTROS_INICIAIS,
+      ...filtrosLimpos,
+    });
+    setAbrirFiltroPai(false);
+  }, []);
+
   const handleConfirmarAgendamento = useCallback(async (codigo) => {
     await confirmarAgendamento(codigo);
   }, [confirmarAgendamento]);
@@ -63,13 +104,17 @@ export default function AppointmentsPage() {
     setShowModalRealizado(true);
   }, []);
 
-
   const handleConfirmarRealizado = useCallback(async (codigo) => {
     await confirmarRealizado(codigo);
     setShowModalRealizado(false);
-    const ag = agendamentos.find(a => a.codigo === codigo);
+
+    const ag = agendamentos.find((item) => item.codigo === codigo);
     if (ag) {
-      abrirResultadoVenda({ ...ag, resultado_visita: 'REALIZADO', resultado_venda: 'PENDENTE' });
+      abrirResultadoVenda({
+        ...ag,
+        resultado_visita: "REALIZADO",
+        resultado_venda: "PENDENTE",
+      });
     }
   }, [confirmarRealizado, agendamentos, abrirResultadoVenda]);
 
@@ -94,28 +139,47 @@ export default function AppointmentsPage() {
     await recarregar();
   }, [fecharModal, recarregar]);
 
-  const pedirCancelamento = useCallback((codigo) => setConfirm({ tipo: "cancelar", codigo }), []);
-  const pedirExclusao = useCallback((codigo) => setConfirm({ tipo: "excluir", codigo }), []);
+  const pedirCancelamento = useCallback(
+    (codigo) => setConfirm({ tipo: "cancelar", codigo }),
+    []
+  );
+
+  const pedirExclusao = useCallback(
+    (codigo) => setConfirm({ tipo: "excluir", codigo }),
+    []
+  );
 
   const confirmarAcao = useCallback(async () => {
     if (!confirm) return;
-    if (confirm.tipo === "cancelar") await cancelarAgendamento(confirm.codigo);
-    if (confirm.tipo === "excluir") await excluir(confirm.codigo);
+
+    if (confirm.tipo === "cancelar") {
+      await cancelarAgendamento(confirm.codigo);
+    }
+
+    if (confirm.tipo === "excluir") {
+      await excluir(confirm.codigo);
+    }
+
     setConfirm(null);
   }, [confirm, cancelarAgendamento, excluir]);
 
   return (
     <>
-      {/* ═══════════ MODAIS ═══════════ */}
+
+
       {confirm && (
         <ConfirmModal
-          mensagem={confirm.tipo === "cancelar" ? "Deseja cancelar este agendamento?" : "Deseja excluir permanentemente este agendamento?"}
+          mensagem={
+            confirm.tipo === "cancelar"
+              ? "Deseja cancelar este agendamento?"
+              : "Deseja excluir permanentemente este agendamento?"
+          }
           onConfirm={confirmarAcao}
           onCancel={() => setConfirm(null)}
         />
       )}
 
-      {modoModal === 'visualizar' && agendamentoSelecionado && (
+      {modoModal === "visualizar" && agendamentoSelecionado && (
         <VisualizarModal
           tipo="agendamento"
           agendamento={agendamentoSelecionado}
@@ -130,47 +194,111 @@ export default function AppointmentsPage() {
       )}
 
       {showResultadoVenda && agendamentoParaResultado && (
-        <ResultCard agendamento={agendamentoParaResultado} onConfirm={handleConfirmarResultado} onCancel={fecharResultadoVenda} loading={loadingResultado} />
+        <ResultCard
+          agendamento={agendamentoParaResultado}
+          onConfirm={handleConfirmarResultado}
+          onCancel={fecharResultadoVenda}
+          loading={loadingResultado}
+        />
       )}
 
       {abrirModal && (
-        <NewAppointment onClose={handleCloseModal} dadosEdicao={modoModal === 'editar' ? agendamentoSelecionado : null} />
+        <NewAppointment
+          onClose={handleCloseModal}
+          dadosEdicao={modoModal === "editar" ? agendamentoSelecionado : null}
+        />
       )}
 
       {showModalRealizado && agendamentoParaRealizar && (
-        <ModalRealizado agendamento={agendamentoParaRealizar} onConfirm={handleConfirmarRealizado} onFaltou={handleFaltou} onClose={() => setShowModalRealizado(false)} />
+        <ModalRealizado
+          agendamento={agendamentoParaRealizar}
+          onConfirm={handleConfirmarRealizado}
+          onFaltou={handleFaltou}
+          onClose={() => setShowModalRealizado(false)}
+        />
       )}
 
-      {/* ═══════════ CONTEÚDO PRINCIPAL ═══════════ */}
       <div className={styles.container}>
+
         <main className={`${styles.main} ${visible ? styles.mainVisible : ""}`}>
-          <PageHeader title="Agendamentos" subtitle="Gestão operacional dos visitantes e reservas"
-            badge={{ text: "Sistema Ativo", type: "success" }} actionLabel="Novo Agendamento" actionIcon={Plus}
-            onAction={() => { fecharModal(); setAbrirModal(true); }} />
+          <div className={styles.containerheader}>
+            <div className={styles.pageHeaderWrapper}>
+              <PageHeader
+                title="Agendamentos"
+                subtitle="Gestão operacional dos visitantes e reservas"
+                actionLabel="Novo Agendamento"
+                actionIcon={Plus}
+                onAction={() => {
+                  fecharModal();
+                  setAbrirModal(true);
+                }}
+              />
+            </div>
 
-          {erro && <div className={styles.errorBanner}><AlertTriangle size={16} /><span>{erro}</span></div>}
+            <button
+              type="button"
+              className={styles.filterTrigger}
+              onClick={() => setAbrirFiltroPai(true)}
+              aria-label="Abrir filtros dos indicadores"
+            >
+              <Filter size={18} strokeWidth={2} />
+              <span>Filtros</span>
+            </button>
+          </div>
 
-          <AppointmentsWeekStatus semanaData={semanaData} statusCount={statusCount} statusCountVenda={statusCountVenda} loading={loadingStats} />
+          <FiltroPai
+            aberto={abrirFiltroPai}
+            filtros={filtrosPai}
+            onAplicar={handleAplicarFiltroPai}
+            onLimpar={handleLimparFiltroPai}
+            onFechar={() => setAbrirFiltroPai(false)}
+          />
+
+
+
+
+          {erroGeral && (
+            <div className={styles.errorBanner}>
+              <AlertTriangle size={16} />
+              <span>{erroGeral}</span>
+            </div>
+          )}
+
+          <AppointmentsWeekStatus
+            semanaData={semanaData}
+            statusCount={statusCount}
+            statusCountVenda={statusCountVenda}
+            loading={loadingStats}
+          />
 
           {isMobile ? (
-            <MobileList tipo="agendamento" dados={agendamentos} loading={loadingTabela} total={total} pagina={pagina} totalPaginas={totalPaginas}
-              onPageChange={setPagina} onCardClick={(ag) => abrirVisualizar(ag.codigo)} emptyMessage="Nenhum agendamento encontrado" />
+            <MobileList
+              tipo="agendamento"
+              dados={agendamentos}
+              loading={loadingTabela}
+              total={total}
+              pagina={pagina}
+              totalPaginas={totalPaginas}
+              onPageChange={setPagina}
+              onCardClick={(ag) => abrirVisualizar(ag.codigo)}
+              emptyMessage="Nenhum agendamento encontrado"
+            />
           ) : (
-           <DataTable
-  tipo="agendamento"
-  dados={agendamentos}
-  loading={loadingTabela}
-  total={total}
-  pagina={pagina}
-  totalPaginas={totalPaginas}
-  busca={inputBusca}
-  onBuscaChange={onChangeBusca}
-  onPageChange={setPagina}
-  onRowClick={(ag) => abrirVisualizar(ag.codigo)}
-  onFiltroDataChange={handleFiltroDataChange}
-  showExport={true}
-  showSearch={true}
-/>
+            <DataTable
+              tipo="agendamento"
+              dados={agendamentos}
+              loading={loadingTabela}
+              total={total}
+              pagina={pagina}
+              totalPaginas={totalPaginas}
+              busca={inputBusca}
+              onBuscaChange={onChangeBusca}
+              onPageChange={setPagina}
+              onRowClick={(agendamento) => abrirVisualizar(agendamento.codigo)}
+              onFiltroDataChange={handleFiltroDataChange}
+              showExport={true}
+              showSearch={true}
+            />
           )}
         </main>
       </div>

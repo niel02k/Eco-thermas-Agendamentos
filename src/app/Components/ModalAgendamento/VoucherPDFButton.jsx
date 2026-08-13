@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { Eye, Copy, Check, Image as ImageIcon } from "lucide-react";
-import { visualizarPDF, copiarVoucherComoImagem } from "@/app/services/voucherPDFService";
+import { Check, Image as ImageIcon } from "lucide-react";
+import { copiarVoucherComoImagem } from "@/app/services/voucherPDFService";
 import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
 
 export default function VoucherPDFButton({ agendamento, disabled = false }) {

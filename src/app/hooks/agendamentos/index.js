@@ -1,90 +1,112 @@
-"use client";
-// src/app/hooks/agendamentos/index.js
+'use client';
 
-import { useCallback, useEffect, useState } from "react";
-import { useAgendamentosList } from "./useAgendamentosList";
-import { useAgendamentosStats } from "./useAgendamentosStats";
-import { useAgendamentosForm } from "./useAgendamentosForm";
-import { useAgendamentoDetalhe } from "./useAgendamentoDetalhe";
-import { useAgendamentosActions } from "./useAgendamentosActions";
+import { useCallback, useEffect, useState } from 'react';
+import { useAgendamentosList } from '@/app/hooks/agendamentos/useAgendamentosList';
+import { useAgendamentosStats } from '@/app/hooks/agendamentos/useAgendamentosStats';
+import { useAgendamentosForm } from '@/app/hooks/agendamentos/useAgendamentosForm';
+import { useAgendamentoDetalhe } from '@/app/hooks/agendamentos/useAgendamentoDetalhe';
+import { useAgendamentosActions } from '@/app/hooks/agendamentos/useAgendamentosActions';
 
-export function useAgendamentos() {
+const FILTROS_PAI_VAZIOS = Object.freeze({
+  dataInicio: null,
+  dataFim: null,
+  statusAgendamento: '',
+  resultadoVisita: '',
+  resultadoVenda: '',
+});
+
+export function useAgendamentos(
+  filtrosPai = FILTROS_PAI_VAZIOS,
+) {
+  // Filtro diário adicional da tabela.
   const [dataFiltro, setDataFiltro] = useState(null);
 
-  // Listagem
-  const listagem = useAgendamentosList();
+  // O filtro pai é enviado para a tabela e para os indicadores.
+  const listagem = useAgendamentosList(filtrosPai);
+  const stats = useAgendamentosStats(filtrosPai);
 
-  // Stats
-  const stats = useAgendamentosStats();
-
-  // Formulário
   const form = useAgendamentosForm();
-
-  // Detalhe
   const detalhe = useAgendamentoDetalhe();
 
-  // Ações
-  const actions = useAgendamentosActions();
+  const {
+    agendamentos,
+    total,
+    pagina,
+    totalPaginas,
+    busca,
+    loading: loadingTabela,
+    erro: erroLista,
+    setPagina,
+    carregar,
+    handleBusca,
+  } = listagem;
 
-  // Carrega a lista aplicando o filtro de data
-  const carregarLista = useCallback(
-    async (pagina, busca) => {
-      await listagem.carregar(pagina, busca, dataFiltro);
-    },
-    [listagem, dataFiltro]
-  );
+  const {
+    totalHoje,
+    semanaData,
+    proximosDias,
+    taxaConversao,
+    totalClientes,
+    statusCount,
+    resultadoVisitaCount,
+    statusCountVenda,
+    loading: loadingStats,
+    erro: erroStats,
+    carregar: carregarStats,
+  } = stats;
 
-  // Callback executado após qualquer ação
-  const onActionComplete = useCallback(async () => {
-    await Promise.all([
-      carregarLista(listagem.pagina, listagem.busca),
-      stats.carregar(),
-    ]);
-  }, [carregarLista, listagem.pagina, listagem.busca, stats]);
+  const carregarLista = useCallback(async () => {
+    await carregar(pagina, busca, dataFiltro);
+  }, [carregar, pagina, busca, dataFiltro]);
 
-  // Carrega estatísticas uma vez
   useEffect(() => {
-    stats.carregar();
-  }, [stats]);
-
-  // Carrega a lista ao iniciar e quando mudar página, busca ou filtro
-  useEffect(() => {
-    carregarLista(listagem.pagina, listagem.busca);
-  }, [carregarLista, listagem.pagina, listagem.busca]);
+    carregarLista();
+  }, [carregarLista]);
 
   const handleFiltroDataChange = useCallback((data) => {
-    setDataFiltro(data);
-    listagem.setPagina(1);
-  }, [listagem]);
+    setDataFiltro(data || null);
+    setPagina(1);
+  }, [setPagina]);
+
+  const carregarEstatisticas = useCallback(async () => {
+    await carregarStats();
+  }, [carregarStats]);
+
+  const onActionComplete = useCallback(async () => {
+    await Promise.all([
+      carregarLista(),
+      carregarEstatisticas(),
+    ]);
+  }, [carregarLista, carregarEstatisticas]);
+
+  const actions = useAgendamentosActions(onActionComplete);
 
   return {
-    // ── Tabela ──────────────────────────────────────────
-    agendamentos: listagem.agendamentos,
-    total: listagem.total,
-    pagina: listagem.pagina,
-    totalPaginas: listagem.totalPaginas,
-    busca: listagem.busca,
-    filtroStatus: listagem.filtroStatus,
-    loadingTabela: listagem.loading,
-    erro: listagem.erro,
-    setPagina: listagem.setPagina,
-    setBusca: listagem.setBusca,
-    setFiltroStatus: listagem.setFiltroStatus,
-    setErro: listagem.setErro,
-    handleBusca: listagem.handleBusca,
+    filtrosPai,
 
-    // ── Filtro de Data ──────────────────────────────────
+    agendamentos,
+    total,
+    pagina,
+    totalPaginas,
+    busca,
+    loadingTabela,
+    erro: erroLista,
+    setPagina,
+    handleBusca,
+
     dataFiltro,
     handleFiltroDataChange,
 
-    // ── Stats ────────────────────────────────────────────
-    totalHoje: stats.totalHoje,
-    semanaData: stats.semanaData,
-    statusCount: stats.statusCount,
-    statusCountVenda: stats.statusCountVenda,
-    loadingStats: stats.loading,
+    totalHoje,
+    semanaData,
+    proximosDias,
+    taxaConversao,
+    totalClientes,
+    statusCount,
+    resultadoVisitaCount,
+    statusCountVenda,
+    loadingStats,
 
-    // ── Form (Criar/Editar) ─────────────────────────────
     criarAgendamento: form.salvar,
     loadingCriar: form.loading,
     erroCriar: form.erro,
@@ -92,7 +114,6 @@ export function useAgendamentos() {
     agendamentoCriado: form.agendamentoSalvo,
     resetarCriacao: form.resetar,
 
-    // ── Detalhe (Visualizar) ────────────────────────────
     agendamentoSelecionado: detalhe.agendamento,
     modalAberto: detalhe.modalAberto,
     loadingDetalhe: detalhe.loading,
@@ -102,7 +123,6 @@ export function useAgendamentos() {
     fecharModal: detalhe.fecharModal,
     buscarDetalhe: detalhe.buscarDetalhe,
 
-    // ── Resultado de Venda ──────────────────────────────
     showResultadoVenda: actions.showResultadoVenda,
     agendamentoParaResultado: actions.agendamentoParaResultado,
     loadingResultado: actions.loadingResultado,
@@ -110,15 +130,18 @@ export function useAgendamentos() {
     fecharResultadoVenda: actions.fecharResultadoVenda,
     confirmarResultadoVenda: actions.confirmarResultadoVenda,
     confirmarRealizado: actions.confirmarRealizado,
+    marcarComoFaltou: actions.marcarComoFaltou,
 
-    // ── Ações ────────────────────────────────────────────
     cancelarAgendamento: actions.cancelar,
     excluir: actions.excluir,
 
-    // ── Erro ─────────────────────────────────────────────
-    erroGeral: listagem.erro || stats.erro || form.erro || detalhe.erro || actions.erro,
+    erroGeral:
+      erroLista ||
+      erroStats ||
+      form.erro ||
+      detalhe.erro ||
+      actions.erro,
 
-    // ── Utilidades ──────────────────────────────────────
     recarregar: onActionComplete,
   };
 }
