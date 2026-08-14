@@ -490,7 +490,7 @@ export default function NewAppointment({
                     <option value="Orgânico">Orgânico</option>
                     <option value="Day use">Day use</option>
                     <option value="OUTRO">Outro</option>
-                    <option value="Clube de Indicações">Outro</option>
+                    <option value="Clube de Indicações">Clube de Indicações</option>
                   </select>
                 </div>
 
