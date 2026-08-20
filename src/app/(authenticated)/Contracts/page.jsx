@@ -202,14 +202,7 @@ export default function Contracts() {
             />
           )}
 
-          {receita8m?.length > 0 && (
-            <ReceitaMensalChart
-              data={receita8m}
-              height={300}
-              title="Receita Mensal"
-              subtitle="Últimos 8 meses"
-            />
-          )}
+          
         </main>
       </div>
     </>
