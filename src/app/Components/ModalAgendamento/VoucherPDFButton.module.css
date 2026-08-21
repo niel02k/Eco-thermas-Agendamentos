@@ -1,0 +1,50 @@
+/* ================================================================
+   VOUCHER PDF BUTTON — ESTILOS LOCAIS
+   ================================================================ */
+
+.voucherActions {
+  display: flex;
+  gap: 8px;
+}
+
+.voucherButton {
+  display: flex;
+  min-width: 75px;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: none;
+  border-radius: 8px;
+  background-color: #fa643c;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.voucherButtonSuccess {
+  background-color: #3cc83c;
+}
+
+.voucherButtonError {
+  background-color: #ef4444;
+}
+
+.voucherButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 10px;
+  height: 10px;
+  border: 2px solid #fff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: voucherSpinner 1s linear infinite;
+}
+
+@keyframes voucherSpinner {
+  to {
+    transform: rotate(360deg);
+  }
+}

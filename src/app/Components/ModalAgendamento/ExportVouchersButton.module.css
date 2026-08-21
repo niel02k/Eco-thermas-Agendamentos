@@ -1,0 +1,104 @@
+/* ================================================================
+   EXPORT VOUCHERS BUTTON — ESTILOS LOCAIS
+   ================================================================ */
+
+.exportWrapper {
+  position: relative;
+}
+
+.exportBtn,
+.exportConfirmBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 10px;
+  background: var(--color-green);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition), border-color var(--transition), color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+
+.exportBtn {
+  white-space: nowrap;
+}
+
+.exportBtn:hover:not(:disabled),
+.exportConfirmBtn:hover:not(:disabled) {
+  background: #166534;
+  box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
+  transform: translateY(-1px);
+}
+
+.exportCancelBtn {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #f3f4f6;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition), border-color var(--transition), color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+
+.exportCancelBtn:hover:not(:disabled) {
+  background: #e5e7eb;
+  color: var(--text-secondary);
+}
+
+.datePickerPopup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dateInput {
+  padding: 0.5rem 0.75rem;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  color: #1e293b;
+  font-family: inherit;
+  font-size: 0.85rem;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.dateInput:focus {
+  border-color: var(--color-blue);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
+}
+
+.exportBtn:focus-visible,
+.exportConfirmBtn:focus-visible,
+.exportCancelBtn:focus-visible {
+  outline: 3px solid rgba(249, 115, 22, 0.24);
+  outline-offset: 3px;
+}
+
+.exportBtn:disabled,
+.exportConfirmBtn:disabled,
+.exportCancelBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .exportBtn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+}

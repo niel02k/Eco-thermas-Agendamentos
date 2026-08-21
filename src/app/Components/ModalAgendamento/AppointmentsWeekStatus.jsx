@@ -3,7 +3,7 @@
 
 import React, { useMemo } from "react";
 import { CheckCircle2, TrendingUp, TrendingDown, XCircle } from "lucide-react";
-import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
+import styles from "@/app/Components/ModalAgendamento/AppointmentsWeekStatus.module.css";
 import WeeklyAppointmentsChart from "@/app/Components/WeeklyAppointmentsChart/WeeklyAppointmentsChart.jsx";
 import StatCard from "@/app/Components/Cards/StatCard/StatCard.jsx";
 
@@ -19,11 +19,11 @@ function getPeriodoSemana() {
   return `${formatar(inicio)} - ${formatar(fim)}`;
 }
 
-export default function AppointmentsWeekStatus({ semanaData, statusCount, statusCountVenda, loading }) {
+export default function AppointmentsWeekStatus({ semanaData, statusCount,statusCountVenda, resultadoVisitaCount,loading }) {
   const totalSemana = (semanaData || []).reduce((acc, d) => acc + (d.total || 0), 0);
   const vendasRealizadas = statusCountVenda?.VENDA_REALIZADA || 0;
   const vendasPerdidas = statusCountVenda?.VENDA_PERDIDA || statusCountVenda?.VENDA_PERDIDA ;
-  const faltas = statusCount?.FALTOU || 0;
+  const faltas = resultadoVisitaCount?.FALTOU || 0;
   const periodo = useMemo(() => getPeriodoSemana(), []);
 
   return (

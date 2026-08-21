@@ -28,7 +28,7 @@ export default function DataTable({
 
   const columns = isAgendamento
     ? ["Código", "Cliente", "Data / Horário", "Pessoas", "Status"]
-    : ["#", "Cliente", "Consultor", "Valor", "Status"];
+    : ["#", "Cliente", "Consultor", "Valor" ,"Tipo" ];
 
 
   return (

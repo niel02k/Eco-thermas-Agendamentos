@@ -649,21 +649,12 @@ export async function atualizarResultadoVenda(codigo, resultadoVenda) {
   return data;
 }
 
-export async function marcarComoRealizado(codigo) {
-  validarCodigo(codigo);
 
-  const { data, error } = await supabase
-    .from('agendamentos')
-    .update({
-      resultado_visita: 'REALIZADO',
-      resultado_venda: 'PENDENTE',
-    })
-    .eq('codigo', codigo)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+export async function marcarComoRealizado(codigo, vendedorId) {
+  return atualizarAgendamento(codigo, {
+    resultado_visita: 'REALIZADO',
+    vendedor_id: vendedorId,
+  });
 }
 
 export async function marcarComoFaltou(codigo) {
@@ -840,6 +831,8 @@ async function buscarSemanaFiltrada(filtros) {
   );
 }
 
+
+
 export async function buscarAgendamentosStats(filtros = {}) {
   const filtrosNormalizados = normalizarFiltrosStats(filtros);
   const hoje = dataLocalISO();
@@ -895,6 +888,8 @@ export async function buscarAgendamentosStats(filtros = {}) {
       })),
     ),
 
+
+    
     Promise.all(
       resultadosVenda.map(async (resultado) => ({
         resultado,
@@ -933,6 +928,9 @@ export async function buscarAgendamentosStats(filtros = {}) {
   const statusCountVenda = Object.fromEntries(
     vendaResultados.map(({ resultado, total }) => [resultado, total]),
   );
+
+
+  
 
   
 

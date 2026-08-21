@@ -6,6 +6,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useConsultores } from "@/app/hooks/useConsultores";
 import { useDisponibilidadeParque } from "@/app/hooks/useDisponibilidadeParque";
 import { useAgendamentosForm } from "@/app/hooks/agendamentos/useAgendamentosForm";
+import VisualizarModal from '@/app/Components/Shared/VisualizarModal.jsx';
 
 export default function NewAppointment({
   onClose,
@@ -360,37 +361,6 @@ export default function NewAppointment({
     onClose();
   }, [resetar, onClose]);
 
-  if (sucesso && agendamentoSalvo) {
-    return (
-      <div className={styles.overlay} onClick={handleClose}>
-        <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-          <div className={styles.header}>
-            <div>
-              <h2>✅ {isEdicao ? "Agendamento Atualizado!" : "Agendamento Criado!"}</h2>
-              <p>O agendamento foi {isEdicao ? "atualizado" : "registrado"} com sucesso.</p>
-            </div>
-          </div>
-          <div className={styles.body}>
-            <div className={styles.successBox}>
-              <h3>Código: <strong>{agendamentoSalvo.codigo || form.codigo}</strong></h3>
-              <p><strong>Cliente:</strong> {form.cliente}</p>
-              <p><strong>Idade:</strong> {form.idade} anos</p>
-              <p><strong>CPF:</strong> {form.cpf}</p>
-              {form.telefone && <p><strong>Telefone:</strong> {form.telefone}</p>}
-              <p><strong>Data:</strong> {new Date(form.dataVisita + "T00:00:00").toLocaleDateString("pt-BR")}</p>
-              <p><strong>Horário:</strong> {form.horario}</p>
-              <p><strong>Pessoas:</strong> {1 + companions.length}</p>
-              <p><strong>Status:</strong> {form.status}</p>
-            </div>
-          </div>
-          <div className={styles.footer}>
-            <button className={styles.saveButton} onClick={handleClose}>Fechar</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={styles.overlay} onClick={handleClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -489,8 +459,9 @@ export default function NewAppointment({
                     <option value="Direto">Direto</option>
                     <option value="Orgânico">Orgânico</option>
                     <option value="Day use">Day use</option>
-                    <option value="OUTRO">Outro</option>
                     <option value="Clube de Indicações">Clube de Indicações</option>
+                    <option value="OUTRO">Outro</option>
+                    
                   </select>
                 </div>
 

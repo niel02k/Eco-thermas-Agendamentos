@@ -55,9 +55,20 @@ export function useAgendamentosActions(onActionComplete) {
   }, [handleAction]);
 
   // Confirmar como realizado (resultado_visita = REALIZADO)
-  const confirmarRealizado = useCallback((codigo) => {
-    return handleAction(marcarComoRealizado, codigo);
-  }, [handleAction]);
+const confirmarRealizado = useCallback((codigo, vendedorId) => {
+  if (!codigo || !vendedorId) {
+    return Promise.resolve({
+      sucesso: false,
+      erro: 'Selecione o vendedor que atendeu o agendamento.',
+    });
+  }
+
+  return handleAction(
+    marcarComoRealizado,
+    codigo,
+    vendedorId,
+  );
+}, [handleAction]);
 
   // Marcar como faltou (resultado_visita = FALTOU)
   const marcarComoFaltou = useCallback((codigo) => {

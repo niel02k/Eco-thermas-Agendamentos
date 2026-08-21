@@ -24,6 +24,7 @@ import NewAppointment from '@/app/Components/modal/Newappointment.jsx';
 import ResultCard from '@/app/Components/Cards/ResultCard/ResultCard.jsx';
 import MobileList from '@/app/Components/Shared/MobileList.jsx';
 import DataTable from '@/app/Components/Shared/DataTable.jsx';
+import { useConsultores } from "@/app/hooks/useConsultores";
 
 import { useAgendamentos } from '@/app/hooks/agendamentos/index.js';
 import { useMediaQuery } from '@/app/hooks/useMediaQuery';
@@ -38,6 +39,8 @@ export default function AppointmentsPage() {
   const [inputBusca, setInputBusca] = useState('');
   const [showModalRealizado, setShowModalRealizado] = useState(false);
   const [agendamentoParaRealizar, setAgendamentoParaRealizar] = useState(null);
+
+    const { consultores, loading: loadingConsultores } = useConsultores();
 
   const debounceRef = useRef(null);
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -55,6 +58,7 @@ export default function AppointmentsPage() {
     semanaData,
     statusCount,
     statusCountVenda,
+    resultadoVisitaCount,
     loadingStats,
 
     agendamentoSelecionado,
@@ -135,40 +139,44 @@ export default function AppointmentsPage() {
     setShowModalRealizado(true);
   }, []);
 
-  const handleConfirmarRealizado = useCallback(async (codigo) => {
-    const resposta = await confirmarRealizado(codigo);
-
-    if (resposta?.sucesso === false) {
+  const handleAgendamentoSalvo = useCallback(async (agendamento) => {
+    if (!agendamento?.codigo) {
+      console.error('Agendamento salvo sem código:', agendamento);
       return;
     }
 
-    setShowModalRealizado(false);
+    setAbrirModal(false);
+    fecharModal();
 
-    const agendamento = agendamentos.find(
-      (item) => item.codigo === codigo,
-    );
+    await abrirVisualizar(agendamento.codigo);
+    void recarregar();
+  }, [abrirVisualizar, fecharModal, recarregar]);
 
-    if (agendamento) {
-      abrirResultadoVenda({
-        ...agendamento,
-        resultado_visita: 'REALIZADO',
-        resultado_venda: 'PENDENTE',
-      });
+  // Confirma o atendimento e grava também o vendedor selecionado no ModalRealizado.
+  const handleConfirmarRealizado = useCallback(async (codigo, vendedorId) => {
+    const resposta = await confirmarRealizado(codigo, vendedorId);
+
+    if (resposta?.sucesso === false) {
+      return resposta;
     }
-  }, [
-    confirmarRealizado,
-    agendamentos,
-    abrirResultadoVenda,
-  ]);
+
+    setShowModalRealizado(false);
+    setAgendamentoParaRealizar(null);
+
+    return resposta;
+  }, [confirmarRealizado]);
 
   const handleFaltou = useCallback(async (codigo) => {
     const resposta = await marcarComoFaltou(codigo);
 
     if (resposta?.sucesso === false) {
-      return;
+      return resposta;
     }
 
     setShowModalRealizado(false);
+    setAgendamentoParaRealizar(null);
+
+    return resposta;
   }, [marcarComoFaltou]);
 
   const handleConfirmarResultado = useCallback(async (
@@ -268,6 +276,7 @@ export default function AppointmentsPage() {
       {abrirModal && (
         <NewAppointment
           onClose={handleCloseModal}
+          onSubmit={handleAgendamentoSalvo}
           dadosEdicao={
             modoModal === 'editar'
               ? agendamentoSelecionado
@@ -279,16 +288,19 @@ export default function AppointmentsPage() {
       {showModalRealizado && agendamentoParaRealizar && (
         <ModalRealizado
           agendamento={agendamentoParaRealizar}
+          vendedores={consultores}
           onConfirm={handleConfirmarRealizado}
           onFaltou={handleFaltou}
-          onClose={() => setShowModalRealizado(false)}
+          onClose={() => {
+            setShowModalRealizado(false);
+            setAgendamentoParaRealizar(null);
+          }}
         />
       )}
 
       <div className={styles.container}>
         <main
-          className={`${styles.main} ${visible ? styles.mainVisible : ''
-            }`}
+          className={`${styles.main} ${visible ? styles.mainVisible : ''}`}
         >
           <div className={styles.containerheader}>
             <div className={styles.pageHeaderWrapper}>
@@ -329,6 +341,7 @@ export default function AppointmentsPage() {
           <AppointmentsWeekStatus
             semanaData={semanaData}
             statusCount={statusCount}
+            resultadoVisitaCount={resultadoVisitaCount}
             statusCountVenda={statusCountVenda}
             loading={loadingStats}
           />

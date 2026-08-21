@@ -1,30 +1,33 @@
-// src/app/Components/ModalAgendamento/ExportVouchersButton.jsx
 "use client";
 
 import React, { useState } from "react";
 import { FileSpreadsheet, X } from "lucide-react";
-import { exportarVouchersExcel, listarAgendamentos } from "@/app/services/exportServices";
-import styles from "@/app/(authenticated)/Appointments/Appointments.module.css";
+import {exportarVouchersExcel, listarAgendamentos,
+} from "@/app/services/exportServices";
+import styles from "@/app/Components/ModalAgendamento/ExportVouchersButton.module.css"; "";
 
 export default function ExportVouchersButton({ disabled = false }) {
   const [loading, setLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
 
   const handleExport = async () => {
     setLoading(true);
     try {
-      // 👇 Buscar TODOS os agendamentos da data (sem paginação)
-      const { listarAgendamentos } = await import('@/app/services/agendamentosServices');
-      
+      // Buscar todos os agendamentos da data, sem paginação.
+      const { listarAgendamentos } = await import(
+        "@/app/services/agendamentosServices"
+      );
+
       const resultado = await listarAgendamentos({
         pagina: 1,
-        limite: 1000, // 👈 Buscar até 1000 registros
+        limite: 1000,
       });
 
-      // Filtrar pela data selecionada
       const filtrados = (resultado.agendamentos || []).filter(
-        ag => ag.data_visita === selectedDate
+        (ag) => ag.data_visita === selectedDate,
       );
 
       if (filtrados.length === 0) {
@@ -47,7 +50,7 @@ export default function ExportVouchersButton({ disabled = false }) {
   const handleCancel = () => setShowDatePicker(false);
 
   const formatarData = (data) => {
-    const [ano, mes, dia] = data.split('-');
+    const [ano, mes, dia] = data.split("-");
     return `${dia}/${mes}/${ano}`;
   };
 
@@ -61,6 +64,7 @@ export default function ExportVouchersButton({ disabled = false }) {
             onChange={(e) => setSelectedDate(e.target.value)}
             className={styles.dateInput}
           />
+
           <button
             onClick={handleExport}
             disabled={loading}
@@ -69,6 +73,7 @@ export default function ExportVouchersButton({ disabled = false }) {
             <FileSpreadsheet size={16} />
             {loading ? "Gerando..." : "Exportar"}
           </button>
+
           <button
             onClick={handleCancel}
             disabled={loading}

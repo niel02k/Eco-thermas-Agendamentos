@@ -15,7 +15,6 @@ import FormContrato from "@/app/Components/ModalContrato/Form/formcontrato.jsx";
 import VisualizarModal from "@/app/Components/Shared/VisualizarModal.jsx";
 import MobileList from "@/app/Components/Shared/MobileList.jsx";
 import DataTable from "@/app/Components/Shared/DataTable.jsx";
-import ReceitaMensalChart from "@/app/Components/ReceitaMensal/ReceitaMensalChart.jsx";
 
 export default function Contracts() {
   const [visible, setVisible] = useState(false);

@@ -52,6 +52,8 @@ export function useContratos() {
     setFiltroStatus: listagem.setFiltroStatus,
     setErro: listagem.setErro,
     carregarContratos: listagem.carregar,
+    filtroTipo: listagem.filtroTipo || 'todos',      // 👈
+    setFiltroTipo: listagem.setFiltroTipo,           // 👈
 
     // Detalhe
     contratoSelecionado: detalhe.contrato || null,

@@ -12,6 +12,7 @@ export function useContratosList() {
   const [pagina, setPagina] = useState(1);
   const [busca, setBusca] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('todos');
+  const [filtroTipo, setFiltroTipo] = useState('todos'); // 👈 novo state
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState(null);
 
@@ -20,13 +21,16 @@ export function useContratosList() {
     setErro(null);
     try {
       const status = filtroStatus !== 'todos' ? filtroStatus : null;
+      const tipoContrato = filtroTipo !== 'todos' ? filtroTipo : null; // 👈
+
       const resultado = await listarContratos({
         pagina,
         limite: LIMITE,
         busca,
         status,
-        ordenarPor: 'data_criacao', // 👈 ADICIONAR
-        ordem: 'desc',               // 👈 ADICIONAR
+        tipoContrato,       // 👈 nome correto, sem referência solta
+        ordenarPor: 'data_criacao',
+        ordem: 'desc',
       });
       setContratos(resultado.contratos || []);
       setTotal(resultado.total || 0);
@@ -36,7 +40,7 @@ export function useContratosList() {
     } finally {
       setLoading(false);
     }
-  }, [pagina, busca, filtroStatus]);
+  }, [pagina, busca, filtroStatus, filtroTipo]); // 👈 incluir na dependência
 
   const totalPaginas = Math.max(1, Math.ceil(total / LIMITE));
 
@@ -47,11 +51,13 @@ export function useContratosList() {
     totalPaginas,
     busca,
     filtroStatus,
+    filtroTipo,           // 👈 expor
     loading,
     erro,
     setPagina,
     setBusca,
     setFiltroStatus,
+    setFiltroTipo,        // 👈 expor
     setErro,
     carregar,
   };

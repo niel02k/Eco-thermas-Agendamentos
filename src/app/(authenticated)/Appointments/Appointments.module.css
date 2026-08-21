@@ -112,19 +112,11 @@
   gap: 1rem;
 }
 
-.statCard {
-  animation: fadeUp 0.5s var(--transition) both;
-}
-
-.card,
-.cardChart {
+.card {
   min-width: 0;
   border: 1px solid var(--border);
   background: var(--bg-white);
   box-shadow: var(--shadow);
-}
-
-.card {
   padding: 1.5rem;
   border-radius: var(--radius-lg);
   transition: box-shadow var(--transition), transform var(--transition);
@@ -135,25 +127,8 @@
   transform: translateY(-2px);
 }
 
-.cardChart {
-  display: flex;
-  min-height: 300px;
-  flex-direction: column;
-  padding: 1.25rem;
-  border-color: #e2e8f0;
-  border-radius: var(--radius-lg);
-  box-shadow: 0 4px 16px rgba(30, 110, 190, 0.06);
-}
-
-.cardChart > div {
-  flex: 1;
-  padding: 0 !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-}
-
 .cardHeader {
+
   margin-bottom: 1rem;
 }
 
@@ -172,17 +147,7 @@
   font-weight: 500;
 }
 
-.weekRightColumn {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.4rem;
-}
 
-.weekStatusRow {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
-}
 
 .statusList {
   display: flex;
@@ -271,16 +236,10 @@
 .filterTrigger:focus-visible,
 .btnRealizado:focus-visible,
 .btnFaltou:focus-visible,
-.voucherBtn:focus-visible,
-.exportBtn:focus-visible,
-.exportConfirmBtn:focus-visible,
-.exportCancelBtn:focus-visible,
 .closeBtn:focus-visible,
 .actionButton:focus-visible,
 .btnFechar:focus-visible,
-.btnEditar:focus-visible,
-.confirmCancel:focus-visible,
-.confirmOk:focus-visible {
+.btnEditar:focus-visible {
   outline: 3px solid rgba(249, 115, 22, 0.24);
   outline-offset: 3px;
 }
@@ -326,11 +285,7 @@
 }
 
 .btnRealizado:disabled,
-.btnFaltou:disabled,
-.voucherBtn:disabled,
-.exportBtn:disabled,
-.exportConfirmBtn:disabled,
-.exportCancelBtn:disabled {
+.btnFaltou:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -339,38 +294,9 @@
    VOUCHERS E EXPORTAÇÃO
    ================================================================ */
 
-.voucherActions {
-  display: flex;
-  gap: 0.5rem;
-}
 
-.voucherBtn,
-.exportBtn,
-.exportConfirmBtn,
-.exportCancelBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-family: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color var(--transition), border-color var(--transition), color var(--transition), box-shadow var(--transition), transform var(--transition);
-}
 
-.voucherBtn {
-  padding: 8px 14px;
-  border: 1px solid #bfdbfe;
-  border-radius: 10px;
-  background: #eff6ff;
-  color: var(--color-blue);
-  font-size: 0.85rem;
-}
 
-.voucherBtn:hover:not(:disabled) {
-  background: #dbeafe;
-  transform: translateY(-1px);
-}
 
 .voucherBtnDownload {
   border-color: #bbf7d0;
@@ -382,85 +308,19 @@
   background: #dcfce7;
 }
 
-.exportWrapper {
-  position: relative;
-}
 
-.exportBtn,
-.exportConfirmBtn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 10px;
-  background: var(--color-green);
-  color: #fff;
-  font-size: 0.85rem;
-  white-space: nowrap;
-}
-
-.exportBtn:hover:not(:disabled),
-.exportConfirmBtn:hover:not(:disabled) {
-  background: #166534;
-  box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
-  transform: translateY(-1px);
-}
-
-.exportCancelBtn {
-  padding: 8px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: #f3f4f6;
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
-
-.exportCancelBtn:hover:not(:disabled) {
-  background: #e5e7eb;
-  color: var(--text-secondary);
-}
-
-.datePickerPopup {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
 
 .datePickerHeader {
   display: none;
 }
 
-.dateInput {
-  padding: 0.5rem 0.75rem;
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  background: #fff;
-  color: #1e293b;
-  font-family: inherit;
-  font-size: 0.85rem;
-  transition: border-color var(--transition), box-shadow var(--transition);
-}
 
-.dateInput:focus {
-  border-color: var(--color-blue);
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
-}
 
 /* ================================================================
    MODAL DE VISUALIZAÇÃO
    ================================================================ */
 
-.modalOverlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(2px);
-  animation: fadeIn 0.2s ease;
-}
+
 
 .modalDetalhe {
   display: flex;
@@ -674,72 +534,7 @@
   transform: translateY(-1px);
 }
 
-/* ================================================================
-   MODAL DE CONFIRMAÇÃO
-   ================================================================ */
 
-.confirmBox {
-  display: flex;
-  width: 90%;
-  max-width: 420px;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.25rem;
-  padding: 2rem 2.5rem;
-  border-radius: var(--radius-xl);
-  background: var(--bg-white);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-  animation: slideUp 0.25s var(--transition);
-}
-
-.confirmMsg {
-  margin: 0;
-  color: var(--text-primary);
-  font-size: 0.95rem;
-  font-weight: 600;
-  line-height: 1.5;
-  text-align: center;
-}
-
-.confirmActions {
-  display: flex;
-  width: 100%;
-  gap: 0.75rem;
-}
-
-.confirmCancel,
-.confirmOk {
-  flex: 1;
-  padding: 0.75rem;
-  border-radius: var(--radius-sm);
-  font-family: inherit;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.confirmCancel {
-  border: 1px solid var(--border);
-  background: #f3f4f6;
-  color: var(--text-secondary);
-  font-weight: 600;
-}
-
-.confirmCancel:hover {
-  background: #e5e7eb;
-}
-
-.confirmOk {
-  border: none;
-  background: var(--color-orange);
-  color: #fff;
-  font-weight: 700;
-  transition: background-color var(--transition), transform var(--transition);
-}
-
-.confirmOk:hover {
-  background: #9a3412;
-  transform: translateY(-1px);
-}
 
 /* ================================================================
    SKELETONS
@@ -757,22 +552,9 @@
    ANIMAÇÕES
    ================================================================ */
 
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.97);
-  }
 
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+
 
 @keyframes slideUp {
   from {
@@ -806,9 +588,7 @@
     padding: 1.5rem;
   }
 
-  .weekStatusRow {
-    grid-template-columns: 1fr;
-  }
+  
 }
 
 @media (max-width: 768px) {
@@ -862,9 +642,7 @@
     justify-content: center;
   }
 
-  .confirmBox {
-    padding: 1.5rem;
-  }
+  
 }
 
 @media (max-width: 640px) {
@@ -872,12 +650,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .exportBtn {
-    width: 100%;
-    justify-content: center;
-    padding: 12px;
-    font-size: 0.9rem;
-  }
+  
 }
 
 @media (max-width: 480px) {
@@ -887,10 +660,6 @@
 
   .statsGrid {
     grid-template-columns: 1fr;
-  }
-
-  .confirmActions {
-    flex-direction: column;
   }
 
 }

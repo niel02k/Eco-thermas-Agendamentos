@@ -1,0 +1,314 @@
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(15, 23, 42, 0.62);
+  backdrop-filter: blur(5px);
+  animation: modalOverlayIn 180ms ease-out both;
+}
+
+.confirmBox {
+  position: relative;
+  width: min(100%, 440px);
+  max-height: calc(100vh - 2.5rem);
+  overflow-y: auto;
+  padding: 2rem;
+  border: 1px solid rgba(226, 232, 240, 0.92);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+  animation: modalContentIn 220ms ease-out both;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #64748b;
+  background: transparent;
+  cursor: pointer;
+  transition: color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.closeBtn:hover:not(:disabled) {
+  color: #0f172a;
+  background: #f1f5f9;
+  transform: rotate(4deg);
+}
+
+.closeBtn:focus-visible,
+.backButton:focus-visible,
+.btnRealizado:focus-visible,
+.btnFaltou:focus-visible,
+.confirmCancel:focus-visible,
+.vendedorSelect:focus-visible {
+  outline: 3px solid rgba(234, 88, 12, 0.25);
+  outline-offset: 2px;
+}
+
+.closeBtn:disabled,
+.backButton:disabled,
+.btnRealizado:disabled,
+.btnFaltou:disabled,
+.confirmCancel:disabled,
+.vendedorSelect:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.modalTitle {
+  margin: 0;
+  padding-right: 1.75rem;
+  color: #111827;
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.modalClient {
+  margin: 0.35rem 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.modalQuestion {
+  margin: 1.25rem 0 0.85rem;
+  color: #334155;
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.confirmActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.btnRealizado,
+.btnFaltou,
+.confirmCancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 750;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.btnRealizado {
+  padding: 0.75rem 1rem;
+  border: 1px solid #15803d;
+  color: #ffffff;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  box-shadow: 0 8px 18px rgba(21, 128, 61, 0.2);
+}
+
+.btnRealizado:hover:not(:disabled) {
+  background: linear-gradient(135deg, #15803d, #166534);
+  box-shadow: 0 11px 24px rgba(21, 128, 61, 0.28);
+  transform: translateY(-1px);
+}
+
+.btnFaltou {
+  padding: 0.75rem 1rem;
+  border: 1px solid #dc2626;
+  color: #b91c1c;
+  background: #fff7f7;
+}
+
+.btnFaltou:hover:not(:disabled) {
+  border-color: #b91c1c;
+  color: #991b1b;
+  background: #fee2e2;
+  transform: translateY(-1px);
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 1rem auto 0;
+  padding: 0.35rem 0;
+  border: 0;
+  color: #64748b;
+  background: transparent;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+.backButton:hover:not(:disabled) {
+  color: #ea580c;
+}
+
+.vendedorGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 1rem;
+}
+
+.vendedorLabel {
+  color: #334155;
+  font-size: 0.86rem;
+  font-weight: 750;
+}
+
+.vendedorSelect {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.65rem 2.4rem 0.65rem 0.8rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  outline: none;
+  color: #111827;
+  background-color: #ffffff;
+  font: inherit;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.vendedorSelect:hover:not(:disabled) {
+  border-color: #94a3b8;
+}
+
+.vendedorSelect:focus {
+  border-color: #ea580c;
+  box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.12);
+}
+
+.emptyVendedores {
+  margin: 0.55rem 0 0;
+  color: #a16207;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.errorMessage {
+  margin: 0.6rem 0 0;
+  color: #b91c1c;
+  font-size: 0.84rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.confirmButton {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.confirmCancel {
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  background: #f8fafc;
+   transition: all 0.2s ease; /* garante a transição suave */
+}
+
+.confirmCancel:hover:not(:disabled) {
+  border-color: #cbd5e1;
+  color: #1e293b;
+  background: #f1f5f9;
+  transform: translateY(-2px); /* sobe 2px, ajuste o valor conforme necessário */
+}
+
+.backButton {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 2;
+  margin: 0 !important;
+}
+
+@keyframes modalOverlayIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalContentIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 560px) {
+  .modalOverlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .confirmBox {
+    width: 100%;
+    max-height: min(92vh, 720px);
+    padding: 1.5rem 1.1rem 1.1rem;
+    border-bottom: 0;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .confirmActions {
+    grid-template-columns: 1fr;
+  }
+
+  .btnRealizado,
+  .btnFaltou,
+  .confirmCancel {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modalOverlay,
+  .confirmBox {
+    animation: none;
+  }
+
+  .closeBtn,
+  .btnRealizado,
+  .btnFaltou,
+  .confirmCancel,
+  .backButton,
+  .vendedorSelect {
+    transition: none;
+  }
+}

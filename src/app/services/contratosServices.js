@@ -8,13 +8,39 @@ const supabase = createClient();
 /**
  * Listar contratos com paginação e busca
  */
-export async function listarContratos({ pagina = 1, limite = 10, busca = '', status = null, ordenarPor = 'data_criacao', ordem = 'desc' } = {}) {
+export async function listarContratos({ 
+  pagina = 1, 
+  limite = 10, 
+  busca = '', 
+  status = null,
+  tipoContrato = null,     // 👈 novo parâmetro
+  ordenarPor = 'data_criacao', 
+  ordem = 'desc' 
+} = {}) {
   const inicio = (pagina - 1) * limite;
   const fim = inicio + limite - 1;
 
+  const COLUNAS_ORDENAVEIS = ['data_criacao', 'data_inicio', 'valor_total', 'titular_nome', 'status'];
+  const ordenarPorSeguro = COLUNAS_ORDENAVEIS.includes(ordenarPor) ? ordenarPor : 'data_criacao';
+
   let query = supabase
     .from('contratos')
-    .select(`*,
+    .select(`
+      id,
+      tipo_contrato,
+      titular_nome,
+      titular_cpf,
+      titular_email,
+      titular_telefone,
+      valor_total,
+      forma_pagamento,
+      tipo_cobranca,
+      parcelas,
+      status,
+      data_inicio,
+      data_fim,
+      cidade,
+      data_criacao,
       vendedor:vendedor_id (nome),
       agendamento:agendamento_id (codigo, data_visita, horario_visita),
       dependentes:contrato_dependentes (nome, cpf, idade)
@@ -28,9 +54,12 @@ export async function listarContratos({ pagina = 1, limite = 10, busca = '', sta
     query = query.eq('status', status);
   }
 
-  // 👇 Ordenação dinâmica
+  if (tipoContrato && tipoContrato !== 'todos') {
+    query = query.eq('tipo_contrato', tipoContrato);   // 👈 filtro aplicado
+  }
+
   const ascending = ordem === 'asc';
-  query = query.order(ordenarPor, { ascending });
+  query = query.order(ordenarPorSeguro, { ascending });
 
   const { data, count, error } = await query.range(inicio, fim);
 
